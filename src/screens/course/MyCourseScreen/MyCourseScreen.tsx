@@ -265,8 +265,9 @@ const MyCourseScreen = () => {
           paddingVertical: verticalScale(16),
         },
         emptyWrapper: {
-          marginTop: verticalScale(40),
+          flex: 1,
           alignItems: 'center',
+          justifyContent: 'center',
         },
         loadMoreText: { textAlign: 'center', color: AppColors.textSecondary },
         loadMoreRow: {
@@ -278,6 +279,7 @@ const MyCourseScreen = () => {
           gap: scale(8),
         },
         courseListContainer: {
+          flexGrow: 1,
           gap: verticalScale(14),
         },
       }),

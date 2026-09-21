@@ -4,7 +4,10 @@ import { IS_Android } from '../../constants/platform';
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { LINE_HEIGHT_RATIO } from '../../styles/sharedstyles';
+import {
+  LINE_HEIGHT_RATIO,
+  SINGLE_LINE_HEIGHT_RATIO,
+} from '../../styles/sharedstyles';
 import { AppTextProps } from '../../types/ui/texts/text.props';
 
 const AppText: React.FC<AppTextProps> = ({
@@ -31,9 +34,10 @@ const AppText: React.FC<AppTextProps> = ({
         {
           fontFamily: getFontFamily(fontWeight),
           fontSize: scaledFontSize,
-          ...(isSingleLine
-            ? null
-            : { lineHeight: Math.round(scaledFontSize * LINE_HEIGHT_RATIO) }),
+          lineHeight: Math.round(
+            scaledFontSize *
+              (isSingleLine ? SINGLE_LINE_HEIGHT_RATIO : LINE_HEIGHT_RATIO),
+          ),
           ...(IS_Android ? { includeFontPadding: false } : null), // Android vertical alignment fix
         },
         style,

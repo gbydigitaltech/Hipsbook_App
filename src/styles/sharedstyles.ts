@@ -88,6 +88,18 @@ export const AppFontSize = {
  */
 export const LINE_HEIGHT_RATIO = 1.45;
 
+/**
+ * Line-height multiplier for single-line text (buttons, chips, tile labels).
+ *
+ * Without an explicit lineHeight, iOS falls back to the font's natural line
+ * height — IBM Plex Sans Thai reserves extra ascent/descent for stacked marks,
+ * so its box renders taller than Android's, which is shrunk by
+ * `includeFontPadding: false`. Pinning a ratio makes both platforms agree.
+ * 1.2 still clears upper vowels and tone marks while fitting fixed-height
+ * buttons without the glyphs touching the edges.
+ */
+export const SINGLE_LINE_HEIGHT_RATIO = 1.2;
+
 /* -------------------------------------------------------------------------- */
 /* =========================== Press feedback =========================== */
 /* -------------------------------------------------------------------------- */
