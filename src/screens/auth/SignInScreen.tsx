@@ -75,22 +75,22 @@ const SignInScreen = () => {
 
   const { googleLoading, handleGoogleSignIn } = useGoogleSignIn({
     isSubmitting,
-    onSuccess: () => signIn(),
+    onSuccess: () => signIn('google'),
   });
 
   const { twitterLoading, handleTwitterSignIn } = useTwitterSignIn({
     isSubmitting,
-    onSuccess: () => signIn(),
+    onSuccess: () => signIn('twitter'),
   });
 
   const { lineLoading, handleLineSignIn } = useLineSignIn({
     isSubmitting,
-    onSuccess: () => signIn(),
+    onSuccess: () => signIn('line'),
   });
 
   const { appleLoading, handleAppleSignIn } = useAppleSignIn({
     isSubmitting,
-    onSuccess: () => signIn(),
+    onSuccess: () => signIn('apple'),
   });
 
   const isBusy =

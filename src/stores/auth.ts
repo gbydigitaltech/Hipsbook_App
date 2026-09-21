@@ -82,7 +82,7 @@ export const useAuth = create<AuthState>()(
 
           set({
             isAuthenticated: true,
-            ...(provider ? { provider } : {}),
+            provider,
             pendingOtpEmail: null,
             pendingOtpCredentials: null,
           });

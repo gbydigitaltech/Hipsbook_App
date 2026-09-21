@@ -21,7 +21,7 @@ const persistTokens = async ({
   await saveTokens({
     accessToken: access_token,
     refreshToken: refresh_token,
-    provider,
+    provider: provider ?? 'line',
   });
 };
 

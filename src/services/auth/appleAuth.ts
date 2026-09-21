@@ -12,7 +12,7 @@ const persistTokens = async (data: AppleSignInResponse): Promise<void> => {
   await saveTokens({
     accessToken: data.access_token,
     refreshToken: data.refresh_token,
-    provider: data.provider,
+    provider: data.provider ?? 'apple',
   });
 };
 
