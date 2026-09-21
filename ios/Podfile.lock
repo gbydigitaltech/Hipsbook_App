@@ -67,10 +67,11 @@ PODS:
   - hermes-engine (0.82.1):
     - hermes-engine/Pre-built (= 0.82.1)
   - hermes-engine/Pre-built (0.82.1)
+  - JitsiWebRTC (124.0.2)
   - LineSDKSwift (5.12.0):
     - LineSDKSwift/Core (= 5.12.0)
   - LineSDKSwift/Core (5.12.0)
-  - NitroIap (14.7.12):
+  - NitroIap (15.5.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -78,7 +79,7 @@ PODS:
     - glog
     - hermes-engine
     - NitroModules
-    - openiap (= 1.3.15)
+    - openiap (= 2.4.0)
     - RCT-Folly
     - RCT-Folly/Fabric
     - RCTRequired
@@ -101,7 +102,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - NitroModules (0.31.10):
+  - NitroModules (0.35.10):
     - boost
     - DoubleConversion
     - fast_float
@@ -130,7 +131,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - openiap (1.3.15)
+  - NodeMediaClient (3.2.10)
+  - openiap (2.4.0)
   - PromisesObjC (2.4.0)
   - RCT-Folly (2024.11.18.00):
     - boost
@@ -1993,6 +1995,34 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - react-native-image-picker (8.2.1):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - react-native-line (5.4.0):
     - boost
     - DoubleConversion
@@ -2001,6 +2031,35 @@ PODS:
     - glog
     - hermes-engine
     - LineSDKSwift (~> 5.12.0)
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - react-native-nodemediaclient (0.3.6):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - NodeMediaClient (= 3.2.10)
     - RCT-Folly
     - RCT-Folly/Fabric
     - RCTRequired
@@ -2315,6 +2374,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - react-native-webrtc (124.0.7):
+    - JitsiWebRTC (~> 124.0.0)
+    - React-Core
   - react-native-webview (13.16.1):
     - boost
     - DoubleConversion
@@ -2882,6 +2944,34 @@ PODS:
     - React-perflogger (= 0.82.1)
     - React-utils (= 0.82.1)
     - SocketRocket
+  - ReactNativeAvoidSoftinput (8.0.2):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RNAppleAuthentication (2.2.1):
     - React-Core
   - RNBootSplash (6.3.12):
@@ -3352,7 +3442,9 @@ DEPENDENCIES:
   - react-native-blob-util (from `../node_modules/react-native-blob-util`)
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - react-native-date-picker (from `../node_modules/react-native-date-picker`)
+  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-line (from `../node_modules/@xmartlabs/react-native-line`)"
+  - react-native-nodemediaclient (from `../node_modules/react-native-nodemediaclient`)
   - react-native-orientation-locker (from `../node_modules/react-native-orientation-locker`)
   - react-native-pdf (from `../node_modules/react-native-pdf`)
   - react-native-render-html (from `../node_modules/react-native-render-html`)
@@ -3361,6 +3453,7 @@ DEPENDENCIES:
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - "react-native-vector-icons-ionicons (from `../node_modules/@react-native-vector-icons/ionicons`)"
   - react-native-video (from `../node_modules/react-native-video`)
+  - react-native-webrtc (from `../node_modules/react-native-webrtc`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
@@ -3394,6 +3487,7 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - ReactNativeAvoidSoftinput (from `../node_modules/react-native-avoid-softinput`)
   - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
   - RNBootSplash (from `../node_modules/react-native-bootsplash`)
   - "RNCCheckbox (from `../node_modules/@react-native-community/checkbox`)"
@@ -3417,7 +3511,9 @@ SPEC REPOS:
     - GoogleUtilities
     - GTMAppAuth
     - GTMSessionFetcher
+    - JitsiWebRTC
     - LineSDKSwift
+    - NodeMediaClient
     - openiap
     - PromisesObjC
     - SocketRocket
@@ -3520,8 +3616,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/blur"
   react-native-date-picker:
     :path: "../node_modules/react-native-date-picker"
+  react-native-image-picker:
+    :path: "../node_modules/react-native-image-picker"
   react-native-line:
     :path: "../node_modules/@xmartlabs/react-native-line"
+  react-native-nodemediaclient:
+    :path: "../node_modules/react-native-nodemediaclient"
   react-native-orientation-locker:
     :path: "../node_modules/react-native-orientation-locker"
   react-native-pdf:
@@ -3538,6 +3638,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-vector-icons/ionicons"
   react-native-video:
     :path: "../node_modules/react-native-video"
+  react-native-webrtc:
+    :path: "../node_modules/react-native-webrtc"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -3604,6 +3706,8 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  ReactNativeAvoidSoftinput:
+    :path: "../node_modules/react-native-avoid-softinput"
   RNAppleAuthentication:
     :path: "../node_modules/@invertase/react-native-apple-authentication"
   RNBootSplash:
@@ -3646,10 +3750,12 @@ SPEC CHECKSUMS:
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   hermes-engine: 273e30e7fb618279934b0b95ffab60ecedb7acf5
+  JitsiWebRTC: b47805ab5668be38e7ee60e2258f49badfe8e1d0
   LineSDKSwift: 117c099af28d1918cd620fa411ac05d52deee215
-  NitroIap: 2430239a8ed80e0c57b29eb3ef409b5126021498
-  NitroModules: 22837572f1ecf8f1560f5aac7c9f687825754901
-  openiap: 2825d732c9d081fd5a5d0d09b2f67c2d655f4ed4
+  NitroIap: e44d0dd01768f3a1593a0b389f8d8e0a88ec93d6
+  NitroModules: 181b4768f950d939f73aa79296f71c1eec5b13dd
+  NodeMediaClient: 0df928e923d2d585319cca83a933f2fb4e7362c2
+  openiap: 06499a744856f204cddd086175e8cc171ed99351
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: f17e2ebc07876ca9ab8eb6e4b0a4e4647497ae3a
@@ -3688,7 +3794,9 @@ SPEC CHECKSUMS:
   react-native-blob-util: 8daf4b1ee1f0e35c4f6fb2f0305f498afa7e7947
   react-native-blur: ba0e9ad6274783c8d45f42da82acae02e25784ad
   react-native-date-picker: d4bcb2f05cd74601bad5cbac13b2dfe8effbd69d
+  react-native-image-picker: 43e6cd4231e670030fe09b079d696fa5a634ccfc
   react-native-line: 3c2b49a6981909eb8a405b2df2bf2fe15ecee4c7
+  react-native-nodemediaclient: a65cd7b78048901fc096b4ecb88f06f18c547405
   react-native-orientation-locker: 5819fd23ca89cbac0d736fb4314745f62716d517
   react-native-pdf: 5c1fc3660cfc5c9bb703c9aadf6e8af9ee0524d3
   react-native-render-html: 984dfe2294163d04bf5fe25d7c9f122e60e05ebe
@@ -3697,6 +3805,7 @@ SPEC CHECKSUMS:
   react-native-slider: 5da4af460d0dd1346f927e829dfecbb81bd46f91
   react-native-vector-icons-ionicons: 7bc32eadb4d24c93252430b49f25b8be000e2340
   react-native-video: c129a091917b98995af609c78a357ed64264e64d
+  react-native-webrtc: b5062b745a26c99835efdf0d6c027c9b2ee7ddbc
   react-native-webview: 278eeb4df23d6202b559ceb21bd4088dbde30090
   React-NativeModulesApple: c4bee6aa736092cd347456488a4f97a8e7517604
   React-oscompat: 95875e81f5d4b3c7b2c888d5bd2c9d83450d8bdb
@@ -3730,6 +3839,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: cc2795efe30a023c3a505676b9c748b664b9c0a1
   ReactCodegen: 897bad2d2f722ff4dc46fc144f9cc018db0e2ce4
   ReactCommon: c5803af00bd3737dc1631749b1f1da5beba5b049
+  ReactNativeAvoidSoftinput: 81ca7d7c5b3baa4c44c543e708beae4218baf899
   RNAppleAuthentication: dab41edef916715148ce94a7dd04041a01590ddc
   RNBootSplash: 9bcb1ea9b8a8199cf7e397200f38261424daac6f
   RNCCheckbox: 471ebdc33884c084f362615c1ef3507496cc07f1
@@ -3744,6 +3854,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 689c8e04277f3ad631e60fe2a08e41d411daf8eb
 
-PODFILE CHECKSUM: 1a72945461bb2c5f802e3e25f57965a8de3a2d83
+PODFILE CHECKSUM: c13fbdac1c0e069c0c74f739935ad015d360ecfc
 
 COCOAPODS: 1.16.2

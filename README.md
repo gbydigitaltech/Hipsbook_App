@@ -40,10 +40,8 @@ npx react-native doctor
 ### 1. ติดตั้ง dependencies
 
 ```sh
-npm install --legacy-peer-deps
+npm install
 ```
-
-> ต้องใส่ `--legacy-peer-deps` เพราะ `react-native-iap` ระบุ peer เป็น `react-native-nitro-modules@^0.31.1` แต่โปรเจกต์ใช้ `^0.35.0`
 
 ### 2. สร้างไฟล์ `.env`
 
@@ -129,8 +127,12 @@ src/
 Reanimated 4.2.x รองรับ `react-native-worklets` เฉพาะสาย 0.7.x เท่านั้น ถ้าถูกอัปเป็น 0.8+ ให้ปักหมุดกลับ
 
 ```sh
-npm install react-native-worklets@0.7.4 --save-exact --legacy-peer-deps
+npm install react-native-worklets@0.7.4 --save-exact
 ```
+
+**Android build ล้มที่ `:react-native-iap:compileDebugKotlin` (`Unresolved reference 'updateNative'`)**
+
+`react-native-iap` กับ `react-native-nitro-modules` เวอร์ชันไม่เข้ากัน โปรเจกต์ล็อก `react-native-iap` ไว้ที่ `15.5.0` ซึ่งเป็นเวอร์ชันสุดท้ายที่ใช้ peer `nitro ^0.35.10` — อย่าอัปข้ามไป 15.5.2+ โดยไม่อัป `react-native-nitro-modules` เป็น `^0.36.1` พร้อมกัน
 
 **Metro ใช้ cache เก่า / แก้โค้ดแล้วไม่อัปเดต**
 
