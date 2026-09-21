@@ -47,6 +47,11 @@ const { height: screenHeight } = Dimensions.get('window');
 
 const RATING_HINTS = ['', 'แย่', 'พอใช้', 'ปานกลาง', 'ดี', 'ดีมาก'];
 
+/**
+ * Bottom-sheet form for writing or editing a course review (rating + text).
+ * Slides up over a backdrop, stays mounted through the closing animation via
+ * `shouldRender`, and lifts above the keyboard using the tracked height.
+ */
 const ReviewActionSheet: React.FC<Props> = ({
   visible,
   onClose,
@@ -72,6 +77,7 @@ const ReviewActionSheet: React.FC<Props> = ({
   const [submitting, setSubmitting] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+  // Keep the sheet mounted through the closing animation, then unmount.
   const [shouldRender, setShouldRender] = useState(visible);
   const translateY = useRef(new Animated.Value(screenHeight)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
@@ -83,6 +89,7 @@ const ReviewActionSheet: React.FC<Props> = ({
     }
   }, [visible, initialRating, initialText]);
 
+  // Track keyboard height so we can lift the sheet manually.
   useEffect(() => {
     const showSub = Keyboard.addListener(
       IS_IOS ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -238,7 +245,6 @@ const ReviewActionSheet: React.FC<Props> = ({
           fontFamily: getFontFamily(fontWeight),
           fontSize: moderateScale(fontSize, 0.5),
           textAlignVertical: 'top',
-          includeFontPadding: false,
         },
         actionsRow: {
           flexDirection: 'row',
@@ -266,6 +272,7 @@ const ReviewActionSheet: React.FC<Props> = ({
   };
 
   const handleBackdropPress = () => {
+    // First tap dismisses the keyboard; tap again to close the sheet.
     if (keyboardHeight > 0) {
       Keyboard.dismiss();
       return;

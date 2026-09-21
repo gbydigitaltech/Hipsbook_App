@@ -354,7 +354,6 @@ const styles = StyleSheet.create({
   labelText: {
     flex: 1,
     minWidth: 0,
-    includeFontPadding: false,
     textAlignVertical: 'center',
   },
   headerRightIcon: {
@@ -369,7 +368,6 @@ const styles = StyleSheet.create({
   teacherNameText: {
     flexShrink: 1,
     minWidth: 0,
-    includeFontPadding: false,
   },
   noTeacherText: {
     color: AppColors.textSecondary,

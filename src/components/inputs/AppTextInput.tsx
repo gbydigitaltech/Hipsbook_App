@@ -119,7 +119,6 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
           paddingHorizontal: 0,
 
           textAlignVertical: 'center' as const,
-          includeFontPadding: false, // Android alignment fix
         },
 
         leftIconMargin: { marginRight: responsiveSpacing(iconSpacing) },

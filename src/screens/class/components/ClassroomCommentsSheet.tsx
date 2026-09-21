@@ -56,6 +56,7 @@ const ClassroomCommentsSheet: React.FC<Props> = ({
   courseId,
 }) => {
   const { scale, verticalScale, responsiveRadius } = useResponsive();
+  // Keep the sheet mounted through the closing animation, then unmount.
   const [shouldRender, setShouldRender] = useState(visible);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -318,7 +319,7 @@ const ClassroomCommentsSheet: React.FC<Props> = ({
           <Animated.View
             style={[
               styles.sheet,
-              !composing && styles.sheetListMin,
+              !composing && styles.sheetListMin, // list keeps min 50% height; compose sizes to content
               { transform: [{ translateY }] },
             ]}
           >
@@ -424,6 +425,7 @@ const ClassroomCommentsSheet: React.FC<Props> = ({
                   return;
                 }
                 closeCommentAction();
+                // Wait for the action sheet to finish closing before swapping to compose.
                 setTimeout(() => openCompose(review), 320);
               },
             },

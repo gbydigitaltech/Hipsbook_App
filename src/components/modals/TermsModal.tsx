@@ -17,6 +17,7 @@ import {
   AppFontSize,
   PRESSED_OPACITY,
   sharedPaddingHorizontal,
+  thaiSafeLineHeight,
 } from '../../styles/sharedstyles';
 import AppButton from '../buttons/AppButton';
 import AppText from '../texts/AppText';
@@ -135,7 +136,7 @@ const TermsModal = ({
         color: AppColors.textSecondary,
         fontFamily: regular,
         fontSize: moderateScale(15, 0.5),
-        lineHeight: moderateScale(25, 0.5),
+        lineHeight: thaiSafeLineHeight(moderateScale(25, 0.5)),
       },
       paragraph: {
         marginTop: 0,
@@ -145,7 +146,7 @@ const TermsModal = ({
         color: AppColors.white,
         fontFamily: bold,
         fontSize: moderateScale(20, 0.5),
-        lineHeight: moderateScale(28, 0.5),
+        lineHeight: thaiSafeLineHeight(moderateScale(28, 0.5)),
         marginTop: moderateScale(6, 0.5),
         marginBottom: moderateScale(10, 0.5),
       },
@@ -153,7 +154,7 @@ const TermsModal = ({
         color: AppColors.white,
         fontFamily: bold,
         fontSize: moderateScale(17, 0.5),
-        lineHeight: moderateScale(24, 0.5),
+        lineHeight: thaiSafeLineHeight(moderateScale(24, 0.5)),
         marginTop: moderateScale(18, 0.5),
         marginBottom: moderateScale(8, 0.5),
       },

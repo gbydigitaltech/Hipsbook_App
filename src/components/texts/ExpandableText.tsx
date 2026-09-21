@@ -7,6 +7,7 @@ import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
+import { thaiSafeLineHeight } from '../../styles/sharedstyles';
 import { AppTextProps } from '../../types/ui/texts/text.props';
 import AppText from '../texts/AppText';
 
@@ -20,6 +21,12 @@ interface Props {
   fadeColors?: [string, string];
 }
 
+/**
+ * Collapsible text block that clamps to `maxLines`, adds a bottom fade, and
+ * shows an "อ่านเพิ่มเติม / ย่อข้อความ" toggle when the content overflows.
+ * Accepts either an `html` string (rendered via react-native-render-html) or
+ * plain-text `children`.
+ */
 const ExpandableText: React.FC<Props> = ({
   html,
   children,
@@ -37,7 +44,7 @@ const ExpandableText: React.FC<Props> = ({
 
   const scaledFontSize = moderateScale(fontSize, 0.5);
   const lineHeight = Math.round(scaledFontSize * 1.6);
-  const collapsedHeight = maxLines * lineHeight;
+  const collapsedHeight = maxLines * lineHeight; // max height while collapsed
 
   const isHtmlMode = !!html && html.trim().length > 0;
 
@@ -52,6 +59,7 @@ const ExpandableText: React.FC<Props> = ({
     const raw = (html ?? '').trim();
     if (!raw) return raw;
 
+    // Strip inline font-* declarations so the app's Thai font always wins.
     return raw.replace(/style\s*=\s*"(.*?)"/gi, (_m, styleText: string) => {
       const cleaned = styleText
         .replace(/(^|;)\s*font-family\s*:[^;"]*/gi, '')
@@ -104,7 +112,7 @@ const ExpandableText: React.FC<Props> = ({
         },
         text: {
           fontSize: scaledFontSize,
-          lineHeight,
+          lineHeight: thaiSafeLineHeight(lineHeight),
         },
       }),
     [
@@ -121,7 +129,7 @@ const ExpandableText: React.FC<Props> = ({
     () => ({
       color: AppColors.textSecondary,
       fontSize: scaledFontSize,
-      lineHeight,
+      lineHeight: thaiSafeLineHeight(lineHeight),
       fontFamily,
     }),
     [scaledFontSize, lineHeight, fontFamily],
@@ -155,6 +163,8 @@ const ExpandableText: React.FC<Props> = ({
     [],
   );
 
+  // Measure the full, unclipped height off-screen to decide whether the
+  // content overflows maxLines (i.e. whether the toggle/fade are needed).
   const onMeasureLayout = (e: LayoutChangeEvent) => {
     const h = e.nativeEvent.layout.height;
     if (h <= 0) return;

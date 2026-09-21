@@ -26,6 +26,7 @@ import {
   AppFontSize,
   AppRadius,
   sharedPaddingHorizontal,
+  thaiSafeLineHeight,
 } from '../../styles/sharedstyles';
 import { Course } from '../../types/data/courses/course.type';
 import { AppStackParamList } from '../../types/data/navigation/navigation.types';
@@ -283,7 +284,7 @@ const TeacherProfileScreen = () => {
         },
         bodyText: {
           color: AppColors.textSecondary,
-          lineHeight: verticalScale(IS_TABLET ? 26 : 22),
+          lineHeight: thaiSafeLineHeight(verticalScale(IS_TABLET ? 26 : 22)),
         },
         educationSection: {
           marginTop: verticalScale(16),

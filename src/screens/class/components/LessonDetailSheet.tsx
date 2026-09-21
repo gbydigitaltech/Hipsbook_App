@@ -16,7 +16,11 @@ import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import { AppColors } from '../../../styles/colors';
 import type { LessonItem } from '../ClassroomScreen';
-import { AppFontSize, AppRadius } from '../../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  thaiSafeLineHeight,
+} from '../../../styles/sharedstyles';
 
 type Props = {
   visible: boolean;
@@ -192,7 +196,7 @@ const LessonDetailSheet: React.FC<Props> = ({
         },
         descriptionText: {
           color: AppColors.textSecondary,
-          lineHeight: verticalScale(24),
+          lineHeight: thaiSafeLineHeight(verticalScale(24)),
         },
         emptyText: {
           color: AppColors.textTertiary,

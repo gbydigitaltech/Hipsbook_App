@@ -19,7 +19,11 @@ import {
 } from '../../types/ui/selects/select.props';
 import AppTextInput from '../inputs/AppTextInput';
 import AppText from '../texts/AppText';
-import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  thaiSafeLineHeight,
+} from '../../styles/sharedstyles';
 
 const SELECT_CONSTANTS = {
   LABEL_FONT_SIZE: 16,
@@ -615,6 +619,6 @@ const createStyles = ({
     emptyText: {
       color: AppColors.disabled,
       textAlign: 'center',
-      lineHeight: verticalScale(22),
+      lineHeight: thaiSafeLineHeight(verticalScale(22)),
     },
   });

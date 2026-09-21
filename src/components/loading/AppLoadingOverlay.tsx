@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
+import { thaiSafeLineHeight } from '../../styles/sharedstyles';
 import { AppLoadingOverlayProps } from '../../types/ui/loading/app-loading-overlay.props';
 
 const AppLoadingOverlay: React.FC<AppLoadingOverlayProps> = ({
@@ -51,7 +52,7 @@ const AppLoadingOverlay: React.FC<AppLoadingOverlayProps> = ({
           color: AppColors.white,
           fontSize: moderateScale(14),
           textAlign: 'center',
-          lineHeight: moderateScale(20),
+          lineHeight: thaiSafeLineHeight(moderateScale(20)),
         },
       }),
     [scale, verticalScale, moderateScale],

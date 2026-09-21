@@ -122,7 +122,6 @@ const ReviewComposerForm: React.FC<Props> = ({
           fontFamily: getFontFamily('regular'),
           fontSize: moderateScale(fontSize, 0.5),
           textAlignVertical: 'top',
-          includeFontPadding: false,
         },
         actionsRow: {
           flexDirection: 'row',

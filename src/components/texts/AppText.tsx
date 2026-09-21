@@ -1,13 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
-import { IS_Android } from '../../constants/platform';
+import { IS_IOS } from '../../constants/platform';
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import {
-  LINE_HEIGHT_RATIO,
-  SINGLE_LINE_HEIGHT_RATIO,
-} from '../../styles/sharedstyles';
+import { LINE_HEIGHT_RATIO } from '../../styles/sharedstyles';
 import { AppTextProps } from '../../types/ui/texts/text.props';
 
 const AppText: React.FC<AppTextProps> = ({
@@ -25,6 +22,10 @@ const AppText: React.FC<AppTextProps> = ({
 
   const isSingleLine = props.numberOfLines === 1;
 
+  // Thai can stack an upper vowel + tone mark (e.g. ื + ้ in "ซื้อ"),
+  // so a single line must be tall enough or the top mark gets clipped.
+  const singleLineRatio = 1.4;
+
   return (
     <Text
       allowFontScaling={allowFontScaling}
@@ -34,11 +35,16 @@ const AppText: React.FC<AppTextProps> = ({
         {
           fontFamily: getFontFamily(fontWeight),
           fontSize: scaledFontSize,
-          lineHeight: Math.round(
-            scaledFontSize *
-              (isSingleLine ? SINGLE_LINE_HEIGHT_RATIO : LINE_HEIGHT_RATIO),
-          ),
-          ...(IS_Android ? { includeFontPadding: false } : null), // Android vertical alignment fix
+          // iOS clips tone marks when lineHeight is forced, so let it use the
+          // font's natural metrics; Android keeps lineHeight to control spacing.
+          ...(IS_IOS
+            ? null
+            : {
+                lineHeight: Math.round(
+                  scaledFontSize *
+                    (isSingleLine ? singleLineRatio : LINE_HEIGHT_RATIO),
+                ),
+              }),
         },
         style,
       ]}

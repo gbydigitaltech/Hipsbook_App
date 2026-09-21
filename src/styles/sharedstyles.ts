@@ -1,12 +1,6 @@
-import { IS_TABLET } from '../constants/platform';
+import { IS_IOS, IS_TABLET } from '../constants/platform';
 
-/**
- * Left/right screen padding (px) applied to every screen.
- *
- * Was 12px on phones — too tight against the edge, especially for Thai text
- * with stacked vowel marks. Bumped to 16px (24px on tablets) to give content
- * room to breathe; every screen referencing this shifts together.
- */
+/** Left/right screen padding (px), applied on every screen. */
 export const sharedPaddingHorizontal = IS_TABLET ? 24 : 16;
 
 /** Default vertical padding used across shared layouts (px) */
@@ -14,8 +8,7 @@ export const sharedPaddingVertical = 12;
 
 export const sharedBottomSpace = 30;
 
-/** Safe top spacing for Android screens (px) */
-// Gap from the status bar to the header — fixed (not scaled) so it matches across devices.
+/** Gap from status bar to header (px), fixed so it matches across devices. */
 export const sharedTopSpace = 12;
 
 export const androidSafeTop = 12;
@@ -28,12 +21,7 @@ export const iosSafeTop = 12;
 /* -------------------------------------------------------------------------- */
 
 /**
- * App's central corner-radius scale.
- *
- * Corner-radius values were scattered across 10 values (8,10,12,14,16,18,20,30,50,999),
- * so cards placed side by side looked unevenly rounded. Collapsed to 4 levels,
- * choosing the closest match — most spots move by no more than 2px.
- *
+ * Central corner-radius scale.
  * Always use with responsiveRadius(), e.g. responsiveRadius(AppRadius.md).
  */
 export const AppRadius = {
@@ -54,13 +42,8 @@ export const AppRadius = {
 /* -------------------------------------------------------------------------- */
 
 /**
- * App's central font-size scale (values already chosen per device).
- *
- * Size pairs were scattered across 22 variants, so same-level headings differed
- * between screens. Collapsed to 7 levels using the most common pairs from the old code
- * (16/20, 12/14, 24/28, 14/16, 18/22 cover almost all previous usage).
- *
- * Use instead of writing fontSize={IS_TABLET ? 20 : 16}, e.g.
+ * Central font-size scale (values chosen per device).
+ * Use instead of fontSize={IS_TABLET ? 20 : 16}, e.g.
  *   <AppText fontSize={AppFontSize.subtitle}>
  */
 export const AppFontSize = {
@@ -80,34 +63,25 @@ export const AppFontSize = {
   h1: IS_TABLET ? 28 : 24,
 } as const;
 
-/**
- * Line-height multiplier.
- *
- * Thai can stack an upper vowel and a tone mark two levels high; too tight a
- * line height makes glyphs collide. 1.45 leaves room for upper/lower marks.
- */
+/** Line-height multiplier. 1.45 leaves room for Thai upper vowels + tone marks. */
 export const LINE_HEIGHT_RATIO = 1.45;
 
-/**
- * Line-height multiplier for single-line text (buttons, chips, tile labels).
- *
- * Without an explicit lineHeight, iOS falls back to the font's natural line
- * height — IBM Plex Sans Thai reserves extra ascent/descent for stacked marks,
- * so its box renders taller than Android's, which is shrunk by
- * `includeFontPadding: false`. Pinning a ratio makes both platforms agree.
- * 1.2 still clears upper vowels and tone marks while fitting fixed-height
- * buttons without the glyphs touching the edges.
- */
+/** Line-height multiplier for single-line text (buttons, chips, labels). */
 export const SINGLE_LINE_HEIGHT_RATIO = 1.2;
 
 /* -------------------------------------------------------------------------- */
 /* =========================== Press feedback =========================== */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Opacity while pressing a button/card.
- *
- * Was scattered across 6 values (0.7-0.97), so presses felt inconsistent.
- * One value app-wide — clear enough to register a press without feeling jumpy.
- */
+/** Opacity while pressing a button/card. */
 export const PRESSED_OPACITY = 0.8;
+
+/**
+ * Thai-safe cross-platform line height.
+ *
+ * On iOS, forcing lineHeight clips upper vowels/tone marks, so return undefined
+ * there (use the font's natural metrics) and the given value on Android. Use for
+ * any text style where you'd otherwise set lineHeight.
+ */
+export const thaiSafeLineHeight = (value?: number): number | undefined =>
+  IS_IOS ? undefined : value;

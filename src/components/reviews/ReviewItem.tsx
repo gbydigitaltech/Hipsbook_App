@@ -10,7 +10,11 @@ import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import RoundProfileImage from '../profiles/RoundProfileImage';
 import AppText from '../texts/AppText';
-import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  thaiSafeLineHeight,
+} from '../../styles/sharedstyles';
 
 interface Props {
   name?: string;
@@ -25,6 +29,11 @@ interface Props {
   onPressReply?: () => void;
 }
 
+/**
+ * A single review/comment shown as a card: avatar, name, star rating, body
+ * text, and reply/like actions. The "⋯" menu is rendered only when
+ * `onLongPress` is provided (i.e. the current user may edit/delete it).
+ */
 const ReviewItem: React.FC<Props> = ({
   name = 'User',
   content = '',
@@ -70,7 +79,7 @@ const ReviewItem: React.FC<Props> = ({
         },
         content: {
           color: AppColors.white,
-          lineHeight: verticalScale(IS_TABLET ? 26 : 22),
+          lineHeight: thaiSafeLineHeight(verticalScale(IS_TABLET ? 26 : 22)),
         },
         divider: {
           height: StyleSheet.hairlineWidth,
@@ -120,6 +129,7 @@ const ReviewItem: React.FC<Props> = ({
     ]).start();
   };
 
+  // Optimistic like: flip the UI right away, then notify the parent.
   const handleToggleLike = () => {
     animateLike();
     const next = !liked;

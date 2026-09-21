@@ -192,6 +192,5 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
     flexShrink: 1,
-    includeFontPadding: false,
   },
 });
