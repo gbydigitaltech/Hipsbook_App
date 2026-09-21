@@ -1,97 +1,158 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Hipsbook App
 
-# Getting Started
+แอปมือถือ (iOS / Android) สำหรับแพลตฟอร์มคอร์สเรียนออนไลน์ Hipsbook — ดูคอร์ส เรียนวิดีโอ ไลฟ์สด รีวิว และจัดการโปรไฟล์ผู้ใช้
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+สร้างด้วย [React Native](https://reactnative.dev) 0.82 + TypeScript
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Tech Stack
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+| ส่วน | เทคโนโลยี |
+|---|---|
+| Framework | React Native 0.82.1, React 19.1.1, TypeScript 5.8 |
+| Navigation | React Navigation 7 (native-stack, bottom-tabs) |
+| State / Data | Zustand, TanStack Query 5, Axios |
+| Forms | React Hook Form + Yup |
+| UI | React Native Paper, Reanimated 4, Gesture Handler, Skia, Bottom Sheet |
+| Media | react-native-video, NodeMediaClient (RTMP), WebRTC (WHIP), HLS |
+| Auth | Google Sign-In, Apple Authentication, LINE Login, Twitter (App Auth) |
+| Payments | react-native-iap (In-App Purchase) |
+
+---
+
+## ความต้องการของระบบ
+
+- **Node.js** >= 20 (แนะนำ 22.x)
+- **JDK** 17 และ Android SDK (สำหรับ Android)
+- **Xcode** + CocoaPods (สำหรับ iOS, ต้องใช้ macOS)
+
+ตรวจสอบสภาพแวดล้อมได้ด้วย
 
 ```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+npx react-native doctor
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## เริ่มต้นใช้งาน
 
-### Android
+### 1. ติดตั้ง dependencies
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+npm install --legacy-peer-deps
 ```
 
-### iOS
+> ต้องใส่ `--legacy-peer-deps` เพราะ `react-native-iap` ระบุ peer เป็น `react-native-nitro-modules@^0.31.1` แต่โปรเจกต์ใช้ `^0.35.0`
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### 2. สร้างไฟล์ `.env`
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+คัดลอกจาก `.env.example` แล้วเติมค่าจริง (ไฟล์ `.env` ถูก ignore ไว้ ไม่ขึ้น git)
 
 ```sh
-bundle install
+cp .env.example .env
 ```
 
-Then, and every time you update your native dependencies, run:
+ตัวแปรที่ต้องมี:
+
+| ตัวแปร | คำอธิบาย |
+|---|---|
+| `API_BASE_URL` | URL ของ backend API |
+| `RESET_PASSWORD_CALLBACK` | deep link ปลายทางหลังรีเซ็ตรหัสผ่าน |
+| `VIDEO_STREAM_BASE_URL` | base URL ของไฟล์วิดีโอคอร์ส |
+| `VIDEO_THUMBNAIL_BASE_URL` | base URL ของ thumbnail |
+| `GOOGLE_WEB_CLIENT_ID` / `GOOGLE_IOS_CLIENT_ID` | Google Sign-In |
+| `TWITTER_CLIENT_ID` | Twitter OAuth |
+| `LINE_CLIENT_ID` | LINE Login |
+| `STREAM_API_BASE_URL` / `STREAM_API_KEY` | บริการไลฟ์สตรีม |
+| `STREAM_RTMP_SERVER` / `STREAM_HLS_SERVER` | endpoint สำหรับ push / play สตรีม |
+| `STREAM_WHIP_BASE_URL` | endpoint WebRTC (WHIP) |
+| `STREAM_SIGNALR_HUB` | SignalR hub สำหรับ realtime |
+
+### 3. ติดตั้ง Pods (เฉพาะ iOS)
 
 ```sh
-bundle exec pod install
+bundle install          # ครั้งแรกเท่านั้น
+bundle exec pod install --project-directory=ios
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### 4. รันแอป
 
 ```sh
-# Using npm
+npm start               # Metro dev server
+npm run android         # หน้าต่างใหม่
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## คำสั่งที่ใช้บ่อย
 
-## Step 3: Modify your app
+| คำสั่ง | ทำอะไร |
+|---|---|
+| `npm start` | เปิด Metro dev server |
+| `npm run android` | build + ติดตั้งลง Android emulator/device |
+| `npm run android:debug` | build APK debug อย่างเดียว |
+| `npm run ios` | build + รันบน iOS Simulator |
+| `npm run lint` | ตรวจ ESLint |
+| `npm run typecheck` | ตรวจ TypeScript (ไม่ emit ไฟล์) |
+| `npm test` | รัน Jest |
 
-Now that you have successfully run the app, let's make changes!
+---
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## โครงสร้างโปรเจกต์
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```
+src/
+├── assets/        # รูปภาพ ฟอนต์ ไอคอน
+├── components/    # UI components ที่ใช้ซ้ำ
+├── config/        # ค่าคอนฟิกและ env mapping
+├── constants/     # ค่าคงที่ต่าง ๆ
+├── helpers/       # ฟังก์ชันช่วยเหลือทั่วไป
+├── hooks/         # custom React hooks
+├── navigation/    # RootNavigator, AppStack, auth / bottom / profile stacks
+├── screens/       # หน้าจอ: about, auth, class, course, home, live,
+│                  #          notification, policy, profile, teacher, terms
+├── services/      # เรียก API แยกตามโดเมน + http.ts (axios instance)
+├── stores/        # Zustand stores
+├── styles/        # theme และ style กลาง
+├── types/         # TypeScript types
+└── validation/    # Yup schemas
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+---
 
-## Congratulations! :tada:
+## แก้ปัญหาที่พบบ่อย
 
-You've successfully run and modified your React Native App. :partying_face:
+**Build Android ล้มที่ `assertWorkletsVersionTask`**
 
-### Now what?
+Reanimated 4.2.x รองรับ `react-native-worklets` เฉพาะสาย 0.7.x เท่านั้น ถ้าถูกอัปเป็น 0.8+ ให้ปักหมุดกลับ
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+```sh
+npm install react-native-worklets@0.7.4 --save-exact --legacy-peer-deps
+```
 
-# Troubleshooting
+**Metro ใช้ cache เก่า / แก้โค้ดแล้วไม่อัปเดต**
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```sh
+npx react-native start --reset-cache
+```
 
-# Learn More
+**Android build ค้างหรือ error แปลก ๆ**
 
-To learn more about React Native, take a look at the following resources:
+```sh
+cd android && ./gradlew clean && cd ..
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**iOS build พังหลังเปลี่ยน native dependency**
+
+```sh
+bundle exec pod install --project-directory=ios
+```
+
+---
+
+## หมายเหตุ
+
+- ห้าม commit ไฟล์ `.env`, keystore สำหรับ release, หรือไฟล์ credential ใด ๆ
+- `android/app/debug.keystore` เป็น debug key มาตรฐานของ React Native — ปลอดภัยที่จะอยู่ใน repo

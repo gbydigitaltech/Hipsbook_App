@@ -76,3 +76,6 @@ yarn-error.log
 .env
 .env.production
 package-lock.json
+
+# CI (ปิดไว้ชั่วคราว จะตั้งใหม่ภายหลัง)
+.github.disabled/
