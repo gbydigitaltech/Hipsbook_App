@@ -1,0 +1,23 @@
+diff --git a/node_modules/react-native-nodemediaclient/ios/RCTNodePublisherView.m b/node_modules/react-native-nodemediaclient/ios/RCTNodePublisherView.m
+index c8b3efb..aff6b7f 100644
+--- a/node_modules/react-native-nodemediaclient/ios/RCTNodePublisherView.m
++++ b/node_modules/react-native-nodemediaclient/ios/RCTNodePublisherView.m
+@@ -36,6 +36,18 @@
+     [_np stop];
+ }
+ 
++- (void)layoutSubviews {
++    [super layoutSubviews];
++    // New Architecture interop fix: resize the camera preview layer/subviews
++    // to the actual bounds (attachView runs at init when bounds are still 0).
++    for (UIView *sub in self.subviews) {
++        sub.frame = self.bounds;
++    }
++    for (CALayer *layer in self.layer.sublayers) {
++        layer.frame = self.bounds;
++    }
++}
++
+ -(void) onEventCallback:(nonnull id)sender event:(int)event msg:(nonnull NSString*)msg {
+     if (_onChange) {
+         _onChange(@{@"code": [NSNumber numberWithInteger:event], @"msg": msg});;

@@ -9,6 +9,8 @@ declare module 'react-native-nodemediaclient' {
       videoParam?: Record<string, unknown>;
       frontCamera?: boolean;
       HWAccelEnable?: boolean;
+      videoOrientation?: number;
+      roomRatio?: number;
       onEvent?: (code: number, msg: string) => void;
     }
   > {
@@ -20,5 +22,12 @@ declare module 'react-native-nodemediaclient' {
     static NMC_CODEC_ID_AAC: number;
     static NMC_PROFILE_H264_HIGH: number;
     static NMC_PROFILE_AAC_LC: number;
+    static VIDEO_ORIENTATION_PORTRAIT: number;
+    static VIDEO_ORIENTATION_LANDSCAPE_RIGHT: number;
+    static VIDEO_ORIENTATION_LANDSCAPE_LEFT: number;
   }
+
+  export const NodeMediaClient: {
+    setLicense(license: string): void;
+  };
 }

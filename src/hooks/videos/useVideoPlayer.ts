@@ -9,9 +9,15 @@ import type {
 interface UseVideoPlayerProps {
   videoRef: React.RefObject<VideoRef | null>;
   mediaId?: string;
+  /** Fired when a double-tap seek happens; direction -1 = back, 1 = forward. */
+  onDoubleTapSeek?: (direction: number) => void;
 }
 
-export const useVideoPlayer = ({ videoRef, mediaId }: UseVideoPlayerProps) => {
+export const useVideoPlayer = ({
+  videoRef,
+  mediaId,
+  onDoubleTapSeek,
+}: UseVideoPlayerProps) => {
   const [paused, setPaused] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
@@ -114,6 +120,7 @@ export const useVideoPlayer = ({ videoRef, mediaId }: UseVideoPlayerProps) => {
     const target = Math.max(0, Math.min(duration, currentTime + jump));
     videoRef.current?.seek(target);
     setCurrentTime(target);
+    onDoubleTapSeek?.(direction);
     showControlsTemporarily();
   };
 

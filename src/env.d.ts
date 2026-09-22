@@ -14,4 +14,5 @@ declare module '@env' {
   export const STREAM_HLS_SERVER: string;
   export const STREAM_WHIP_BASE_URL: string;
   export const STREAM_SIGNALR_HUB: string;
+  export const NODEMEDIA_LICENSE: string;
 }

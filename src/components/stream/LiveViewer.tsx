@@ -1,6 +1,6 @@
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { log, logWarn } from '../../helpers/logger';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -10,12 +10,12 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Video, { VideoRef } from 'react-native-video';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import AppText from '../texts/AppText';
 import liveStreamService from './liveStreamService';
+import Player from '../videos/Player';
 import { getHlsUrl, normalizeHlsPlaybackUrl } from './streamConfig';
 import { AppFontSize } from '../../styles/sharedstyles';
 
@@ -34,15 +34,14 @@ const LiveViewer = ({
   streamKey,
   title: initialTitle,
 }: LiveViewerProps) => {
-  const videoRef = useRef<VideoRef>(null);
   const insets = useSafeAreaInsets();
   const { scale, verticalScale } = useResponsive();
-  const [isBuffering, setIsBuffering] = useState(true);
+  const [, setIsBuffering] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [hlsUrl, setHlsUrl] = useState('');
   const [title, setTitle] = useState(initialTitle ?? '');
   const [viewerCount, setViewerCount] = useState(0);
-  const [status, setStatus] = useState('');
+  const [, setStatus] = useState('');
 
   useEffect(() => {
     if (!visible) return;
@@ -160,13 +159,6 @@ const LiveViewer = ({
           flex: 1,
           backgroundColor: '#000',
         },
-        video: {
-          width: '100%',
-          height: '100%',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-        },
         bufferingOverlay: {
           position: 'absolute',
           top: 0,
@@ -276,39 +268,7 @@ const LiveViewer = ({
           </View>
         ) : hlsUrl ? (
           <View style={styles.videoContainer}>
-            <Video
-              key={hlsUrl}
-              ref={videoRef}
-              source={{
-                uri: hlsUrl,
-                type: 'm3u8',
-                minLoadRetryCount: 5,
-              }}
-              style={styles.video}
-              resizeMode="contain"
-              onBuffer={({ isBuffering: b }) => setIsBuffering(b)}
-              onLoad={() => setIsBuffering(false)}
-              onProgress={({ currentTime, playableDuration }) => {
-                if (currentTime > 0 || playableDuration > 0) {
-                  setIsBuffering(false);
-                }
-              }}
-              onError={handleError}
-              paused={false}
-              repeat={false}
-              playInBackground={false}
-            />
-            {isBuffering && (
-              <View style={styles.bufferingOverlay}>
-                <ActivityIndicator size="large" color={AppColors.primary} />
-                <AppText
-                  fontSize={AppFontSize.body}
-                  style={{ marginTop: 12, color: AppColors.grayLight }}
-                >
-                  กำลังโหลด...
-                </AppText>
-              </View>
-            )}
+            <Player sourceUrl={hlsUrl} isLive onError={() => handleError({})} />
           </View>
         ) : (
           <View style={styles.bufferingOverlay}>

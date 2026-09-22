@@ -1,3 +1,4 @@
+import { NODEMEDIA_LICENSE } from '@env';
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { log, logError } from '../../helpers/logger';
 import React, {
@@ -12,6 +13,7 @@ import {
   Alert,
   AppState,
   Modal,
+  PanResponder,
   PermissionsAndroid,
   Platform,
   StatusBar,
@@ -19,7 +21,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { NodePublisher } from 'react-native-nodemediaclient';
+import {
+  NodeMediaClient,
+  NodePublisher,
+} from 'react-native-nodemediaclient';
+import {
+  PERMISSIONS,
+  RESULTS,
+  request,
+} from 'react-native-permissions';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
@@ -45,16 +55,21 @@ type StreamStatus =
   | 'error';
 
 async function requestPermissions(): Promise<boolean> {
-  if (Platform.OS !== 'android') return true;
   try {
-    const granted = await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.CAMERA,
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-    ]);
-    return (
-      granted[PermissionsAndroid.PERMISSIONS.CAMERA] === 'granted' &&
-      granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === 'granted'
-    );
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      ]);
+      return (
+        granted[PermissionsAndroid.PERMISSIONS.CAMERA] === 'granted' &&
+        granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === 'granted'
+      );
+    }
+    // iOS: request camera + microphone before the capture session starts
+    const cam = await request(PERMISSIONS.IOS.CAMERA);
+    const mic = await request(PERMISSIONS.IOS.MICROPHONE);
+    return cam === RESULTS.GRANTED && mic === RESULTS.GRANTED;
   } catch {
     return false;
   }
@@ -62,14 +77,55 @@ async function requestPermissions(): Promise<boolean> {
 
 const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (NODEMEDIA_LICENSE) {
+      NodeMediaClient.setLicense(NODEMEDIA_LICENSE);
+    }
+  }, []);
   const { scale, verticalScale } = useResponsive();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [visibility, setVisibility] = useState<'Public' | 'Private'>('Public');
+  const [visibility, setVisibility] = useState<'Public' | 'Private'>(
+    'Public',
+  );
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>('idle');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [previewSize, setPreviewSize] = useState({ width: 0, height: 0 });
+  const [mountKey, setMountKey] = useState(0);
+  const [zoom, setZoom] = useState(0);
+  const zoomRef = useRef(0);
+  const pinchStartRef = useRef<{ dist: number; zoom: number } | null>(null);
+  const applyZoom = (v: number) => {
+    const nv = Math.max(0, Math.min(1, v));
+    zoomRef.current = nv;
+    setZoom(nv);
+  };
+  const pinchResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: e => e.nativeEvent.touches.length === 2,
+      onMoveShouldSetPanResponder: e => e.nativeEvent.touches.length === 2,
+      onPanResponderMove: e => {
+        const t = e.nativeEvent.touches;
+        if (t.length !== 2) return;
+        const d = Math.hypot(t[0].pageX - t[1].pageX, t[0].pageY - t[1].pageY);
+        if (!pinchStartRef.current) {
+          pinchStartRef.current = { dist: d, zoom: zoomRef.current };
+          return;
+        }
+        const ratio = d / pinchStartRef.current.dist;
+        applyZoom(pinchStartRef.current.zoom + (ratio - 1));
+      },
+      onPanResponderRelease: () => {
+        pinchStartRef.current = null;
+      },
+      onPanResponderTerminate: () => {
+        pinchStartRef.current = null;
+      },
+    }),
+  ).current;
   const [duration, setDuration] = useState(0);
   const [viewerCount, setViewerCount] = useState(0);
   const [rtmpUrl, setRtmpUrl] = useState<string | null>(null);
@@ -119,6 +175,9 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
     const sub = AppState.addEventListener('change', state => {
       if (state === 'background' && isStreaming && cameraRef.current) {
         cameraRef.current.stop();
+      } else if (state === 'active' && isStreaming) {
+        // Returning from lock/background: remount to re-open camera + preview
+        setMountKey(k => k + 1);
       }
     });
     return () => sub.remove();
@@ -203,13 +262,14 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
     if (!isStreaming || !rtmpUrl) return;
     const t = setTimeout(() => {
       try {
+        cameraRef.current?.startPreview();
         cameraRef.current?.start();
       } catch (e) {
         logError('Stream', '[StreamPublisher] RTMP start', e);
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [isStreaming, rtmpUrl]);
+  }, [isStreaming, rtmpUrl, mountKey]);
 
   const handleStopStream = useCallback(async () => {
     Alert.alert(
@@ -394,7 +454,9 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
           backgroundColor: '#000',
         },
         publisherWrap: {
-          ...StyleSheet.absoluteFillObject,
+          position: 'absolute',
+          top: 0,
+          left: 0,
         },
         overlayTop: {
           position: 'absolute',
@@ -581,14 +643,40 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
             />
           </View>
         ) : (
-          <View style={styles.previewContainer} collapsable={false}>
-            {rtmpUrl ? (
-              <View style={styles.publisherWrap} collapsable={false}>
+          <View
+            style={styles.previewContainer}
+            collapsable={false}
+            onLayout={e => {
+              const { width, height } = e.nativeEvent.layout;
+              setPreviewSize(prev =>
+                prev.width === width && prev.height === height
+                  ? prev
+                  : { width, height },
+              );
+            }}
+          >
+            {rtmpUrl && previewSize.width > 0 ? (
+              <View
+                style={[
+                  styles.publisherWrap,
+                  { width: previewSize.width, height: previewSize.height },
+                ]}
+                collapsable={false}
+                {...pinchResponder.panHandlers}
+              >
                 <NodePublisher
+                  key={`pub-${mountKey}-${Math.round(
+                    previewSize.width,
+                  )}x${Math.round(previewSize.height)}`}
                   ref={cameraRef}
-                  style={StyleSheet.absoluteFill}
+                  style={{
+                    width: previewSize.width,
+                    height: previewSize.height,
+                  }}
                   url={rtmpUrl}
                   frontCamera={isFrontCamera}
+                  videoOrientation={NodePublisher.VIDEO_ORIENTATION_PORTRAIT}
+                  roomRatio={zoom}
                   HWAccelEnable={Platform.OS === 'ios'}
                   videoParam={videoParam}
                   audioParam={audioParam}
