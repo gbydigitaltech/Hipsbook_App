@@ -35,7 +35,7 @@ type UpdateLibraryStatusResponse = {
   status: string;
 };
 
-const buildLibraryListParams = ({
+const buildLibraryListBody = ({
   search,
   page,
   limit,
@@ -52,10 +52,11 @@ export const apiGetLibraryList = async (
   const { signal } = params;
 
   try {
-    const { data } = await privateApi.get<CourseListResponse>('/library/list', {
-      params: buildLibraryListParams(params),
-      signal,
-    });
+    const { data } = await privateApi.post<CourseListResponse>(
+      '/library/list',
+      buildLibraryListBody(params),
+      { signal },
+    );
 
     return data;
   } catch (err) {

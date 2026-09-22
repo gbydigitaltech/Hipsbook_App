@@ -9,6 +9,8 @@ import AppEmptyState from '../../../components/states/AppEmptyState';
 
 import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
+import { getVideoThumbnailUrl } from '../../../helpers/videoThumbnail';
+import { useListThumbnailPreload } from '../../../helpers/thumbnailPreload';
 
 type DocumentType = 'pdf' | 'audio' | 'word' | 'excel' | 'text';
 
@@ -167,6 +169,11 @@ const LessonTab: React.FC<LessonTabProps> = ({
 
   const keyExtractor = useCallback((row: Row) => String(row.item.id), []);
 
+  const { onViewableItemsChanged, viewabilityConfig } =
+    useListThumbnailPreload(data, row =>
+      getVideoThumbnailUrl(row.item.media_id, IS_TABLET ? 720 : 480),
+    );
+
   const renderItem = useCallback(
     ({ item: row }: { item: Row }) => {
       const item = row.item;
@@ -260,6 +267,8 @@ const LessonTab: React.FC<LessonTabProps> = ({
         maxToRenderPerBatch={8}
         updateCellsBatchingPeriod={50}
         windowSize={7}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
         ListEmptyComponent={
           <AppEmptyState
             containerStyle={styles.emptyState}

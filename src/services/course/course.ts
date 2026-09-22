@@ -40,7 +40,7 @@ type MessageResponse = {
   message: string;
 };
 
-const buildCourseListParams = ({
+const buildCourseListBody = ({
   category,
   price,
   review,
@@ -64,7 +64,7 @@ const buildCourseListParams = ({
   ...(limit !== undefined ? { limit } : {}),
 });
 
-const buildRecommendCourseListParams = ({
+const buildRecommendCourseListBody = ({
   category,
   price,
   price_min,
@@ -97,12 +97,10 @@ export const apiGetCourseList = async (
   const { signal } = params;
 
   try {
-    const { data } = await privateApi.get<CourseListResponse>(
+    const { data } = await privateApi.post<CourseListResponse>(
       '/inventory/course/list',
-      {
-        params: buildCourseListParams(params),
-        signal,
-      },
+      buildCourseListBody(params),
+      { signal },
     );
 
     return data;
@@ -118,12 +116,10 @@ export const apiGetRecommendCourseList = async (
   const { signal } = params;
 
   try {
-    const { data } = await privateApi.get<RecommendCourseListResponse>(
+    const { data } = await privateApi.post<RecommendCourseListResponse>(
       '/recommend/course/list',
-      {
-        params: buildRecommendCourseListParams(params),
-        signal,
-      },
+      buildRecommendCourseListBody(params),
+      { signal },
     );
 
     return data;
@@ -138,8 +134,9 @@ export const apiGetCourseDetail = async ({
   signal,
 }: CourseIdParams): Promise<CourseDetailResponse> => {
   try {
-    const { data } = await privateApi.get<CourseDetailResponse>(
-      `/course/detail/${id}`,
+    const { data } = await privateApi.post<CourseDetailResponse>(
+      '/course/detail',
+      { id },
       { signal },
     );
 
@@ -155,8 +152,9 @@ export const apiGetCourseLessonList = async ({
   signal,
 }: CourseIdParams): Promise<CourseLessonListResponse> => {
   try {
-    const { data } = await privateApi.get<CourseLessonListResponse>(
-      `/course/detail/${id}/lesson/list`,
+    const { data } = await privateApi.post<CourseLessonListResponse>(
+      '/course/detail/lesson/list',
+      { id },
       { signal },
     );
 
@@ -207,8 +205,9 @@ export const apiGetTeacherInCourse = async ({
   signal,
 }: CourseIdParams): Promise<Teacher[]> => {
   try {
-    const { data } = await privateApi.get<Teacher[]>(
-      `/course/detail/${id}/teacher/list`,
+    const { data } = await privateApi.post<Teacher[]>(
+      '/course/detail/teacher/list',
+      { id },
       { signal },
     );
 

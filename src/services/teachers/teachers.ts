@@ -26,7 +26,7 @@ type TeacherCourseListParams = TeacherIdParams & {
 
 type TeacherCourseListResponse = { data?: Course[] } | Course[];
 
-const buildPaginationParams = ({ page, limit }: PaginationParams = {}) => ({
+const buildPaginationBody = ({ page, limit }: PaginationParams = {}) => ({
   ...(page !== undefined ? { page } : {}),
   ...(limit !== undefined ? { limit } : {}),
 });
@@ -38,12 +38,10 @@ export const apiGetRecommendedTeachers = async (
   const { signal } = params;
 
   try {
-    const { data } = await publicApi.get<TeacherRecommendResponse>(
+    const { data } = await publicApi.post<TeacherRecommendResponse>(
       '/recommend/teacher/list',
-      {
-        params: buildPaginationParams(params),
-        signal,
-      },
+      buildPaginationBody(params),
+      { signal },
     );
 
     return data;
@@ -58,8 +56,9 @@ export const apiGetTeacherDetail = async ({
   signal,
 }: TeacherIdParams): Promise<Teacher> => {
   try {
-    const { data } = await publicApi.get<Teacher>(
-      `/teacher/detail/${teacherId}`,
+    const { data } = await publicApi.post<Teacher>(
+      '/teacher/detail',
+      { id: teacherId },
       { signal },
     );
 
@@ -77,15 +76,10 @@ export const apiGetTeacherCourseList = async ({
   signal,
 }: TeacherCourseListParams): Promise<TeacherCourseListResponse> => {
   try {
-    const { data } = await privateApi.get<TeacherCourseListResponse>(
-      `/teacher/detail/${teacherId}/course/list`,
-      {
-        params: {
-          page,
-          limit,
-        },
-        signal,
-      },
+    const { data } = await privateApi.post<TeacherCourseListResponse>(
+      '/teacher/detail/course/list',
+      { id: teacherId, page, limit },
+      { signal },
     );
 
     return data;

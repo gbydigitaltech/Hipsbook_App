@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import CourseDetailLessonCard from '../../../../components/cards/CourseDetailLessonCard';
 import AppSectionHeader from '../../../../components/sections/AppSectionHeader';
 import { IS_TABLET } from '../../../../constants/platform';
 import { useResponsive } from '../../../../helpers/responsive';
+import { getVideoThumbnailUrl } from '../../../../helpers/videoThumbnail';
+import { preloadThumbnails } from '../../../../helpers/thumbnailPreload';
 import { LessonGroup } from '../types/group.types';
 import { CourseLesson } from '../types/lesson.types';
 import { AppFontSize } from '../../../../styles/sharedstyles';
@@ -15,6 +17,16 @@ interface Props {
 
 const CourseLessonTab: React.FC<Props> = ({ groups, onPressLesson }) => {
   const { verticalScale } = useResponsive();
+
+  useEffect(() => {
+    preloadThumbnails(
+      groups.flatMap(g =>
+        g.videos.map(v =>
+          getVideoThumbnailUrl(v.media_id, IS_TABLET ? 720 : 480),
+        ),
+      ),
+    );
+  }, [groups]);
 
   return (
     <View>

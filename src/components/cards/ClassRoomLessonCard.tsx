@@ -1,7 +1,6 @@
 import { BlurView } from '@react-native-community/blur';
 import React, { memo, useMemo } from 'react';
 import {
-  Image,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -16,6 +15,8 @@ import { useResponsive } from '../../helpers/responsive';
 import { getVideoThumbnailUrl } from '../../helpers/videoThumbnail';
 import { AppColors } from '../../styles/colors';
 import AppButton from '../buttons/AppButton';
+import AppImage from '../images/AppImage';
+import { IMAGES } from '../../constants/images-paths';
 import AppText from '../texts/AppText';
 import {
   AppFontSize,
@@ -85,7 +86,7 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
 
   const cardHeight = IS_TABLET ? 156 : 116;
   const imageWidth = cardHeight * (4 / 3);
-  const thumbnailUrl = getVideoThumbnailUrl(mediaId, 720);
+  const thumbnailUrl = getVideoThumbnailUrl(mediaId, IS_TABLET ? 720 : 480);
   const showAttachmentButton =
     canStart && hasAttachments && !!onPressAttachments;
 
@@ -120,10 +121,10 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
         ]}
       >
         <View style={styles.coverContent}>
-          <Image
-            source={thumbnailUrl ? { uri: thumbnailUrl } : undefined}
+          <AppImage
+            uri={thumbnailUrl}
             style={styles.coverImage}
-            resizeMode="cover"
+            placeholderIcon={IMAGES.appLogoFull}
           />
           <View style={styles.playIconOverlay}>
             <PlayCircleIcon size={IS_TABLET ? 44 : 28} />

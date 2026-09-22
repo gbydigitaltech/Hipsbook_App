@@ -1,12 +1,14 @@
 import { BlurView } from '@react-native-community/blur';
 import React, { useMemo } from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import PlayCircleIcon from '../../assets/icons/course/PlayCircleIcon';
 import VideoIcon from '../../assets/icons/course/VideoIcon';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { getVideoThumbnailUrl } from '../../helpers/videoThumbnail';
+import AppImage from '../images/AppImage';
+import { IMAGES } from '../../constants/images-paths';
 import { AppColors } from '../../styles/colors';
 import AppButton from '../buttons/AppButton';
 import AppText from '../texts/AppText';
@@ -75,7 +77,7 @@ const CourseDetailLessonCard: React.FC<LessonCardProps> = ({
   const paidPriceLabel = `ซื้อ ฿${formatNumberTH(normalizedPrice)}`;
   const cardHeight = IS_TABLET ? 140 : 116;
   const imageWidth = cardHeight * (4 / 3);
-  const thumbnailUrl = getVideoThumbnailUrl(mediaId, 720);
+  const thumbnailUrl = getVideoThumbnailUrl(mediaId, IS_TABLET ? 720 : 480);
 
   const actionButtonWidth = scale(IS_TABLET ? 148 : 120);
   const actionButtonHeight = verticalScale(IS_TABLET ? 48 : 42);
@@ -180,10 +182,10 @@ const CourseDetailLessonCard: React.FC<LessonCardProps> = ({
     <View style={styles.outerContainer}>
       <View style={styles.coverImageWrapper}>
         <View style={styles.coverContent}>
-          <Image
-            source={thumbnailUrl ? { uri: thumbnailUrl } : undefined}
+          <AppImage
+            uri={thumbnailUrl}
             style={styles.coverImage}
-            resizeMode="cover"
+            placeholderIcon={IMAGES.appLogoFull}
           />
           <View style={styles.playIconOverlay}>
             <PlayCircleIcon size={IS_TABLET ? 34 : 28} />

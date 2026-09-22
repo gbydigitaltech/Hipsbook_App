@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import {
   Image,
-  ImageSourcePropType,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -15,6 +14,7 @@ import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import type { CourseCardProps } from '../../types/ui/cards/course-card.props';
 import AppButton from '../buttons/AppButton';
+import AppImage from '../images/AppImage';
 // import AppCartButton from '../buttons/AppCartButton'; // <-- not used (commented)
 import { IS_TABLET } from '../../constants/platform';
 import WhitelistButton from '../buttons/WhitelistButton';
@@ -60,11 +60,6 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
   const hasWhitelistProp = typeof whitelist === 'boolean';
   const isWhitelisted = !!whitelist;
 
-  // Cover image source
-  const hasCover = !!(cover_image && cover_image.trim().length > 0);
-  const coverImageSource: ImageSourcePropType | null = hasCover
-    ? { uri: cover_image }
-    : null;
 
   // Teacher summary (show first teacher + remaining count)
   const teacherInfo = useMemo(() => {
@@ -123,25 +118,11 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
           },
         ]}
       >
-        {coverImageSource ? (
-          <Image
-            source={coverImageSource}
-            style={styles.fullSize}
-            resizeMode="cover"
-            accessibilityLabel="ภาพหน้าปกคอร์ส"
-          />
-        ) : (
-          <View
-            style={[
-              styles.fullSize,
-              styles.coverImagePlaceholder,
-              {
-                borderTopLeftRadius: cardRadius,
-                borderTopRightRadius: cardRadius,
-              },
-            ]}
-          />
-        )}
+        <AppImage
+          uri={cover_image}
+          style={styles.fullSize}
+          accessibilityLabel="ภาพหน้าปกคอร์ส"
+        />
       </View>
 
       <View
@@ -356,11 +337,6 @@ const styles = StyleSheet.create({
   fullSize: {
     width: '100%',
     height: '100%',
-  },
-  coverImagePlaceholder: {
-    backgroundColor: AppColors.surfaceSubtle,
-    borderWidth: 1,
-    borderColor: AppColors.borderStrong,
   },
   infoContainer: {
     flex: 1,

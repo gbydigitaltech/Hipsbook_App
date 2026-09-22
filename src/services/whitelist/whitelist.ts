@@ -3,7 +3,7 @@ import { GetCourseListParams } from '../../types/data/courses/course.query.types
 import { asError } from '../asError';
 import { privateApi } from '../http';
 
-const buildWhiteListParams = ({
+const buildWhiteListBody = ({
   search,
   page,
   limit,
@@ -20,12 +20,10 @@ export const apiGetWhiteListList = async (
   const { signal } = params;
 
   try {
-    const { data } = await privateApi.get<CourseListResponse>(
+    const { data } = await privateApi.post<CourseListResponse>(
       '/whitelist/list',
-      {
-        params: buildWhiteListParams(params),
-        signal,
-      },
+      buildWhiteListBody(params),
+      { signal },
     );
 
     return data;
