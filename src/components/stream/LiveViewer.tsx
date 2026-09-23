@@ -16,6 +16,7 @@ import { AppColors } from '../../styles/colors';
 import AppText from '../texts/AppText';
 import liveStreamService from './liveStreamService';
 import Player from '../videos/Player';
+import LiveChat from './LiveChat';
 import { getHlsUrl, normalizeHlsPlaybackUrl } from './streamConfig';
 import { AppFontSize } from '../../styles/sharedstyles';
 
@@ -41,6 +42,7 @@ const LiveViewer = ({
   const [hlsUrl, setHlsUrl] = useState('');
   const [title, setTitle] = useState(initialTitle ?? '');
   const [viewerCount, setViewerCount] = useState(0);
+  const [away, setAway] = useState(false);
   const [, setStatus] = useState('');
 
   useEffect(() => {
@@ -109,6 +111,7 @@ const LiveViewer = ({
   const handleClose = () => {
     setHasError(false);
     setIsBuffering(true);
+    setAway(false);
     setHlsUrl('');
     setTitle(initialTitle ?? '');
     setViewerCount(0);
@@ -158,6 +161,23 @@ const LiveViewer = ({
         videoContainer: {
           flex: 1,
           backgroundColor: '#000',
+        },
+        brbOverlay: {
+          ...StyleSheet.absoluteFillObject,
+          backgroundColor: 'rgba(0,0,0,0.82)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: verticalScale(10),
+          paddingHorizontal: scale(32),
+        },
+        brbTitle: { color: AppColors.white, textAlign: 'center' },
+        brbSubtitle: { color: AppColors.grayLight, textAlign: 'center' },
+        chatOverlay: {
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: '50%',
+          bottom: 0,
         },
         bufferingOverlay: {
           position: 'absolute',
@@ -268,7 +288,36 @@ const LiveViewer = ({
           </View>
         ) : hlsUrl ? (
           <View style={styles.videoContainer}>
-            <Player sourceUrl={hlsUrl} isLive onError={() => handleError({})} />
+            <Player
+              sourceUrl={hlsUrl}
+              isLive
+              onError={() => handleError({})}
+              onStalled={setAway}
+            />
+
+            {away && (
+              <View style={styles.brbOverlay} pointerEvents="none">
+                <Ionicons
+                  name="cafe"
+                  size={IS_TABLET ? 72 : 52}
+                  color={AppColors.white}
+                />
+                <AppText
+                  fontWeight="medium"
+                  fontSize={AppFontSize.subtitle}
+                  style={styles.brbTitle}
+                >
+                  โฮสต์ไม่อยู่แป๊บนึง
+                </AppText>
+                <AppText fontSize={AppFontSize.body} style={styles.brbSubtitle}>
+                  เดี๋ยวกลับมา ไม่ต้องปิดหนีนะ 💜
+                </AppText>
+              </View>
+            )}
+
+            <View style={styles.chatOverlay} pointerEvents="box-none">
+              <LiveChat streamId={streamId} bottomInset={insets.bottom} />
+            </View>
           </View>
         ) : (
           <View style={styles.bufferingOverlay}>

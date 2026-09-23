@@ -178,16 +178,26 @@ class LiveStreamService {
         const status = err.response?.status;
         const msg = extractErrorMessage(err);
         const fullUrl = `${err.config?.baseURL ?? ''}${err.config?.url ?? ''}`;
-        logError('Stream', 
-          `[LiveStream] FAIL ${status} ${err.config?.method?.toUpperCase()} ${fullUrl}`,
-        );
-        logError('Stream', 
-          `[LiveStream] Response:`,
-          JSON.stringify(err.response?.data),
-        );
+        const method = err.config?.method?.toUpperCase();
+        if (status == null) {
+          // ไม่มี response เลย: timeout (ECONNABORTED/ETIMEDOUT) หรือเน็ตหลุด (ERR_NETWORK)
+          const code = err.code ?? 'NO_RESPONSE';
+          logError('Stream',
+            `[LiveStream] FAIL ${code} ${method} ${fullUrl} — ${err.message}`,
+          );
+        } else {
+          logError('Stream',
+            `[LiveStream] FAIL ${status} ${method} ${fullUrl}`,
+          );
+          logError('Stream',
+            `[LiveStream] Response:`,
+            JSON.stringify(err.response?.data),
+          );
+        }
 
-        const readable = new Error(`${status}: ${msg}`);
+        const readable = new Error(`${status ?? err.code ?? 'NO_RESPONSE'}: ${msg}`);
         (readable as any).status = status;
+        (readable as any).code = err.code;
         (readable as any).serverData = err.response?.data;
         throw readable;
       },

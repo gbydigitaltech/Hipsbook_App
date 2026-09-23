@@ -27,13 +27,27 @@ export const useVideoPlayer = ({
   const [seekTime, setSeekTime] = useState(0);
   const [isAudio, setIsAudio] = useState(false);
   const [isVerticalVideo, setIsVerticalVideo] = useState(false);
+  const [videoAspectRatio, setVideoAspectRatio] = useState<number | undefined>(
+    undefined,
+  );
   const [currentMediaId, setCurrentMediaId] = useState<string | undefined>(
     mediaId,
   );
   const [hasEnded, setHasEnded] = useState(false);
 
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const singleTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const lastTapRef = useRef(0);
+
+  // เคลียร์ timer ค้างตอน unmount
+  useEffect(() => {
+    return () => {
+      if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+      if (singleTapTimerRef.current) clearTimeout(singleTapTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (mediaId) {
@@ -89,6 +103,9 @@ export const useVideoPlayer = ({
     const isAudioOnly = !width || !height;
     setIsAudio(isAudioOnly);
     setIsVerticalVideo(!isAudioOnly && height > width);
+    if (!isAudioOnly && width > 0 && height > 0) {
+      setVideoAspectRatio(width / height);
+    }
     setDuration(meta.duration);
     setIsBuffering(false);
   };
@@ -124,52 +141,37 @@ export const useVideoPlayer = ({
     showControlsTemporarily();
   };
 
-  const handleTap = () => {
+  /**
+   * แตะโซนวิดีโอ: ทางเดียวจบ กันบั๊ก handler ซ้อนกัน (เพี้ยนหนักบน iOS)
+   *   แตะ 1 ที  -> โชว์/ซ่อน controls
+   *   แตะ 2 ที  -> seek +/-10 วิ (play/pause ใช้ปุ่มกลาง)
+   */
+  const handleZoneTap = (direction: number) => {
     const now = Date.now();
+
+    // แตะซ้ำภายใน 300ms = ดับเบิลแตะ
     if (lastTapRef.current && now - lastTapRef.current < 300) {
+      if (singleTapTimerRef.current) {
+        clearTimeout(singleTapTimerRef.current);
+        singleTapTimerRef.current = null;
+      }
       lastTapRef.current = 0;
-    } else {
-      lastTapRef.current = now;
-      setTimeout(() => {
-        if (Date.now() - lastTapRef.current >= 310) {
-          toggleControls();
-          lastTapRef.current = 0;
-        }
-      }, 310);
+      handleDoubleTap(direction);
+      return;
     }
+
+    // แตะครั้งแรก: รอ 300ms ถ้าไม่มีแตะซ้ำค่อย toggle controls
+    lastTapRef.current = now;
+    if (singleTapTimerRef.current) clearTimeout(singleTapTimerRef.current);
+    singleTapTimerRef.current = setTimeout(() => {
+      toggleControls();
+      singleTapTimerRef.current = null;
+      lastTapRef.current = 0;
+    }, 300);
   };
 
-  const onLeftPress = () => {
-    const now = Date.now();
-    if (lastTapRef.current && now - lastTapRef.current < 300) {
-      handleDoubleTap(-1);
-      lastTapRef.current = 0;
-    } else {
-      lastTapRef.current = now;
-      setTimeout(() => {
-        if (lastTapRef.current !== 0) {
-          togglePlay();
-          lastTapRef.current = 0;
-        }
-      }, 300);
-    }
-  };
-
-  const onRightPress = () => {
-    const now = Date.now();
-    if (lastTapRef.current && now - lastTapRef.current < 300) {
-      handleDoubleTap(1);
-      lastTapRef.current = 0;
-    } else {
-      lastTapRef.current = now;
-      setTimeout(() => {
-        if (lastTapRef.current !== 0) {
-          togglePlay();
-          lastTapRef.current = 0;
-        }
-      }, 300);
-    }
-  };
+  const onLeftPress = () => handleZoneTap(-1);
+  const onRightPress = () => handleZoneTap(1);
 
   return {
     paused,
@@ -187,13 +189,13 @@ export const useVideoPlayer = ({
     onEnd,
     onStartSeek,
     onSeekComplete,
-    handleTap,
     onLeftPress,
     onRightPress,
     setSeekTime,
     currentMediaId,
     isAudio,
     isVerticalVideo,
+    videoAspectRatio,
     hasEnded,
     replay,
   };

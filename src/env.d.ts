@@ -12,4 +12,11 @@ declare module '@env' {
   export const STREAM_API_KEY: string;
   export const STREAM_RTMP_SERVER: string;
   export const STREAM_HLS_SERVER: string;
+  export const FIREBASE_API_KEY: string;
+  export const FIREBASE_AUTH_DOMAIN: string;
+  export const FIREBASE_PROJECT_ID: string;
+  export const FIREBASE_STORAGE_BUCKET: string;
+  export const FIREBASE_MESSAGING_SENDER_ID: string;
+  export const FIREBASE_APP_ID: string;
+  export const FIREBASE_MEASUREMENT_ID: string;
 }

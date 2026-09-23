@@ -9,6 +9,8 @@ import React, {
 import {
   ActivityIndicator,
   Alert,
+  AppState,
+  AppStateStatus,
   Modal,
   PermissionsAndroid,
   Platform,
@@ -33,6 +35,8 @@ import AppTextInput from '../inputs/AppTextInput';
 import AppText from '../texts/AppText';
 import liveStreamService, { LiveStreamSession } from './liveStreamService';
 import { STREAM_CONFIG } from './streamConfig';
+import LiveChat from './LiveChat';
+import KeepAwake from '@sayem314/react-native-keep-awake';
 
 type StreamPublisherProps = {
   visible: boolean;
@@ -46,6 +50,28 @@ type StreamStatus =
   | 'live'
   | 'stopping'
   | 'error';
+
+const SYNC_INTERVAL_MS = 4000;
+const SYNC_MAX_BACKOFF_MS = 30000;
+
+const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+
+/** เรียกซ้ำสูงสุด `attempts` ครั้ง (หน่วง 1s, 2s, ...) ถ้ายัง fail คืน null แทน throw */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  label: string,
+  attempts = 3,
+): Promise<T | null> {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      logError('Stream', `${label} (attempt ${i}/${attempts})`, e);
+      if (i < attempts) await sleep(1000 * i);
+    }
+  }
+  return null;
+}
 
 async function requestPermissions(): Promise<boolean> {
   try {
@@ -77,12 +103,19 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>('idle');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [duration, setDuration] = useState(0);
   const [viewerCount, setViewerCount] = useState(0);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [controlsHeight, setControlsHeight] = useState(0);
 
   const sessionRef = useRef<LiveStreamSession | null>(null);
   const liveRef = useRef<ApiVideoLiveStreamMethods>(null);
   const startedRef = useRef(false);
+  const connectedRef = useRef(false); // RTMP ต่ออยู่จริงหรือไม่
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!isStreaming) return;
@@ -96,25 +129,40 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
     const id = sessionRef.current?.id;
     if (!id) return;
 
+    // ใช้ setTimeout ต่อกันแทน setInterval: รอบถัดไปเริ่มหลังรอบนี้จบเท่านั้น
+    // (request ไม่ซ้อนกันตอนเซิร์ฟเวอร์ช้า) + backoff เมื่อ fail ติดกัน
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let failStreak = 0;
+
     const sync = async () => {
+      let ok = true;
       try {
         const s = await liveStreamService.getById(id);
         if (!cancelled && s.status === 'Live') {
           setStreamStatus(prev => (prev === 'live' ? prev : 'live'));
         }
-      } catch {}
+      } catch {
+        ok = false;
+      }
+      if (cancelled) return;
       try {
         const h = await liveStreamService.getHealth(id);
         if (!cancelled) setViewerCount(h.currentViewers ?? 0);
-      } catch {}
+      } catch {
+        ok = false;
+      }
+      if (cancelled) return;
+      failStreak = ok ? 0 : failStreak + 1;
+      // 4s ปกติ -> 8s -> 16s -> สูงสุด 30s ระหว่างที่ API มีปัญหา
+      const delay = Math.min(SYNC_INTERVAL_MS * 2 ** failStreak, SYNC_MAX_BACKOFF_MS);
+      timer = setTimeout(sync, delay);
     };
 
     sync();
-    const t = setInterval(sync, 4000);
     return () => {
       cancelled = true;
-      clearInterval(t);
+      if (timer) clearTimeout(timer);
     };
   }, [isStreaming]);
 
@@ -133,6 +181,9 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
     setStreamStatus('idle');
     setDuration(0);
     setViewerCount(0);
+    setSessionId(null);
+    connectedRef.current = false;
+    setIsMuted(false);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -165,6 +216,7 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
         recordingEnabled: true,
       });
       sessionRef.current = session;
+      setSessionId(session.id);
       await liveStreamService.start(session.id);
 
       if (!session.streamKey?.trim()) {
@@ -203,6 +255,66 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
     }, 300);
     return () => clearTimeout(t);
   }, [isStreaming]);
+
+  /**
+   * ต่อ RTMP ใหม่ (ใช้ตอนกลับมา foreground หลัง lock จอ/สลับแอป)
+   * lock จอ -> ระบบตัด publish -> media server ไม่มีสัญญาณ -> เว็บมองไม่เห็นไลฟ์
+   * แก้: กลับมา active แล้วปลุก session (ถ้าโดนปิด) + start RTMP ใหม่ด้วย key เดิม
+   */
+  const reconnectStream = useCallback(async () => {
+    const session = sessionRef.current;
+    if (!session?.streamKey || !STREAM_CONFIG.rtmpServer) return;
+    setStreamStatus('connecting');
+    try {
+      // ปลุก session ฝั่ง backend ถ้าโดนปิดตอนหลุด (retry เผื่อ API ล่มชั่วคราว)
+      const s = await withRetry(
+        () => liveStreamService.getById(session.id),
+        '[StreamPublisher] reconnect status check',
+      );
+      if (sessionRef.current?.id !== session.id) return; // ปิดไลฟ์ไปแล้วระหว่างรอ
+      if (s && (s.status === 'Ended' || s.status === 'Error')) {
+        await withRetry(
+          () => liveStreamService.start(session.id),
+          '[StreamPublisher] reconnect start session',
+        );
+        if (sessionRef.current?.id !== session.id) return;
+      }
+      // รีเซ็ตแล้วต่อใหม่ด้วย key เดิม (streamId เดิม เว็บกลับมาเห็น)
+      try {
+        liveRef.current?.stopStreaming();
+      } catch {}
+      startedRef.current = true;
+      await liveRef.current?.startStreaming(
+        session.streamKey,
+        STREAM_CONFIG.rtmpServer,
+      );
+    } catch (e) {
+      logError('Stream', '[StreamPublisher] reconnect failed', e);
+      startedRef.current = false;
+      setStreamStatus('error');
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleChange = (state: AppStateStatus) => {
+      if (state === 'background') {
+        // ถูกพักไว้ -> publish หลุดแน่ ๆ mark ให้ตอนกลับมาต่อใหม่
+        connectedRef.current = false;
+        startedRef.current = false;
+      } else if (state === 'active' && isStreaming && !connectedRef.current) {
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+        // หน่วงให้กล้อง/หน้าจอ resume ก่อนค่อยต่อ RTMP
+        reconnectTimerRef.current = setTimeout(() => {
+          reconnectStream();
+        }, 800);
+      }
+    };
+    const sub = AppState.addEventListener('change', handleChange);
+    return () => {
+      sub.remove();
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+    };
+  }, [isStreaming, reconnectStream]);
 
   const handleStopStream = useCallback(async () => {
     Alert.alert('หยุด Stream?', `คุณ Stream มาแล้ว ${formatDuration(duration)}`, [
@@ -310,6 +422,7 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
           gap: verticalScale(12),
         },
         previewContainer: { flex: 1, backgroundColor: '#000' },
+        chatOverlay: { ...StyleSheet.absoluteFillObject },
         overlayTop: {
           position: 'absolute',
           top: verticalScale(10),
@@ -387,6 +500,8 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
       onRequestClose={handleClose}
     >
       <StatusBar hidden />
+      {/* กันจอดับระหว่างไลฟ์ (unmount = ปล่อยให้ดับได้ตามปกติ) */}
+      {isStreaming && <KeepAwake />}
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
@@ -456,16 +571,22 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
               ref={liveRef}
               style={StyleSheet.absoluteFill}
               camera={isFrontCamera ? 'front' : 'back'}
+              isMuted={isMuted}
               enablePinchedZoom
               video={{ bitrate: 2_000_000, fps: 30, resolution: '720p' }}
               audio={{ bitrate: 128_000, sampleRate: 44100, isStereo: false }}
-              onConnectionSuccess={() => setStreamStatus('live')}
+              onConnectionSuccess={() => {
+                connectedRef.current = true;
+                setStreamStatus('live');
+              }}
               onConnectionFailed={code => {
+                connectedRef.current = false;
                 logError('Stream', '[StreamPublisher] RTMP connect failed', code);
                 setStreamStatus('error');
               }}
               onDisconnect={() => {
                 startedRef.current = false;
+                connectedRef.current = false;
               }}
             />
 
@@ -517,7 +638,18 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
               </View>
             </View>
 
-            <View style={styles.overlayControls}>
+            <View style={styles.chatOverlay} pointerEvents="box-none">
+              <LiveChat
+                streamId={sessionId ?? undefined}
+                ephemeral
+                bottomInset={controlsHeight}
+              />
+            </View>
+
+            <View
+              style={styles.overlayControls}
+              onLayout={e => setControlsHeight(e.nativeEvent.layout.height)}
+            >
               <TouchableOpacity
                 onPress={() => setIsFrontCamera(v => !v)}
                 style={styles.flipBtn}
@@ -526,6 +658,17 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
                   name="camera-reverse"
                   size={IS_TABLET ? 30 : 24}
                   color={AppColors.white}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setIsMuted(v => !v)}
+                style={styles.flipBtn}
+              >
+                <Ionicons
+                  name={isMuted ? 'mic-off' : 'mic'}
+                  size={IS_TABLET ? 30 : 24}
+                  color={isMuted ? AppColors.danger : AppColors.white}
                 />
               </TouchableOpacity>
 

@@ -2014,6 +2014,34 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - react-native-keep-awake (2.0.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - react-native-line (5.4.0):
     - boost
     - DoubleConversion
@@ -3470,6 +3498,7 @@ DEPENDENCIES:
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - react-native-date-picker (from `../node_modules/react-native-date-picker`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
+  - "react-native-keep-awake (from `../node_modules/@sayem314/react-native-keep-awake`)"
   - "react-native-line (from `../node_modules/@xmartlabs/react-native-line`)"
   - "react-native-livestream (from `../node_modules/@api.video/react-native-livestream`)"
   - react-native-orientation-locker (from `../node_modules/react-native-orientation-locker`)
@@ -3649,6 +3678,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-date-picker"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
+  react-native-keep-awake:
+    :path: "../node_modules/@sayem314/react-native-keep-awake"
   react-native-line:
     :path: "../node_modules/@xmartlabs/react-native-line"
   react-native-livestream:
@@ -3826,6 +3857,7 @@ SPEC CHECKSUMS:
   react-native-blur: ba0e9ad6274783c8d45f42da82acae02e25784ad
   react-native-date-picker: d4bcb2f05cd74601bad5cbac13b2dfe8effbd69d
   react-native-image-picker: 43e6cd4231e670030fe09b079d696fa5a634ccfc
+  react-native-keep-awake: c3ccf9c2b610fba7b32898f04b251eb24a099e62
   react-native-line: 3c2b49a6981909eb8a405b2df2bf2fe15ecee4c7
   react-native-livestream: c74d2c338c5b76f2c988b23e81ec3589b954e4e7
   react-native-orientation-locker: 5819fd23ca89cbac0d736fb4314745f62716d517

@@ -11,7 +11,6 @@ import { log } from '../../helpers/logger';
 
 import AppBackground from '../../components/background/AppBackground';
 import PdfRender from '../../components/pdf/PdfRender';
-import Player from '../../components/videos/Player';
 import AppFlatList from '../../components/views/AppFlatList';
 import { IS_IOS, IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
@@ -173,7 +172,7 @@ const ClassroomScreen = () => {
   const openPdfUrl = params?.openPdfUrl;
 
   const [activeTab, setActiveTab] = useState<ClassroomTabKey>('ALL');
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [, setIsFullscreen] = useState(false);
 
   const [pdfVisible, setPdfVisible] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string>('');
@@ -384,27 +383,12 @@ const ClassroomScreen = () => {
     () =>
       StyleSheet.create({
         rootView: { flex: 1, backgroundColor: '#000000' },
-        fullscreenRoot: { flex: 1, backgroundColor: 'black' },
         contentTab: {
           paddingHorizontal: scale(sharedPaddingHorizontal),
         },
       }),
     [scale],
   );
-
-  if (isFullscreen) {
-    return (
-      <View style={styles.fullscreenRoot}>
-        <Player
-          key={String(playingMediaId ?? 'no-media')}
-          mediaId={playingMediaId}
-          lessonId={playingLessonId}
-          onFullscreenChange={setIsFullscreen}
-          initialFullscreen
-        />
-      </View>
-    );
-  }
 
   return (
     <View style={styles.rootView}>
