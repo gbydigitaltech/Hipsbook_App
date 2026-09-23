@@ -3,8 +3,6 @@ import {
   STREAM_API_KEY,
   STREAM_HLS_SERVER,
   STREAM_RTMP_SERVER,
-  STREAM_SIGNALR_HUB,
-  STREAM_WHIP_BASE_URL,
 } from '@env';
 
 export const STREAM_CONFIG = {
@@ -12,8 +10,6 @@ export const STREAM_CONFIG = {
   apiKey: STREAM_API_KEY,
   rtmpServer: STREAM_RTMP_SERVER,
   hlsServer: STREAM_HLS_SERVER,
-  whipBaseUrl: STREAM_WHIP_BASE_URL,
-  signalrHub: STREAM_SIGNALR_HUB,
 };
 
 export const getHlsUrl = (streamKey: string) =>
@@ -27,9 +23,6 @@ export function normalizeHlsPlaybackUrl(
   if (/\.m3u8(\?.*)?$/i.test(u)) return u;
   return `${u.replace(/\/$/, '')}/index.m3u8`;
 }
-
-export const getWhipUrl = (streamKey: string) =>
-  `${STREAM_CONFIG.whipBaseUrl}/live/${streamKey}/whip`;
 
 export const getRtmpUrl = (streamKey: string) =>
   `${STREAM_CONFIG.rtmpServer}/${streamKey}`;

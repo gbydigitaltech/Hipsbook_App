@@ -13,6 +13,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@api.video/react-native-livestream": "^2.0.2",
     "@d11/react-native-fast-image": "^8.13.0",
     "@hookform/resolvers": "^5.2.2",
     "@invertase/react-native-apple-authentication": "2.2.1",
@@ -45,7 +46,6 @@
     "react-native-linear-gradient": "^2.8.3",
     "react-native-markdown-display": "^7.0.2",
     "react-native-nitro-modules": "^0.35.0",
-    "react-native-nodemediaclient": "^0.3.6",
     "react-native-orientation-locker": "^1.7.0",
     "react-native-pdf": "^7.0.3",
     "react-native-permissions": "^5.6.2",

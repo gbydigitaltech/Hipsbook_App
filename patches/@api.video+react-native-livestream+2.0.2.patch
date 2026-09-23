@@ -1,0 +1,79 @@
+diff --git a/node_modules/@api.video/react-native-livestream/ios/RNLiveStreamViewManager.swift b/node_modules/@api.video/react-native-livestream/ios/RNLiveStreamViewManager.swift
+index a4f7451..39a4b17 100644
+--- a/node_modules/@api.video/react-native-livestream/ios/RNLiveStreamViewManager.swift
++++ b/node_modules/@api.video/react-native-livestream/ios/RNLiveStreamViewManager.swift
+@@ -1,6 +1,7 @@
+ import ApiVideoLiveStream
+ import CoreGraphics
+ import Foundation
++import UIKit
+ 
+ @objc(RNLiveStreamViewManager)
+ class RNLiveStreamViewManager: RCTViewManager {
+@@ -12,26 +13,60 @@ class RNLiveStreamViewManager: RCTViewManager {
+         return RNLiveStreamViewImpl()
+     }
+ 
++    private func findLiveStreamView(_ view: UIView?) -> RNLiveStreamViewImpl? {
++        guard let view = view else { return nil }
++        if let v = view as? RNLiveStreamViewImpl { return v }
++        for sub in view.subviews {
++            if let v = findLiveStreamView(sub) { return v }
++        }
++        return nil
++    }
++
++    // New Architecture (interop) fallback: the real view is not reachable via
++    // the legacy view registry, so search the app's window hierarchy. There is
++    // only one publisher view mounted at a time, so this resolves to it.
++    private func findInWindows() -> RNLiveStreamViewImpl? {
++        for scene in UIApplication.shared.connectedScenes {
++            guard let ws = scene as? UIWindowScene else { continue }
++            for window in ws.windows {
++                if let v = findLiveStreamView(window) { return v }
++            }
++        }
++        return nil
++    }
++
++    private func withView(_ reactTag: NSNumber, _ block: @escaping (RNLiveStreamViewImpl) -> Void) {
++        let run = { [weak self] in
++            guard let self = self else { return }
++            if let bridge = self.bridge {
++                bridge.uiManager.addUIBlock { (_: RCTUIManager?, viewRegistry: [NSNumber: UIView]?) in
++                    let view = self.findLiveStreamView(viewRegistry?[reactTag]) ?? self.findInWindows()
++                    if let view = view { block(view) }
++                }
++            } else if let view = self.findInWindows() {
++                block(view)
++            }
++        }
++        if Thread.isMainThread { run() } else { DispatchQueue.main.async { run() } }
++    }
++
+     @objc(startStreaming:withRequestId:withStreamKey:withUrl:)
+     func startStreaming(_ reactTag: NSNumber, withRequestId requestId: NSNumber, streamKey: String, url: String?) {
+-        bridge!.uiManager.addUIBlock { (_: RCTUIManager?, viewRegistry: [NSNumber: UIView]?) in
+-            let view: RNLiveStreamViewImpl = (viewRegistry![reactTag] as? RNLiveStreamViewImpl)!
++        withView(reactTag) { view in
+             view.startStreaming(requestId: Int(truncating: requestId), streamKey: streamKey, url: url)
+         }
+     }
+ 
+     @objc(stopStreaming:)
+     func stopStreaming(_ reactTag: NSNumber) {
+-        bridge!.uiManager.addUIBlock { (_: RCTUIManager?, viewRegistry: [NSNumber: UIView]?) in
+-            let view: RNLiveStreamViewImpl = (viewRegistry![reactTag] as? RNLiveStreamViewImpl)!
++        withView(reactTag) { view in
+             view.stopStreaming()
+         }
+     }
+ 
+     @objc(setZoomRatioCommand:withZoomRatio:)
+     func setZoomRatioCommand(_ reactTag: NSNumber, zoomRatio: NSNumber) {
+-        bridge!.uiManager.addUIBlock { (_: RCTUIManager?, viewRegistry: [NSNumber: UIView]?) in
+-            let view: RNLiveStreamViewImpl = (viewRegistry![reactTag] as? RNLiveStreamViewImpl)!
++        withView(reactTag) { view in
+             view.zoomRatio = zoomRatio.floatValue
+         }
+     }
