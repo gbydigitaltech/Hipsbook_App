@@ -6,6 +6,10 @@ type GetBannerParams = {
 
 // Get banner settings from the server.
 export const apiGetBanner = async ({ signal }: GetBannerParams = {}) => {
-  const { data } = await publicApi.get('/settings/Banner', { signal });
+  const { data } = await publicApi.post(
+    '/settings',
+    { key: 'Banner' },
+    { signal },
+  );
   return data;
 };

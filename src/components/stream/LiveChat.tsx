@@ -1,8 +1,16 @@
 import { Ionicons } from '@react-native-vector-icons/ionicons';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   FlatList,
   Keyboard,
+  PanResponder,
   Pressable,
   StyleProp,
   StyleSheet,
@@ -32,7 +40,53 @@ type LiveChatProps = {
   style?: StyleProp<ViewStyle>;
   /** ระยะเว้นด้านล่างของช่องพิมพ์ตอนคีย์บอร์ดปิด (กันทับปุ่มควบคุม/safe area) */
   bottomInset?: number;
+  /** แจ้ง parent ตอนคีย์บอร์ดเปิด/ปิด (เช่นให้ขยายพื้นที่แตะปิดคีย์บอร์ดเต็มจอ) */
+  onKeyboardVisibleChange?: (visible: boolean) => void;
 };
+
+type RowStyles = {
+  row: StyleProp<ViewStyle>;
+  avatar: any;
+  bubbleText: StyleProp<ViewStyle>;
+  name: any;
+  msg: any;
+};
+
+/**
+ * แยกแถวคอมเมนต์เป็น memo component: ตอนพิมพ์ (input เปลี่ยนทุกตัวอักษร)
+ * แถวเดิมจะไม่ re-render ทั้งลิสต์ -> คีย์บอร์ดไม่หน่วง/ค้าง
+ */
+const ChatRow = memo(
+  ({
+    item,
+    styles,
+    extraStyle,
+  }: {
+    item: ChatMessage;
+    styles: RowStyles;
+    extraStyle?: StyleProp<ViewStyle>;
+  }) => (
+    <View style={extraStyle ? [styles.row, extraStyle] : styles.row}>
+      {item.avatar ? (
+        <FastImage
+          style={styles.avatar}
+          source={{ uri: item.avatar }}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+      ) : (
+        <View style={styles.avatar} />
+      )}
+      <View style={styles.bubbleText}>
+        <AppText fontSize={AppFontSize.overline} style={styles.name}>
+          {item.user}
+        </AppText>
+        <AppText fontSize={AppFontSize.caption} style={styles.msg}>
+          {item.text}
+        </AppText>
+      </View>
+    </View>
+  ),
+);
 
 // โหมด ephemeral: อายุคอมเมนต์และการจาง
 const LIFETIME_MS = 8000; // อยู่บนจอ ~8 วิ
@@ -50,12 +104,16 @@ const LiveChat = ({
   ephemeral = false,
   style,
   bottomInset = 0,
+  onKeyboardVisibleChange,
 }: LiveChatProps) => {
   const { scale, verticalScale } = useResponsive();
   const { messages, input, setInput, sendMessage, sending, error } = useChat(
     streamId,
     canSend,
   );
+
+  // ปัดขวาเปิดประวัติแชท (โหมด ephemeral): ดูย้อนหลังแม้คอมเมนต์จางหายไปแล้ว
+  const [showHistory, setShowHistory] = useState(false);
 
   // ---- คีย์บอร์ด: จับความสูงเองแล้วดันช่องพิมพ์ขึ้น (ชัวร์กว่าใน Modal) ----
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -69,23 +127,29 @@ const LiveChat = ({
     return () => {
       show.remove();
       hide.remove();
+      // ปิดหน้าไลฟ์ระหว่างที่คีย์บอร์ดเปิดอยู่ -> iOS จะค้างคีย์บอร์ดไว้บนหน้าเดิม
+      Keyboard.dismiss();
     };
   }, []);
   const keyboardVisible = keyboardHeight > 0;
 
+  useEffect(() => {
+    onKeyboardVisibleChange?.(keyboardVisible);
+  }, [keyboardVisible, onKeyboardVisibleChange]);
+
   // ---- โหมด ephemeral: ticker ให้คอมเมนต์เก่าจางหาย ----
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (!ephemeral || messages.length === 0) return;
+    // หยุด ticker ตอนพิมพ์/เปิดประวัติ -> input ไม่โดน re-render กวน คีย์บอร์ดไม่หลุด
+    if (!ephemeral || messages.length === 0 || keyboardVisible || showHistory) {
+      return;
+    }
     const t = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(t);
-  }, [ephemeral, messages.length]);
+  }, [ephemeral, messages.length, keyboardVisible, showHistory]);
 
   // list ปกติ (คนดู): inverted ให้ข้อความใหม่อยู่ล่างและ stick อัตโนมัติ
-  const invertedData = useMemo(
-    () => (ephemeral ? [] : [...messages].reverse()),
-    [messages, ephemeral],
-  );
+  const invertedData = useMemo(() => [...messages].reverse(), [messages]);
 
   // list ephemeral (คนไลฟ์): เฉพาะที่ยังไม่หมดอายุ + จำกัดจำนวน พร้อมค่า opacity
   const ephemeralData = useMemo(() => {
@@ -105,6 +169,26 @@ const LiveChat = ({
       .filter(x => x.remaining > 0)
       .slice(-MAX_VISIBLE);
   }, [ephemeral, messages, now]);
+
+  // ปัดขวา (แถบซ้าย) -> เปิดประวัติ | ปัดซ้าย (ในประวัติ) -> ปิด
+  const openPan = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_e, g) =>
+        g.dx > 12 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+      onPanResponderRelease: (_e, g) => {
+        if (g.dx > 40) setShowHistory(true);
+      },
+    }),
+  ).current;
+  const closePan = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_e, g) =>
+        g.dx < -12 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+      onPanResponderRelease: (_e, g) => {
+        if (g.dx < -40) setShowHistory(false);
+      },
+    }),
+  ).current;
 
   const styles = useMemo(
     () =>
@@ -153,8 +237,6 @@ const LiveChat = ({
           gap: scale(8),
           paddingHorizontal: scale(12),
           paddingTop: verticalScale(8),
-          paddingBottom:
-            (keyboardVisible ? keyboardHeight : bottomInset) + verticalScale(8),
         },
         input: {
           flex: 1,
@@ -176,34 +258,50 @@ const LiveChat = ({
         },
         sendBtnDisabled: { opacity: 0.5 },
         dismissBackdrop: { ...StyleSheet.absoluteFillObject },
+        historyPanel: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
+        historyHeader: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: scale(12),
+          paddingTop: verticalScale(8),
+          paddingBottom: verticalScale(4),
+        },
+        historyTitle: { color: AppColors.white },
+        edgeSwipe: {
+          position: 'absolute',
+          left: 0,
+          top: '40%',
+          bottom: verticalScale(56),
+          width: scale(28),
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        edgeHandle: {
+          width: scale(4),
+          height: verticalScale(40),
+          borderRadius: scale(2),
+          backgroundColor: 'rgba(255,255,255,0.45)',
+        },
       }),
-    [scale, verticalScale, keyboardVisible, keyboardHeight, bottomInset],
+    [scale, verticalScale],
   );
 
-  const renderRow = (item: ChatMessage, extraStyle?: StyleProp<ViewStyle>) => {
-    const rowStyle = extraStyle ? [styles.row, extraStyle] : styles.row;
-    return (
-      <View style={rowStyle}>
-        {item.avatar ? (
-          <FastImage
-            style={styles.avatar}
-            source={{ uri: item.avatar }}
-            resizeMode={FastImage.resizeMode.cover}
-          />
-        ) : (
-          <View style={styles.avatar} />
-        )}
-        <View style={styles.bubbleText}>
-          <AppText fontSize={AppFontSize.overline} style={styles.name}>
-            {item.user}
-          </AppText>
-          <AppText fontSize={AppFontSize.caption} style={styles.msg}>
-            {item.text}
-          </AppText>
-        </View>
-      </View>
-    );
-  };
+  const inputBarPadding = useMemo(
+    () => ({
+      paddingBottom:
+        (keyboardVisible ? keyboardHeight : bottomInset) + verticalScale(8),
+    }),
+    [keyboardVisible, keyboardHeight, bottomInset, verticalScale],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: ChatMessage }) => (
+      <ChatRow item={item} styles={styles} />
+    ),
+    [styles],
+  );
+  const keyExtractor = useCallback((item: ChatMessage) => item.id, []);
 
   const canSubmit = !!input.trim() && !sending;
 
@@ -211,24 +309,69 @@ const LiveChat = ({
     <View style={[styles.root, style]} pointerEvents="box-none">
       {/* คอมเมนต์ */}
       {ephemeral ? (
-        // แตะทะลุได้ -> ซูมวิดีโอผ่านคอมเมนต์ได้
-        <View style={styles.ephemeralWrap} pointerEvents="none">
-          {ephemeralData.map(({ m, opacity }) => {
-            const opacityStyle = { opacity };
-            return (
-              <React.Fragment key={m.id}>
-                {renderRow(m, opacityStyle)}
-              </React.Fragment>
-            );
-          })}
-        </View>
+        showHistory ? (
+          // ประวัติแชท (ปัดขวาเปิด): เลื่อนดูย้อนหลังได้ + ปัดซ้าย/กด ✕ เพื่อปิด
+          <View style={styles.historyPanel} {...closePan.panHandlers}>
+            <View style={styles.historyHeader}>
+              <AppText
+                fontWeight="medium"
+                fontSize={AppFontSize.caption}
+                style={styles.historyTitle}
+              >
+                แชททั้งหมด
+              </AppText>
+              <TouchableOpacity
+                onPress={() => setShowHistory(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons
+                  name="close"
+                  size={IS_TABLET ? 24 : 20}
+                  color={AppColors.white}
+                />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              style={styles.list}
+              contentContainerStyle={styles.listContent}
+              data={invertedData}
+              keyExtractor={keyExtractor}
+              renderItem={renderItem}
+              inverted
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+            />
+          </View>
+        ) : (
+          <>
+            {/* คอมเมนต์จางหาย: แตะทะลุได้ -> ซูมวิดีโอผ่านคอมเมนต์ได้ */}
+            <View style={styles.ephemeralWrap} pointerEvents="none">
+              {ephemeralData.map(({ m, opacity }) => {
+                const opacityStyle = { opacity };
+                return (
+                  <ChatRow
+                    key={m.id}
+                    item={m}
+                    styles={styles}
+                    extraStyle={opacityStyle}
+                  />
+                );
+              })}
+            </View>
+            {/* แถบซ้าย: ปัดขวาเพื่อเปิดประวัติแชท */}
+            <View style={styles.edgeSwipe} {...openPan.panHandlers}>
+              <View style={styles.edgeHandle} />
+            </View>
+          </>
+        )
       ) : (
         <FlatList
           style={styles.list}
           contentContainerStyle={styles.listContent}
           data={invertedData}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => renderRow(item)}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
           inverted
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -248,7 +391,7 @@ const LiveChat = ({
       ) : null}
 
       {canSend ? (
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, inputBarPadding]}>
           <TextInput
             style={styles.input}
             value={input}

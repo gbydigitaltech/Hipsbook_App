@@ -8,9 +8,11 @@ export const apiGetTermOfService = async ({
   signal?: AbortSignal;
 } = {}): Promise<ToSResponse> => {
   try {
-    const { data } = await publicApi.get<ToSResponse>('/settings/ToS', {
-      signal,
-    });
+    const { data } = await publicApi.post<ToSResponse>(
+      '/settings',
+      { key: 'ToS' },
+      { signal },
+    );
     return data;
   } catch (err: unknown) {
     throw asError(err);

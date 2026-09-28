@@ -93,6 +93,35 @@ async function requestPermissions(): Promise<boolean> {
   }
 }
 
+type StreamQuality = 'high' | 'medium' | 'low';
+
+const STREAM_QUALITY_PRESETS: Record<
+  StreamQuality,
+  {
+    label: string;
+    hint: string;
+    video: { bitrate: number; fps: number; resolution: '720p' | '480p' | '360p' };
+  }
+> = {
+  high: {
+    label: 'สูง',
+    hint: '720p · 3 Mbps',
+    video: { bitrate: 3_000_000, fps: 30, resolution: '720p' },
+  },
+  medium: {
+    label: 'กลาง',
+    hint: '480p · 1.5 Mbps',
+    video: { bitrate: 1_500_000, fps: 30, resolution: '480p' },
+  },
+  low: {
+    label: 'ประหยัด',
+    hint: '360p · 0.8 Mbps',
+    video: { bitrate: 800_000, fps: 30, resolution: '360p' },
+  },
+};
+
+const QUALITY_ORDER: StreamQuality[] = ['high', 'medium', 'low'];
+
 const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
   const insets = useSafeAreaInsets();
   const { scale, verticalScale } = useResponsive();
@@ -100,6 +129,7 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [visibility] = useState<'Public' | 'Private'>('Public');
+  const [quality, setQuality] = useState<StreamQuality>('medium');
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>('idle');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
@@ -415,6 +445,29 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
           gap: verticalScale(16),
         },
         setupTitle: { textAlign: 'center', marginBottom: verticalScale(4) },
+        qualityLabel: {
+          color: AppColors.textSecondary,
+          marginBottom: verticalScale(6),
+        },
+        qualityRow: { flexDirection: 'row', gap: scale(8) },
+        qualityChip: {
+          flex: 1,
+          paddingVertical: verticalScale(10),
+          borderRadius: scale(10),
+          borderWidth: 1,
+          borderColor: AppColors.border,
+          backgroundColor: AppColors.surface,
+          alignItems: 'center',
+          gap: verticalScale(2),
+        },
+        qualityChipActive: {
+          borderColor: AppColors.primary,
+          backgroundColor: AppColors.surfaceStrong,
+        },
+        qualityText: { color: AppColors.textSecondary },
+        qualityTextActive: { color: AppColors.primary },
+        qualityHint: { color: AppColors.grayLight },
+        qualityHintActive: { color: AppColors.primary },
         creatingOverlay: {
           flex: 1,
           justifyContent: 'center',
@@ -559,6 +612,44 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
               onChangeText={setDescription}
             />
 
+            <View>
+              <AppText
+                fontSize={AppFontSize.caption}
+                style={styles.qualityLabel}
+              >
+                คุณภาพการถ่ายทอด
+              </AppText>
+              <View style={styles.qualityRow}>
+                {QUALITY_ORDER.map(q => {
+                  const active = quality === q;
+                  return (
+                    <TouchableOpacity
+                      key={q}
+                      onPress={() => setQuality(q)}
+                      style={[
+                        styles.qualityChip,
+                        active && styles.qualityChipActive,
+                      ]}
+                    >
+                      <AppText
+                        fontWeight={active ? 'bold' : 'regular'}
+                        fontSize={AppFontSize.body}
+                        style={active ? styles.qualityTextActive : styles.qualityText}
+                      >
+                        {STREAM_QUALITY_PRESETS[q].label}
+                      </AppText>
+                      <AppText
+                        fontSize={AppFontSize.overline}
+                        style={active ? styles.qualityHintActive : styles.qualityHint}
+                      >
+                        {STREAM_QUALITY_PRESETS[q].hint}
+                      </AppText>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
             <AppButton
               title="เริ่มถ่ายทอดสด"
               onPress={handleStartStream}
@@ -573,7 +664,7 @@ const StreamPublisher = ({ visible, onClose }: StreamPublisherProps) => {
               camera={isFrontCamera ? 'front' : 'back'}
               isMuted={isMuted}
               enablePinchedZoom
-              video={{ bitrate: 2_000_000, fps: 30, resolution: '720p' }}
+              video={STREAM_QUALITY_PRESETS[quality].video}
               audio={{ bitrate: 128_000, sampleRate: 44100, isStereo: false }}
               onConnectionSuccess={() => {
                 connectedRef.current = true;

@@ -36,9 +36,11 @@ export const apiGetProfile = async ({
   signal,
 }: RequestParams = {}): Promise<ProfileResponse> => {
   try {
-    const { data } = await privateApi.get<ProfileResponse>('/profile', {
-      signal,
-    });
+    const { data } = await privateApi.post<ProfileResponse>(
+      '/profile',
+      {},
+      { signal },
+    );
 
     return data;
   } catch (err) {

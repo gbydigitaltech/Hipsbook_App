@@ -23,6 +23,7 @@ export type ChatMessage = {
 };
 
 const MESSAGES = 'messages';
+const MAX_MESSAGES = 100;
 
 /**
  * แชท live ผ่าน Firestore — ใช้ collection "messages" ตัวเดียวกับฝั่งเว็บ
@@ -49,6 +50,8 @@ export const useChat = (streamId?: string, canSend: boolean = true) => {
       collection(db, MESSAGES),
       where('streamId', '==', streamId),
       orderBy('createdAt', 'asc'),
+      // หมายเหตุ: อย่าใช้ limitToLast() ตรงนี้ — Firestore จะต้องใช้ composite index
+      // แบบ createdAt DESC ซึ่งยังไม่มี (มีแค่ streamId + createdAt ASC) -> แชทพัง
     );
 
     const unsubscribe = onSnapshot(
@@ -58,7 +61,10 @@ export const useChat = (streamId?: string, canSend: boolean = true) => {
           d => ({ id: d.id, ...d.data() } as ChatMessage),
         );
         setError(null);
-        setMessages(data);
+        // เรนเดอร์แค่ข้อความล่าสุด กันจอ/คีย์บอร์ดหน่วงตอนแชทเยอะ
+        setMessages(
+          data.length > MAX_MESSAGES ? data.slice(-MAX_MESSAGES) : data,
+        );
       },
       err => {
         // permission-denied  -> Firestore Security Rules ปฏิเสธ

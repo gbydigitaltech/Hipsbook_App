@@ -21,6 +21,9 @@ import AppText from '../texts/AppText';
 import LiveViewer from './LiveViewer';
 import StreamPublisher from './StreamPublisher';
 import liveStreamService, { LiveStreamSession } from './liveStreamService';
+import { logError } from '../../helpers/logger';
+
+const LIVE_LIST_REFRESH_MS = 15000;
 
 const StreamSection = () => {
   const { scale, verticalScale } = useResponsive();
@@ -32,21 +35,37 @@ const StreamSection = () => {
   const [liveStreams, setLiveStreams] = useState<LiveStreamSession[]>([]);
   const [loadingStreams, setLoadingStreams] = useState(false);
 
-  const fetchStreams = useCallback(async () => {
-    setLoadingStreams(true);
+  const loadStreams = useCallback(async (silent: boolean) => {
+    if (!silent) setLoadingStreams(true);
     try {
-      const list = await liveStreamService.list({ pageSize: 10 });
+      // ให้ API กรองเฉพาะที่ Live (เหมือนหน้าเว็บ /live) แทนการดึง 10 รายการล่าสุดแล้วกรองเอง
+      // ไม่งั้นไลฟ์ที่สร้างไว้นานกว่า 10 session ล่าสุดจะหลุดไปหน้าอื่นและไม่แสดง
+      const list = await liveStreamService.list({
+        status: 'Live',
+        pageSize: 50,
+      });
       setLiveStreams(list.filter(s => s.status === 'Live'));
-    } catch {
-      setLiveStreams([]);
+    } catch (e) {
+      // API ล่มชั่วคราว: คงรายการเดิมไว้ ไม่ล้างจนดูเหมือนไม่มีไลฟ์
+      logError('Stream', '[StreamSection] fetch live list', e);
     } finally {
-      setLoadingStreams(false);
+      if (!silent) setLoadingStreams(false);
     }
   }, []);
+
+  // ใช้กับ onPress/onRefresh (ห้ามส่ง event เข้า loadStreams ตรง ๆ)
+  const fetchStreams = useCallback(() => loadStreams(false), [loadStreams]);
 
   useEffect(() => {
     fetchStreams();
   }, [fetchStreams]);
+
+  // รีเฟรชรายการอัตโนมัติ (เงียบ ๆ) ระหว่างอยู่หน้านี้ และไม่ได้เปิดดู/ไลฟ์อยู่
+  useEffect(() => {
+    if (showViewer || showPublisher) return;
+    const t = setInterval(() => loadStreams(true), LIVE_LIST_REFRESH_MS);
+    return () => clearInterval(t);
+  }, [loadStreams, showViewer, showPublisher]);
 
   const handleWatchStream = useCallback((stream: LiveStreamSession) => {
     setSelectedStream(stream);

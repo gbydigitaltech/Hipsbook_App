@@ -11,7 +11,7 @@ export const apiGetInventoryFilter = async ({
   signal,
 }: RequestParams = {}): Promise<InventoryFilterResponse> => {
   return request(
-    publicApi.get<InventoryFilterResponse>('/inventory/filter', { signal }),
+    publicApi.post<InventoryFilterResponse>('/inventory/filter', {}, { signal }),
   );
 };
 
@@ -19,5 +19,7 @@ export const apiGetInventoryFilter = async ({
 export const apiGetSearchTag = async ({
   signal,
 }: RequestParams = {}): Promise<SearchTagResponse> => {
-  return request(publicApi.get<SearchTagResponse>('/search/tag', { signal }));
+  return request(
+    publicApi.post<SearchTagResponse>('/search/tag', {}, { signal }),
+  );
 };

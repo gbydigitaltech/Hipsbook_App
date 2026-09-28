@@ -205,7 +205,11 @@ class LiveStreamService {
   }
 
   async list(
-    params: { pageSize?: number; page?: number } = {},
+    params: {
+      pageSize?: number;
+      page?: number;
+      status?: LiveStreamSession['status'];
+    } = {},
   ): Promise<LiveStreamSession[]> {
     const res = await this.client.get('/livestream', { params });
     const raw = Array.isArray(res.data) ? res.data : res.data.items ?? [];

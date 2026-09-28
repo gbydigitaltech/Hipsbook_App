@@ -16,7 +16,7 @@ const toNum = (v: string | number, fieldName = 'ID'): number => {
 export const apiGetProvinces = (
   signal?: AbortSignal,
 ): Promise<ProvinceListResponse> => {
-  return request(privateApi.get('/backoffice/province', { signal }));
+  return request(privateApi.post('/backoffice/province', {}, { signal }));
 };
 
 export const apiGetDistrictsByProvince = (
@@ -26,10 +26,7 @@ export const apiGetDistrictsByProvince = (
   const pid = toNum(provinceId, 'province ID');
 
   return request(
-    privateApi.get('/backoffice/district', {
-      params: { province_id: pid },
-      signal,
-    }),
+    privateApi.post('/backoffice/district', { province: pid }, { signal }),
   );
 };
 
@@ -40,9 +37,6 @@ export const apiGetSubdistrictsByDistrict = (
   const did = toNum(districtId, 'district ID');
 
   return request(
-    privateApi.get('/backoffice/subdistrict', {
-      params: { district_id: did },
-      signal,
-    }),
+    privateApi.post('/backoffice/subdistrict', { district: did }, { signal }),
   );
 };

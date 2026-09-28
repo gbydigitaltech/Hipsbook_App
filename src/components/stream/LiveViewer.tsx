@@ -1,7 +1,8 @@
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { log, logWarn } from '../../helpers/logger';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Keyboard,
   ActivityIndicator,
   Modal,
   StatusBar,
@@ -103,12 +104,21 @@ const LiveViewer = ({
     setIsBuffering(false);
   };
 
+  const [chatKeyboardOpen, setChatKeyboardOpen] = useState(false);
+  const handleChatKeyboardChange = useCallback(
+    (open: boolean) => setChatKeyboardOpen(open),
+    [],
+  );
+
   const handleRetry = () => {
     setHasError(false);
     setIsBuffering(true);
   };
 
   const handleClose = () => {
+    // ปิดคีย์บอร์ดก่อนปิด Modal ไม่งั้น iOS ค้างคีย์บอร์ดไว้บนหน้าที่อยู่ข้างหลัง
+    Keyboard.dismiss();
+    setChatKeyboardOpen(false);
     setHasError(false);
     setIsBuffering(true);
     setAway(false);
@@ -178,6 +188,10 @@ const LiveViewer = ({
           right: 0,
           top: '50%',
           bottom: 0,
+        },
+        // ตอนพิมพ์: ขยายเต็มจอ ให้แตะตรงไหนก็ปิดคีย์บอร์ดได้ + ช่องพิมพ์ไม่โดนบีบ (แนวนอน)
+        chatOverlayKeyboard: {
+          top: 0,
         },
         bufferingOverlay: {
           position: 'absolute',
@@ -315,8 +329,18 @@ const LiveViewer = ({
               </View>
             )}
 
-            <View style={styles.chatOverlay} pointerEvents="box-none">
-              <LiveChat streamId={streamId} bottomInset={insets.bottom} />
+            <View
+              style={[
+                styles.chatOverlay,
+                chatKeyboardOpen && styles.chatOverlayKeyboard,
+              ]}
+              pointerEvents="box-none"
+            >
+              <LiveChat
+                streamId={streamId}
+                bottomInset={insets.bottom}
+                onKeyboardVisibleChange={handleChatKeyboardChange}
+              />
             </View>
           </View>
         ) : (
