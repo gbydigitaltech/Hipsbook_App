@@ -5,7 +5,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import AppBackButton from '../../../components/buttons/AppBackButton';
 import MoreVerticalButton from '../../../components/buttons/MoreVerticalButton';
 import AppText from '../../../components/texts/AppText';
-import Player from '../../../components/videos/Player';
+import LessonPlayer from '../../../components/videos/LessonPlayer';
 
 import { useResponsive } from '../../../helpers/responsive';
 
@@ -36,6 +36,8 @@ type Props = {
   playingLessonId?: string;
   coverUrl?: string;
   onFullscreenChange: (v: boolean) => void;
+  /** Title of the lesson being played (shown in fullscreen) */
+  videoTitle?: string;
 
   activeTab: ClassroomTabKey;
   onChangeTab: (t: ClassroomTabKey) => void;
@@ -57,11 +59,22 @@ const ClassroomHeader: React.FC<Props> = ({
   playingLessonId,
   coverUrl,
   onFullscreenChange,
+  videoTitle,
 
   activeTab,
   onChangeTab,
 }) => {
   const { scale, verticalScale, responsiveRadius } = useResponsive();
+
+  // Fullscreen: hide the header/tabs so the video fills the screen (Player stays mounted -> no reload)
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const handleFullscreenChange = React.useCallback(
+    (v: boolean) => {
+      setIsFullscreen(v);
+      onFullscreenChange(v);
+    },
+    [onFullscreenChange],
+  );
 
   // menu state
   const moreRef = React.useRef<View>(null);
@@ -115,6 +128,7 @@ const ClassroomHeader: React.FC<Props> = ({
           flexWrap: 'wrap',
         },
 
+        playerContainerFullscreen: { marginTop: 0, gap: 0 },
         playerContainer: {
           marginTop: verticalScale(IS_TABLET ? 24 : 20),
           gap: verticalScale(IS_TABLET ? 18 : 12),
@@ -195,36 +209,44 @@ const ClassroomHeader: React.FC<Props> = ({
 
   return (
     <View>
-      <View style={styles.headerRow}>
-        <View style={styles.sideBox}>
-          <AppBackButton size={backSize} />
-        </View>
+      {!isFullscreen && (
+        <View style={styles.headerRow}>
+          <View style={styles.sideBox}>
+            <AppBackButton size={backSize} />
+          </View>
 
-        <View style={styles.titleBox}>
-          <AppText
-            fontSize={AppFontSize.subtitle}
-            fontWeight="semiBold"
-            numberOfLines={2}
-            ellipsizeMode="tail"
-            style={styles.headerTitle}
-          >
-            {title ?? ''}
-          </AppText>
-        </View>
+          <View style={styles.titleBox}>
+            <AppText
+              fontSize={AppFontSize.subtitle}
+              fontWeight="semiBold"
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={styles.headerTitle}
+            >
+              {title ?? ''}
+            </AppText>
+          </View>
 
-        {/* wrap with ref for measure */}
-        <View style={styles.sideBox} ref={moreRef} collapsable={false}>
-          <MoreVerticalButton onPress={openMenu} />
+          {/* wrap with ref for measure */}
+          <View style={styles.sideBox} ref={moreRef} collapsable={false}>
+            <MoreVerticalButton onPress={openMenu} />
+          </View>
         </View>
-      </View>
+      )}
 
-      <View style={styles.playerContainer}>
+      <View
+        style={[
+          styles.playerContainer,
+          isFullscreen && styles.playerContainerFullscreen,
+        ]}
+      >
         {playingMediaId ? (
-          <Player
+          <LessonPlayer
             key={String(playingMediaId)}
             mediaId={playingMediaId}
             lessonId={playingLessonId}
-            onFullscreenChange={onFullscreenChange}
+            title={videoTitle ?? title}
+            onFullscreenChange={handleFullscreenChange}
           />
         ) : coverUrl ? (
           <View style={styles.coverBox}>
@@ -238,13 +260,15 @@ const ClassroomHeader: React.FC<Props> = ({
           <View style={styles.coverBox} />
         )}
 
-        <View style={styles.segWrap}>
-          <View style={styles.segContainer}>
-            {renderSegItem('ALL', 'ทั้งหมด')}
-            {renderSegItem('LEARN', 'เรียนได้')}
-            {renderSegItem('BUY_MORE', 'ซื้อเพิ่ม')}
+        {!isFullscreen && (
+          <View style={styles.segWrap}>
+            <View style={styles.segContainer}>
+              {renderSegItem('ALL', 'ทั้งหมด')}
+              {renderSegItem('LEARN', 'เรียนได้')}
+              {renderSegItem('BUY_MORE', 'ซื้อเพิ่ม')}
+            </View>
           </View>
-        </View>
+        )}
       </View>
 
       <MoreMenuPopover

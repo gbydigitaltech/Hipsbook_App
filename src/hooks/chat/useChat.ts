@@ -26,11 +26,11 @@ const MESSAGES = 'messages';
 const MAX_MESSAGES = 100;
 
 /**
- * แชท live ผ่าน Firestore — ใช้ collection "messages" ตัวเดียวกับฝั่งเว็บ
- * เพื่อให้ข้อความ sync ข้ามเว็บ↔แอปแบบ realtime
+ * Live chat via Firestore — uses the same "messages" collection as the web
+ * so messages sync between web and app in realtime
  *
- * @param streamId  id ของ live (ตัวเดียวกับที่เว็บใช้ในลิงก์ /live/:id)
- * @param canSend   false = โหมดดูอย่างเดียว (เช่นตอนยังต่อไลฟ์ไม่ติด)
+ * @param streamId  live id (same one the web uses in /live/:id)
+ * @param canSend   false = read-only (e.g. before the live is connected)
  */
 export const useChat = (streamId?: string, canSend: boolean = true) => {
   const profile = useProfile(s => s.profile);
@@ -50,8 +50,8 @@ export const useChat = (streamId?: string, canSend: boolean = true) => {
       collection(db, MESSAGES),
       where('streamId', '==', streamId),
       orderBy('createdAt', 'asc'),
-      // หมายเหตุ: อย่าใช้ limitToLast() ตรงนี้ — Firestore จะต้องใช้ composite index
-      // แบบ createdAt DESC ซึ่งยังไม่มี (มีแค่ streamId + createdAt ASC) -> แชทพัง
+      // Note: don't use limitToLast() here — Firestore would need a composite index
+      // on createdAt DESC which doesn't exist (only streamId + createdAt ASC) -> chat breaks
     );
 
     const unsubscribe = onSnapshot(
@@ -61,15 +61,15 @@ export const useChat = (streamId?: string, canSend: boolean = true) => {
           d => ({ id: d.id, ...d.data() } as ChatMessage),
         );
         setError(null);
-        // เรนเดอร์แค่ข้อความล่าสุด กันจอ/คีย์บอร์ดหน่วงตอนแชทเยอะ
+        // Render only the latest messages so the screen/keyboard stays smooth in busy chats
         setMessages(
           data.length > MAX_MESSAGES ? data.slice(-MAX_MESSAGES) : data,
         );
       },
       err => {
-        // permission-denied  -> Firestore Security Rules ปฏิเสธ
-        // failed-precondition -> ยังไม่มี composite index (streamId + createdAt)
-        //                        ตัว message จะมีลิงก์สร้าง index มาให้
+        // permission-denied  -> rejected by Firestore Security Rules
+        // failed-precondition -> missing composite index (streamId + createdAt)
+        //                        the error message includes a link to create it
         logError('Chat', 'onSnapshot', err.code, err.message);
         setError(err.message);
       },
@@ -90,7 +90,7 @@ export const useChat = (streamId?: string, canSend: boolean = true) => {
       (typeof profile?.profile_image === 'string' && profile.profile_image) ||
       `https://api.dicebear.com/7.x/initials/svg?seed=${seed}`;
 
-    // optimistic: ล้างช่องพิมพ์ทันที แล้วค่อยยิงขึ้น Firestore
+    // Optimistic: clear the input right away, then write to Firestore
     setInput('');
     setSending(true);
     try {
@@ -105,7 +105,7 @@ export const useChat = (streamId?: string, canSend: boolean = true) => {
     } catch (err: any) {
       logError('Chat', 'sendMessage', err?.code, err?.message);
       setError(err?.message ?? 'ส่งข้อความไม่สำเร็จ');
-      setInput(text); // คืนข้อความให้ผู้ใช้ลองส่งใหม่
+      setInput(text); // restore the text so the user can retry
     } finally {
       setSending(false);
     }

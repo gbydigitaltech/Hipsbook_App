@@ -41,7 +41,7 @@ export const useVideoPlayer = ({
   );
   const lastTapRef = useRef(0);
 
-  // เคลียร์ timer ค้างตอน unmount
+  // Clear pending timers on unmount
   useEffect(() => {
     return () => {
       if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
@@ -142,14 +142,14 @@ export const useVideoPlayer = ({
   };
 
   /**
-   * แตะโซนวิดีโอ: ทางเดียวจบ กันบั๊ก handler ซ้อนกัน (เพี้ยนหนักบน iOS)
-   *   แตะ 1 ที  -> โชว์/ซ่อน controls
-   *   แตะ 2 ที  -> seek +/-10 วิ (play/pause ใช้ปุ่มกลาง)
+   * Video tap area: a single handler, avoids overlapping-handler bugs (very noticeable on iOS)
+   *   single tap -> show/hide controls
+   *   double tap -> seek +/-10s (play/pause uses the center button)
    */
   const handleZoneTap = (direction: number) => {
     const now = Date.now();
 
-    // แตะซ้ำภายใน 300ms = ดับเบิลแตะ
+    // Second tap within 300ms = double tap
     if (lastTapRef.current && now - lastTapRef.current < 300) {
       if (singleTapTimerRef.current) {
         clearTimeout(singleTapTimerRef.current);
@@ -160,7 +160,7 @@ export const useVideoPlayer = ({
       return;
     }
 
-    // แตะครั้งแรก: รอ 300ms ถ้าไม่มีแตะซ้ำค่อย toggle controls
+    // First tap: wait 300ms, toggle controls only if no second tap
     lastTapRef.current = now;
     if (singleTapTimerRef.current) clearTimeout(singleTapTimerRef.current);
     singleTapTimerRef.current = setTimeout(() => {

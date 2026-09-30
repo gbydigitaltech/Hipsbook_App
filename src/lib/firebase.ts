@@ -11,11 +11,11 @@ import {
 } from '@env';
 
 /**
- * Firebase (web JS SDK) — ใช้ตัวเดียวกับฝั่งเว็บ เพื่อให้แชท live sync
- * ข้ามเว็บ↔แอปได้ (collection "messages" เดียวกัน)
+ * Firebase (web JS SDK) — same project as the web so live chat syncs
+ * between web and app (same "messages" collection)
  *
- * ค่า config อ่านจาก .env (FIREBASE_*) — เอาค่าเดียวกับ firebase.ts
- * ของฝั่งเว็บมาใส่ได้เลย ค่าเหล่านี้เป็น public client config ไม่ใช่ secret
+ * Config is read from .env (FIREBASE_*) — use the same values as the web's firebase.ts.
+ * These are public client config values, not secrets
  */
 const firebaseConfig = {
   apiKey: FIREBASE_API_KEY,
@@ -30,8 +30,8 @@ const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 /**
- * initializeFirestore + long-polling: จำเป็นบน React Native เพราะ
- * transport แบบ streaming ของ Firestore มักต่อไม่ติดใน Hermes/new arch
+ * initializeFirestore + long-polling: required on React Native because
+ * Firestore's streaming transport often fails to connect on Hermes/new arch
  */
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,

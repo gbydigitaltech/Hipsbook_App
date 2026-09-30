@@ -1,7 +1,14 @@
 import { Ionicons } from '@react-native-vector-icons/ionicons';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ActivityIndicator,
+  AppState,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -21,7 +28,7 @@ import AppText from '../texts/AppText';
 import LiveViewer from './LiveViewer';
 import StreamPublisher from './StreamPublisher';
 import liveStreamService, { LiveStreamSession } from './liveStreamService';
-import { logError } from '../../helpers/logger';
+import { logWarn } from '../../helpers/logger';
 
 const LIVE_LIST_REFRESH_MS = 15000;
 
@@ -35,37 +42,87 @@ const StreamSection = () => {
   const [liveStreams, setLiveStreams] = useState<LiveStreamSession[]>([]);
   const [loadingStreams, setLoadingStreams] = useState(false);
 
+  // Avoid overlapping requests: if the previous one hasn't finished (slow server), skip this round
+  const inFlightRef = useRef(false);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const loadStreams = useCallback(async (silent: boolean) => {
+    if (inFlightRef.current && silent) return;
+    inFlightRef.current = true;
     if (!silent) setLoadingStreams(true);
+    // Manual refresh: retry once on timeout/network drop | silent refresh: don't, wait for the next round
+    const attempts = silent ? 1 : 2;
     try {
-      // ให้ API กรองเฉพาะที่ Live (เหมือนหน้าเว็บ /live) แทนการดึง 10 รายการล่าสุดแล้วกรองเอง
-      // ไม่งั้นไลฟ์ที่สร้างไว้นานกว่า 10 session ล่าสุดจะหลุดไปหน้าอื่นและไม่แสดง
-      const list = await liveStreamService.list({
-        status: 'Live',
-        pageSize: 50,
-      });
-      setLiveStreams(list.filter(s => s.status === 'Live'));
-    } catch (e) {
-      // API ล่มชั่วคราว: คงรายการเดิมไว้ ไม่ล้างจนดูเหมือนไม่มีไลฟ์
-      logError('Stream', '[StreamSection] fetch live list', e);
+      for (let i = 0; i < attempts; i++) {
+        try {
+          // Let the API filter to Live only (same as the web /live page)
+          const list = await liveStreamService.list({
+            status: 'Live',
+            pageSize: 50,
+          });
+          if (mountedRef.current) {
+            setLiveStreams(list.filter(s => s.status === 'Live'));
+          }
+          return;
+        } catch (e: any) {
+          const noResponse = e?.status == null;
+          if (!noResponse || i === attempts - 1) {
+            // API temporarily down: keep the current list instead of clearing it (would look like no lives)
+            logWarn(
+              'Stream',
+              '[StreamSection] fetch live list failed (keep old list)',
+              e?.message ?? e,
+            );
+            return;
+          }
+        }
+      }
     } finally {
-      if (!silent) setLoadingStreams(false);
+      inFlightRef.current = false;
+      if (!silent && mountedRef.current) setLoadingStreams(false);
     }
   }, []);
 
-  // ใช้กับ onPress/onRefresh (ห้ามส่ง event เข้า loadStreams ตรง ๆ)
+  // For onPress/onRefresh (don't pass the event straight into loadStreams)
   const fetchStreams = useCallback(() => loadStreams(false), [loadStreams]);
 
   useEffect(() => {
     fetchStreams();
   }, [fetchStreams]);
 
-  // รีเฟรชรายการอัตโนมัติ (เงียบ ๆ) ระหว่างอยู่หน้านี้ และไม่ได้เปิดดู/ไลฟ์อยู่
+  // App in background -> stop refreshing (fetch again on return)
+  const [appActive, setAppActive] = useState(
+    AppState.currentState === 'active',
+  );
   useEffect(() => {
-    if (showViewer || showPublisher) return;
-    const t = setInterval(() => loadStreams(true), LIVE_LIST_REFRESH_MS);
-    return () => clearInterval(t);
-  }, [loadStreams, showViewer, showPublisher]);
+    const sub = AppState.addEventListener('change', st =>
+      setAppActive(st === 'active'),
+    );
+    return () => sub.remove();
+  }, []);
+
+  // Auto-refresh the list (silently) while on this screen and not watching/hosting a live
+  // Schedule the next round only after the previous one finishes (setInterval would overlap on a slow server)
+  useEffect(() => {
+    if (showViewer || showPublisher || !appActive) return;
+    let cancelled = false;
+    let t: ReturnType<typeof setTimeout>;
+    const tick = async () => {
+      await loadStreams(true);
+      if (!cancelled) t = setTimeout(tick, LIVE_LIST_REFRESH_MS);
+    };
+    t = setTimeout(tick, LIVE_LIST_REFRESH_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [loadStreams, showViewer, showPublisher, appActive]);
 
   const handleWatchStream = useCallback((stream: LiveStreamSession) => {
     setSelectedStream(stream);

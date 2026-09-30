@@ -8,6 +8,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  Animated,
   FlatList,
   Keyboard,
   PanResponder,
@@ -24,24 +25,41 @@ import { IS_IOS, IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import { AppFontSize } from '../../styles/sharedstyles';
+import CommentIcon from '../../assets/icons/CommentIcon';
 import AppText from '../texts/AppText';
 import useChat, { ChatMessage } from '../../hooks/chat/useChat';
+import { useProfile } from '../../stores/profile';
 
 type LiveChatProps = {
   streamId?: string;
-  /** false = โหมดดูอย่างเดียว (ซ่อนช่องพิมพ์) */
+  /** false = read-only mode (input hidden) */
   canSend?: boolean;
   /**
-   * true = โหมด overlay ลอยบนวิดีโอ (สำหรับคนไลฟ์):
-   *  - คอมเมนต์ค่อย ๆ จางหายไปเอง ไม่ค้างเต็มจอ
-   *  - บริเวณคอมเมนต์แตะทะลุได้ (ซูมวิดีโอผ่านคอมเมนต์ได้)
+   * true = overlay mode floating over the video (for the host):
+   *  - comments fade out on their own instead of piling up
+   *  - the comment area lets touches pass through (video can be zoomed through it)
    */
   ephemeral?: boolean;
   style?: StyleProp<ViewStyle>;
-  /** ระยะเว้นด้านล่างของช่องพิมพ์ตอนคีย์บอร์ดปิด (กันทับปุ่มควบคุม/safe area) */
+  /** Bottom spacing of the input when the keyboard is closed (keeps clear of controls/safe area) */
   bottomInset?: number;
-  /** แจ้ง parent ตอนคีย์บอร์ดเปิด/ปิด (เช่นให้ขยายพื้นที่แตะปิดคีย์บอร์ดเต็มจอ) */
+  /** Notifies the parent when the keyboard opens/closes (e.g. to show a full-screen tap-to-dismiss area) */
   onKeyboardVisibleChange?: (visible: boolean) => void;
+  /**
+   * overlay = floats over the video (bubbles) | panel = chat box below the video (per design)
+   * host = host screen per design (comment pills + input/heart/more bar)
+   */
+  variant?: 'overlay' | 'panel' | 'host' | 'side';
+  /** panel/host: heart button next to the input */
+  onLike?: () => void;
+  /** host: extra round button at the end of the input bar (e.g. camera/mic menu) */
+  extraAction?: React.ReactNode;
+  /** host: hide comments (parent controls this with a full-screen left/right swipe) */
+  hidden?: boolean;
+  /** host: tap the "Chat" tab while hidden to bring it back */
+  onShowChat?: () => void;
+  /** host: left/right edge spacing, matching the top row of the live screen */
+  hostEdge?: number;
 };
 
 type RowStyles = {
@@ -53,8 +71,8 @@ type RowStyles = {
 };
 
 /**
- * แยกแถวคอมเมนต์เป็น memo component: ตอนพิมพ์ (input เปลี่ยนทุกตัวอักษร)
- * แถวเดิมจะไม่ re-render ทั้งลิสต์ -> คีย์บอร์ดไม่หน่วง/ค้าง
+ * Comment rows are memoized components: while typing (input changes on every keystroke)
+ * existing rows don't re-render the whole list -> keyboard stays smooth
  */
 const ChatRow = memo(
   ({
@@ -88,10 +106,125 @@ const ChatRow = memo(
   ),
 );
 
-// โหมด ephemeral: อายุคอมเมนต์และการจาง
-const LIFETIME_MS = 8000; // อยู่บนจอ ~8 วิ
-const FADE_MS = 1500; // ค่อย ๆ จางช่วง 1.5 วิสุดท้าย
-const MAX_VISIBLE = 6; // โชว์ล่าสุดไม่เกิน 6 ข้อความ
+type PanelRowStyles = {
+  pRow: StyleProp<ViewStyle>;
+  pAvatar: any;
+  pBody: StyleProp<ViewStyle>;
+  pName: any;
+  pMsg: any;
+};
+
+/** Panel chat row (per design): avatar + name + message, no bubble */
+const PanelRow = memo(
+  ({ item, styles }: { item: ChatMessage; styles: PanelRowStyles }) => (
+    <View style={styles.pRow}>
+      {item.avatar ? (
+        <FastImage
+          style={styles.pAvatar}
+          source={{ uri: item.avatar }}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+      ) : (
+        <View style={styles.pAvatar} />
+      )}
+      <View style={styles.pBody}>
+        <AppText
+          fontWeight="medium"
+          fontSize={AppFontSize.body}
+          style={styles.pName}
+        >
+          {item.user}
+        </AppText>
+        <AppText fontSize={AppFontSize.body} style={styles.pMsg}>
+          {item.text}
+        </AppText>
+      </View>
+    </View>
+  ),
+);
+
+type HostRowStyles = {
+  hRow: StyleProp<ViewStyle>;
+  hText: any;
+  hMsg: any;
+  hAvatar: any;
+};
+
+/** Host chat row (per design): dark grey pill, name in primary color */
+const HostRow = memo(
+  ({
+    item,
+    styles,
+    extraStyle,
+  }: {
+    item: ChatMessage;
+    styles: HostRowStyles;
+    extraStyle?: StyleProp<ViewStyle>;
+  }) => (
+    <View style={extraStyle ? [styles.hRow, extraStyle] : styles.hRow}>
+      {/* Round avatar (no image -> person icon) */}
+      {item.avatar ? (
+        <FastImage
+          style={styles.hAvatar}
+          source={{ uri: item.avatar }}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+      ) : (
+        <View style={styles.hAvatar}>
+          <Ionicons name="person" size={11} color="#BDBDBD" />
+        </View>
+      )}
+      {/* Username in primary color | message text in white */}
+      <AppText fontSize={12} numberOfLines={2} style={styles.hText}>
+        {item.user}{' '}
+        <AppText fontSize={12} style={styles.hMsg}>
+          {item.text}
+        </AppText>
+      </AppText>
+    </View>
+  ),
+);
+
+type SideRowStyles = {
+  sRow: StyleProp<ViewStyle>;
+  sAvatar: any;
+  sText: any;
+  sName: any;
+  sMsg: any;
+};
+
+/** YouTube-style chat row: round avatar + name + message on one line */
+const SideRow = memo(
+  ({ item, styles }: { item: ChatMessage; styles: SideRowStyles }) => (
+    <View style={styles.sRow}>
+      {item.avatar ? (
+        <FastImage
+          style={styles.sAvatar}
+          source={{ uri: item.avatar }}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+      ) : (
+        <View style={styles.sAvatar}>
+          <Ionicons name="person" size={13} color="#BDBDBD" />
+        </View>
+      )}
+      <AppText fontSize={13} style={styles.sText}>
+        <AppText fontSize={13} fontWeight="medium" style={styles.sName}>
+          {item.user}
+        </AppText>
+        {'  '}
+        <AppText fontSize={13} style={styles.sMsg}>
+          {item.text}
+        </AppText>
+      </AppText>
+    </View>
+  ),
+);
+
+// Ephemeral mode: comment lifetime and fade
+const LIFETIME_MS = 8000; // stays on screen ~8s
+const FADE_MS = 1500; // fades out over the last 1.5s
+const MAX_VISIBLE = 6; // show at most the 6 latest messages
 
 const toMillis = (m: ChatMessage, fallback: number): number => {
   const c = m.createdAt as { toMillis?: () => number } | null | undefined;
@@ -105,17 +238,28 @@ const LiveChat = ({
   style,
   bottomInset = 0,
   onKeyboardVisibleChange,
+  variant = 'overlay',
+  onLike,
+  extraAction,
+  hidden = false,
+  onShowChat,
+  hostEdge,
 }: LiveChatProps) => {
+  const isHost = variant === 'host';
+  // side = live chat panel on the right in fullscreen (YouTube-style)
+  const isSide = variant === 'side';
+  const myAvatar = useProfile(st => st.profile?.profile_image);
+  const isPanel = variant === 'panel' && !ephemeral;
   const { scale, verticalScale } = useResponsive();
   const { messages, input, setInput, sendMessage, sending, error } = useChat(
     streamId,
     canSend,
   );
 
-  // ปัดขวาเปิดประวัติแชท (โหมด ephemeral): ดูย้อนหลังแม้คอมเมนต์จางหายไปแล้ว
+  // Swipe right to open chat history (ephemeral mode): see older comments even after they faded
   const [showHistory, setShowHistory] = useState(false);
 
-  // ---- คีย์บอร์ด: จับความสูงเองแล้วดันช่องพิมพ์ขึ้น (ชัวร์กว่าใน Modal) ----
+  // ---- Keyboard: track its height ourselves and push the input up (more reliable inside a Modal) ----
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   useEffect(() => {
     const showEvt = IS_IOS ? 'keyboardWillShow' : 'keyboardDidShow';
@@ -127,7 +271,7 @@ const LiveChat = ({
     return () => {
       show.remove();
       hide.remove();
-      // ปิดหน้าไลฟ์ระหว่างที่คีย์บอร์ดเปิดอยู่ -> iOS จะค้างคีย์บอร์ดไว้บนหน้าเดิม
+      // Closing the live screen while the keyboard is open -> iOS keeps the keyboard stuck on screen
       Keyboard.dismiss();
     };
   }, []);
@@ -137,21 +281,38 @@ const LiveChat = ({
     onKeyboardVisibleChange?.(keyboardVisible);
   }, [keyboardVisible, onKeyboardVisibleChange]);
 
-  // ---- โหมด ephemeral: ticker ให้คอมเมนต์เก่าจางหาย ----
+  // ---- Ephemeral mode: ticker that fades out old comments ----
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    // หยุด ticker ตอนพิมพ์/เปิดประวัติ -> input ไม่โดน re-render กวน คีย์บอร์ดไม่หลุด
-    if (!ephemeral || messages.length === 0 || keyboardVisible || showHistory) {
+    // Pause the ticker while typing/viewing history -> input isn't re-rendered, keyboard stays open
+    if (
+      !ephemeral ||
+      isHost ||
+      messages.length === 0 ||
+      keyboardVisible ||
+      showHistory
+    ) {
       return;
     }
     const t = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(t);
-  }, [ephemeral, messages.length, keyboardVisible, showHistory]);
+  }, [ephemeral, isHost, messages.length, keyboardVisible, showHistory]);
 
-  // list ปกติ (คนดู): inverted ให้ข้อความใหม่อยู่ล่างและ stick อัตโนมัติ
+  /* ---- host (TikTok-style): chat stays, shown/hidden via the `hidden` prop (slides out to the left) ---- */
+  const hideX = useRef(new Animated.Value(0)).current;
+  const regionWRef = useRef(300);
+  useEffect(() => {
+    Animated.timing(hideX, {
+      toValue: hidden ? -regionWRef.current : 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [hidden, hideX]);
+
+  // Normal list (viewer): inverted so new messages sit at the bottom and stick automatically
   const invertedData = useMemo(() => [...messages].reverse(), [messages]);
 
-  // list ephemeral (คนไลฟ์): เฉพาะที่ยังไม่หมดอายุ + จำกัดจำนวน พร้อมค่า opacity
+  // Ephemeral list (host): only unexpired messages, capped count, with opacity
   const ephemeralData = useMemo(() => {
     if (!ephemeral) return [];
     return messages
@@ -170,7 +331,7 @@ const LiveChat = ({
       .slice(-MAX_VISIBLE);
   }, [ephemeral, messages, now]);
 
-  // ปัดขวา (แถบซ้าย) -> เปิดประวัติ | ปัดซ้าย (ในประวัติ) -> ปิด
+  // Swipe right (left strip) -> open history | swipe left (in history) -> close
   const openPan = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_e, g) =>
@@ -195,9 +356,10 @@ const LiveChat = ({
       StyleSheet.create({
         root: { flex: 1, justifyContent: 'flex-end' },
         list: { flexGrow: 0, maxHeight: '100%' },
+        // The list is inverted: paddingTop = the visible bottom spacing on screen (above the input)
         listContent: {
           paddingHorizontal: scale(12),
-          paddingBottom: verticalScale(8),
+          paddingTop: verticalScale(10),
         },
         ephemeralWrap: {
           flex: 1,
@@ -240,7 +402,8 @@ const LiveChat = ({
         },
         input: {
           flex: 1,
-          height: verticalScale(40),
+          minHeight: verticalScale(40),
+          maxHeight: verticalScale(100),
           backgroundColor: AppColors.scrimStrong,
           borderRadius: scale(20),
           paddingHorizontal: scale(16),
@@ -258,6 +421,237 @@ const LiveChat = ({
         },
         sendBtnDisabled: { opacity: 0.5 },
         dismissBackdrop: { ...StyleSheet.absoluteFillObject },
+        /* ---- side (landscape live chat, YouTube-style) ---- */
+        sListContent: {
+          paddingHorizontal: scale(16),
+          paddingTop: verticalScale(8),
+        },
+        sRow: {
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          gap: scale(10),
+          paddingVertical: verticalScale(7),
+        },
+        sAvatar: {
+          width: scale(28),
+          height: scale(28),
+          borderRadius: scale(14),
+          backgroundColor: '#555555',
+          overflow: 'hidden',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        sText: { flex: 1, color: '#FFFFFF', paddingTop: 2 },
+        sName: { color: AppColors.primary },
+        sMsg: { color: '#FFFFFF' },
+        sEmpty: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: verticalScale(6),
+          paddingHorizontal: scale(20),
+        },
+        sEmptyText: { color: AppColors.textTertiary, textAlign: 'center' },
+        sBar: {
+          flexDirection: 'row',
+          alignItems: 'flex-end', // multiline input: keep buttons at the bottom
+          gap: scale(8),
+          paddingHorizontal: scale(12),
+          paddingTop: verticalScale(10),
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: AppColors.borderStrong,
+        },
+        sPill: {
+          flex: 1,
+          minHeight: scale(40),
+          borderRadius: 999,
+          backgroundColor: AppColors.surface,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: AppColors.borderStrong,
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: scale(4),
+          paddingLeft: scale(16),
+          paddingRight: scale(12),
+        },
+        sHeart: {
+          width: scale(40),
+          height: scale(40),
+          borderRadius: 999,
+          backgroundColor: AppColors.surface,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        /* ---- host (host screen, per design) ---- */
+        hWrap: {
+          flex: 1,
+          justifyContent: 'flex-end',
+          paddingLeft: scale(15),
+          paddingRight: scale(110),
+          paddingBottom: verticalScale(13),
+        },
+        // Host chat area: bottom ~40% of the screen above the input bar (swipeable across the whole strip)
+        hRegion: { height: '40%', overflow: 'hidden' },
+        hSlide: { flex: 1 },
+        hList: { flex: 1 },
+        // The list is inverted: paddingTop = the visible "bottom" gap (keeps comments off the input bar)
+        hListContent: {
+          paddingLeft: hostEdge ?? scale(15),
+          paddingRight: scale(110),
+          paddingTop: verticalScale(13),
+        },
+        hShowTab: {
+          position: 'absolute',
+          left: hostEdge ?? 0,
+          bottom: verticalScale(13),
+          height: scale(28),
+          paddingLeft: scale(12),
+          paddingRight: scale(8),
+          borderRadius: 99,
+          backgroundColor: 'rgba(0,0,0,0.45)',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: scale(2),
+        },
+        hRow: {
+          alignSelf: 'flex-start',
+          maxWidth: '100%',
+          marginTop: verticalScale(13),
+          minHeight: scale(23),
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: scale(6),
+          paddingLeft: scale(3),
+          paddingRight: scale(11),
+          paddingVertical: verticalScale(1),
+          borderRadius: 99,
+          backgroundColor: '#373737',
+        },
+        hText: { color: AppColors.primary, flexShrink: 1 },
+        hMsg: { color: '#FFFFFF' },
+        hAvatar: {
+          width: scale(19),
+          height: scale(19),
+          borderRadius: scale(10),
+          backgroundColor: '#555555',
+          overflow: 'hidden',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        hBar: {
+          flexDirection: 'row',
+          alignItems: 'flex-end', // multiline input: keep buttons at the bottom
+          gap: scale(9),
+          paddingLeft: hostEdge ?? scale(14),
+          paddingRight: hostEdge ?? scale(13),
+        },
+        hPill: {
+          flex: 1,
+          minHeight: scale(49),
+          borderRadius: 999,
+          backgroundColor: '#2D2D2D',
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: scale(4),
+          paddingLeft: scale(15),
+          paddingRight: scale(15),
+        },
+        hCircle: {
+          width: scale(49),
+          height: scale(49),
+          borderRadius: 999,
+          backgroundColor: '#2D2D2D',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        /* ---- panel (per design) ---- */
+        // panel: list fills the remaining space and scrolls; the input never gets pushed off
+        pList: { flex: 1 },
+        // Inverted list: paddingTop = visible bottom spacing
+        pListContent: {
+          paddingHorizontal: scale(18),
+          paddingTop: verticalScale(12),
+          paddingBottom: verticalScale(4),
+        },
+        pEmpty: {
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: verticalScale(8),
+          paddingHorizontal: scale(24),
+        },
+        pEmptyText: { color: AppColors.textSecondary },
+        pEmptySub: { color: AppColors.textTertiary, textAlign: 'center' },
+        pRow: {
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          gap: scale(12),
+          marginTop: verticalScale(14),
+        },
+        pAvatar: {
+          width: scale(38),
+          height: scale(38),
+          borderRadius: scale(19),
+          backgroundColor: AppColors.surfaceStrong,
+        },
+        pBody: { flex: 1, gap: verticalScale(1) },
+        pName: { color: AppColors.primary },
+        pMsg: { color: AppColors.textPrimary },
+        pInputBar: {
+          flexDirection: 'row',
+          alignItems: 'flex-end', // multiline input: keep buttons at the bottom
+          gap: scale(10),
+          paddingHorizontal: scale(18),
+          paddingTop: verticalScale(12),
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: AppColors.border,
+        },
+        pMe: {
+          width: scale(44),
+          height: scale(44),
+          borderRadius: scale(22),
+          backgroundColor: AppColors.surfaceStrong,
+          justifyContent: 'center',
+          alignItems: 'center',
+          overflow: 'hidden',
+        },
+        pMeImg: { width: '100%', height: '100%' },
+        pInputPill: {
+          flex: 1,
+          minHeight: scale(44),
+          borderRadius: 999,
+          // Same input style as the composer used across the app
+          backgroundColor: AppColors.surface,
+          borderWidth: 1,
+          borderColor: AppColors.border,
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: scale(4),
+          paddingLeft: scale(20),
+          paddingRight: scale(14),
+        },
+        pInput: {
+          flex: 1,
+          // Multiline: grows with the text up to ~4 lines, then scrolls inside
+          minHeight: scale(32),
+          maxHeight: scale(90),
+          color: '#FFFFFF',
+          fontSize: 12,
+          fontFamily: 'IBMPlexSansThai-Regular',
+          paddingTop: 7,
+          paddingBottom: 7,
+          textAlignVertical: 'center',
+        },
+        pHeart: {
+          width: scale(44),
+          height: scale(44),
+          borderRadius: scale(22),
+          backgroundColor: AppColors.surface,
+          borderWidth: 1,
+          borderColor: AppColors.border,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
         historyPanel: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
         historyHeader: {
           flexDirection: 'row',
@@ -284,7 +678,7 @@ const LiveChat = ({
           backgroundColor: 'rgba(255,255,255,0.45)',
         },
       }),
-    [scale, verticalScale],
+    [scale, verticalScale, hostEdge],
   );
 
   const inputBarPadding = useMemo(
@@ -296,21 +690,70 @@ const LiveChat = ({
   );
 
   const renderItem = useCallback(
+    ({ item }: { item: ChatMessage }) =>
+      isPanel ? (
+        <PanelRow item={item} styles={styles} />
+      ) : isSide ? (
+        <SideRow item={item} styles={styles} />
+      ) : (
+        // overlay (viewer fullscreen) uses the same pill as the host: round avatar + primary name + white text
+        <HostRow item={item} styles={styles} />
+      ),
+    [styles, isPanel, isSide],
+  );
+  const keyExtractor = useCallback((item: ChatMessage) => item.id, []);
+  const renderHostItem = useCallback(
     ({ item }: { item: ChatMessage }) => (
-      <ChatRow item={item} styles={styles} />
+      <HostRow item={item} styles={styles} />
     ),
     [styles],
   );
-  const keyExtractor = useCallback((item: ChatMessage) => item.id, []);
 
   const canSubmit = !!input.trim() && !sending;
 
   return (
     <View style={[styles.root, style]} pointerEvents="box-none">
-      {/* คอมเมนต์ */}
-      {ephemeral ? (
+      {/* Comments */}
+      {isHost ? (
+        // Host (TikTok-style): chat never disappears, can scroll back; swipe to hide/show
+        <View
+          style={styles.hRegion}
+          pointerEvents="box-none"
+          onLayout={e => {
+            regionWRef.current = Math.max(1, e.nativeEvent.layout.width);
+            if (hidden) hideX.setValue(-regionWRef.current);
+          }}
+        >
+          <Animated.View
+            style={[styles.hSlide, { transform: [{ translateX: hideX }] }]}
+          >
+            <FlatList
+              style={styles.hList}
+              contentContainerStyle={styles.hListContent}
+              data={invertedData}
+              keyExtractor={keyExtractor}
+              renderItem={renderHostItem}
+              inverted
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            />
+          </Animated.View>
+          {hidden && (
+            <TouchableOpacity
+              style={styles.hShowTab}
+              onPress={onShowChat}
+              hitSlop={8}
+            >
+              <AppText fontSize={12} style={styles.hMsg}>
+                แชท
+              </AppText>
+              <Ionicons name="chevron-forward" size={14} color="#FFFFFF" />
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : ephemeral ? (
         showHistory ? (
-          // ประวัติแชท (ปัดขวาเปิด): เลื่อนดูย้อนหลังได้ + ปัดซ้าย/กด ✕ เพื่อปิด
+          // Chat history (swipe right to open): scroll back, swipe left or tap ✕ to close
           <View style={styles.historyPanel} {...closePan.panHandlers}>
             <View style={styles.historyHeader}>
               <AppText
@@ -345,11 +788,21 @@ const LiveChat = ({
           </View>
         ) : (
           <>
-            {/* คอมเมนต์จางหาย: แตะทะลุได้ -> ซูมวิดีโอผ่านคอมเมนต์ได้ */}
-            <View style={styles.ephemeralWrap} pointerEvents="none">
+            {/* Fading comments: touches pass through -> video can be zoomed through them */}
+            <View
+              style={isHost ? styles.hWrap : styles.ephemeralWrap}
+              pointerEvents="none"
+            >
               {ephemeralData.map(({ m, opacity }) => {
                 const opacityStyle = { opacity };
-                return (
+                return isHost ? (
+                  <HostRow
+                    key={m.id}
+                    item={m}
+                    styles={styles}
+                    extraStyle={opacityStyle}
+                  />
+                ) : (
                   <ChatRow
                     key={m.id}
                     item={m}
@@ -359,16 +812,43 @@ const LiveChat = ({
                 );
               })}
             </View>
-            {/* แถบซ้าย: ปัดขวาเพื่อเปิดประวัติแชท */}
+            {/* Left strip: swipe right to open chat history */}
             <View style={styles.edgeSwipe} {...openPan.panHandlers}>
               <View style={styles.edgeHandle} />
             </View>
           </>
         )
+      ) : isPanel && messages.length === 0 ? (
+        <View style={styles.pEmpty}>
+          <CommentIcon size={IS_TABLET ? 80 : 64} />
+          <AppText fontSize={AppFontSize.subtitle} style={styles.pEmptyText}>
+            ยังไม่มีข้อความ
+          </AppText>
+          <AppText fontSize={AppFontSize.caption} style={styles.pEmptySub}>
+            เริ่มพูดคุยกับคนอื่น ๆ ในไลฟ์นี้ได้เลย
+          </AppText>
+        </View>
+      ) : isSide && messages.length === 0 ? (
+        <View style={styles.sEmpty}>
+          <Ionicons
+            name="chatbubbles-outline"
+            size={IS_TABLET ? 34 : 28}
+            color={AppColors.textTertiary}
+          />
+          <AppText fontSize={13} style={styles.sEmptyText}>
+            ยังไม่มีข้อความ{'\n'}เริ่มพูดคุยกันเลย
+          </AppText>
+        </View>
       ) : (
         <FlatList
-          style={styles.list}
-          contentContainerStyle={styles.listContent}
+          style={isPanel || isSide ? styles.pList : styles.list}
+          contentContainerStyle={
+            isPanel
+              ? styles.pListContent
+              : isSide
+              ? styles.sListContent
+              : styles.listContent
+          }
           data={invertedData}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
@@ -379,7 +859,7 @@ const LiveChat = ({
         />
       )}
 
-      {/* backdrop แตะปิดคีย์บอร์ด (โผล่เฉพาะตอนพิมพ์ ไม่งั้นปล่อยแตะทะลุ) */}
+      {/* Backdrop that dismisses the keyboard (only while typing, otherwise touches pass through) */}
       {keyboardVisible ? (
         <Pressable style={styles.dismissBackdrop} onPress={Keyboard.dismiss} />
       ) : null}
@@ -390,7 +870,106 @@ const LiveChat = ({
         </AppText>
       ) : null}
 
-      {canSend ? (
+      {canSend && isSide ? (
+        <View style={[styles.sBar, inputBarPadding]}>
+          <View style={styles.sPill}>
+            <TextInput
+              style={styles.pInput}
+              value={input}
+              onChangeText={setInput}
+              placeholder="พิมพ์ข้อความ..."
+              placeholderTextColor={AppColors.textTertiary}
+              multiline
+              submitBehavior="newline"
+            />
+            <TouchableOpacity
+              onPress={sendMessage}
+              disabled={!canSubmit}
+              hitSlop={10}
+              style={!canSubmit && styles.sendBtnDisabled}
+            >
+              <Ionicons
+                name="send"
+                size={IS_TABLET ? 18 : 15}
+                color={canSubmit ? AppColors.primary : '#FFFFFF'}
+              />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.sHeart} onPress={onLike} hitSlop={6}>
+            <Ionicons name="heart" size={IS_TABLET ? 20 : 17} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      ) : canSend && isHost ? (
+        <View style={[styles.hBar, inputBarPadding]}>
+          <View style={styles.hPill}>
+            <TextInput
+              style={styles.pInput}
+              value={input}
+              onChangeText={setInput}
+              placeholder="พิมพ์ข้อความของคุณ..."
+              placeholderTextColor="#FFFFFF"
+              multiline
+              submitBehavior="newline"
+            />
+            <TouchableOpacity
+              onPress={sendMessage}
+              disabled={!canSubmit}
+              hitSlop={10}
+              style={!canSubmit && styles.sendBtnDisabled}
+            >
+              <Ionicons
+                name="send"
+                size={IS_TABLET ? 18 : 15}
+                color={canSubmit ? AppColors.primary : '#FFFFFF'}
+              />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.hCircle} onPress={onLike} hitSlop={6}>
+            <Ionicons name="heart" size={IS_TABLET ? 22 : 18} color="#FFFFFF" />
+          </TouchableOpacity>
+          {extraAction}
+        </View>
+      ) : canSend && isPanel ? (
+        <View style={[styles.pInputBar, inputBarPadding]}>
+          <View style={styles.pMe}>
+            {typeof myAvatar === 'string' && myAvatar ? (
+              <FastImage style={styles.pMeImg} source={{ uri: myAvatar }} />
+            ) : (
+              <Ionicons
+                name="person"
+                size={IS_TABLET ? 22 : 18}
+                color={AppColors.textSecondary}
+              />
+            )}
+          </View>
+          <View style={styles.pInputPill}>
+            <TextInput
+              style={styles.pInput}
+              value={input}
+              onChangeText={setInput}
+              placeholder="พิมพ์ข้อความของคุณ..."
+              placeholderTextColor="#FFFFFF"
+              multiline
+              submitBehavior="newline"
+            />
+            <TouchableOpacity
+              onPress={sendMessage}
+              disabled={!canSubmit}
+              hitSlop={10}
+              style={!canSubmit && styles.sendBtnDisabled}
+            >
+              <Ionicons
+                name="send"
+                size={IS_TABLET ? 18 : 15}
+                color={canSubmit ? AppColors.primary : '#FFFFFF'}
+              />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.pHeart} onPress={onLike} hitSlop={6}>
+            <Ionicons name="heart" size={IS_TABLET ? 22 : 18} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      ) : canSend ? (
         <View style={[styles.inputBar, inputBarPadding]}>
           <TextInput
             style={styles.input}
@@ -398,9 +977,8 @@ const LiveChat = ({
             onChangeText={setInput}
             placeholder="พิมพ์ข้อความ..."
             placeholderTextColor={AppColors.grayLight}
-            returnKeyType="send"
-            onSubmitEditing={sendMessage}
-            blurOnSubmit={false}
+            multiline
+            submitBehavior="newline"
           />
           <TouchableOpacity
             style={[styles.sendBtn, !canSubmit && styles.sendBtnDisabled]}

@@ -1,6 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
-import Carousel from 'react-native-snap-carousel';
+import { Extrapolation, interpolate } from 'react-native-reanimated';
+import {
+  Carousel,
+  type CarouselPanGesture,
+} from 'react-native-reanimated-carousel';
 import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import { AppColors } from '../../../styles/colors';
@@ -168,26 +172,48 @@ const VerticalCourseSlider: React.FC<VerticalCourseSliderProps> = React.memo(
     gap = 8,
     containerStyle,
     autoSlideInterval = DEFAULT_AUTO_SLIDE_INTERVAL,
-    autoplayDelayMs = DEFAULT_AUTOPLAY_DELAY,
+    // The new library has no delay before autoplay starts (prop kept so callers don't break)
+    autoplayDelayMs: _autoplayDelayMs = DEFAULT_AUTOPLAY_DELAY,
     loading = false,
     skeletonCount = DEFAULT_SKELETON_COUNT,
   }) => {
     const { scale, verticalScale } = useResponsive();
     const { width: screenWidth } = useWindowDimensions();
 
-    const carouselRef = useRef<Carousel<any> | null>(null);
-
     const cardWidth = useMemo(() => scale(IS_TABLET ? 264 : 220), [scale]);
 
     const sliderHeight = verticalScale(IS_TABLET ? 372 : 310);
 
-    useEffect(() => {
-      if (loading || !data || data.length === 0) return;
-      const id = setTimeout(() => {
-        carouselRef.current?.snapToItem?.(0, false);
-      }, 50);
-      return () => clearTimeout(id);
-    }, [loading, data]);
+    // Distance between cards (center to center)
+    const step = cardWidth + gap * 2;
+
+    /**
+     * Card animation: value = position relative to the center card (-1 left, 0 center, 1 right)
+     * Computed from the real scroll position every frame -> the center card is always big/bright (no snap-carousel glitches)
+     */
+    const animationStyle = useCallback(
+      (value: number) => {
+        'worklet';
+        const translateX = value * step;
+        const s = interpolate(
+          value,
+          [-1, 0, 1],
+          [0.9, 1, 0.9],
+          Extrapolation.CLAMP,
+        );
+        const opacity = interpolate(
+          value,
+          [-1, 0, 1],
+          [0.5, 1, 0.5],
+          Extrapolation.CLAMP,
+        );
+        const zIndex = Math.round(
+          interpolate(value, [-1, 0, 1], [0, 10, 0], Extrapolation.CLAMP),
+        );
+        return { transform: [{ translateX }, { scale: s }], opacity, zIndex };
+      },
+      [step],
+    );
 
     const styles = useMemo(
       () =>
@@ -196,13 +222,15 @@ const VerticalCourseSlider: React.FC<VerticalCourseSliderProps> = React.memo(
             width: screenWidth,
             height: sliderHeight,
           } as ViewStyle,
+          carousel: { width: screenWidth, height: sliderHeight },
+          // Each page is screen-wide: the card sits in the middle (side cards slide in via the animation)
           slideInner: {
+            flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
-            paddingHorizontal: gap,
           },
         }),
-      [screenWidth, sliderHeight, gap],
+      [screenWidth, sliderHeight],
     );
 
     type ItemType = VerticalCourseSliderProps['data'][number];
@@ -234,25 +262,16 @@ const VerticalCourseSlider: React.FC<VerticalCourseSliderProps> = React.memo(
     );
 
     if (loading) {
-      const shouldLoopSkeleton = skeletonData.length > 1;
-
       return (
         <View style={[styles.root, containerStyle]}>
           <Carousel<{ id: string }>
             data={skeletonData}
             renderItem={renderSkeletonItem}
-            sliderWidth={screenWidth}
-            itemWidth={cardWidth + gap * 2}
-            vertical={false}
-            activeSlideAlignment="center"
-            inactiveSlideScale={0.9}
-            inactiveSlideOpacity={0.5}
-            loop={shouldLoopSkeleton}
-            loopClonesPerSide={1}
-            autoplay={false}
-            scrollEnabled={shouldLoopSkeleton}
-            enableSnap
-            firstItem={0}
+            style={styles.carousel}
+            loop={skeletonData.length > 1}
+            scrollEnabled={false}
+            renderWindowSize={5}
+            itemAnimation={animationStyle}
           />
         </View>
       );
@@ -265,23 +284,19 @@ const VerticalCourseSlider: React.FC<VerticalCourseSliderProps> = React.memo(
     return (
       <View style={[styles.root, containerStyle]}>
         <Carousel<ItemType>
-          ref={carouselRef}
           data={data}
           renderItem={renderItem}
-          sliderWidth={screenWidth}
-          itemWidth={cardWidth + gap * 2}
-          vertical={false}
-          activeSlideAlignment="center"
-          inactiveSlideScale={0.9}
-          inactiveSlideOpacity={0.5}
+          style={styles.carousel}
           loop={shouldLoop}
-          loopClonesPerSide={data.length > 2 ? 2 : 1}
-          autoplay={shouldLoop}
-          autoplayInterval={autoSlideInterval}
-          autoplayDelay={autoplayDelayMs}
           scrollEnabled={shouldLoop}
-          enableSnap
-          firstItem={0}
+          autoplay={shouldLoop && autoSlideInterval > 0}
+          autoplayInterval={autoSlideInterval}
+          renderWindowSize={5}
+          itemAnimation={animationStyle}
+          // Horizontal swipes only: vertical swipes still scroll the page
+          onConfigurePanGesture={(g: CarouselPanGesture) => {
+            g.activeOffsetX([-10, 10]).failOffsetY([-10, 10]);
+          }}
         />
       </View>
     );

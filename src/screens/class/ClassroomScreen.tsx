@@ -172,7 +172,7 @@ const ClassroomScreen = () => {
   const openPdfUrl = params?.openPdfUrl;
 
   const [activeTab, setActiveTab] = useState<ClassroomTabKey>('ALL');
-  const [, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [pdfVisible, setPdfVisible] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string>('');
@@ -383,6 +383,7 @@ const ClassroomScreen = () => {
     () =>
       StyleSheet.create({
         rootView: { flex: 1, backgroundColor: '#000000' },
+        hidden: { display: 'none' },
         contentTab: {
           paddingHorizontal: scale(sharedPaddingHorizontal),
         },
@@ -411,10 +412,13 @@ const ClassroomScreen = () => {
             playingLessonId={playingLessonId}
             coverUrl={coverUrl}
             onFullscreenChange={setIsFullscreen}
+            videoTitle={currentLesson?.label}
             activeTab={activeTab}
             onChangeTab={setActiveTab}
           />
         }
+        // Fullscreen: hide the lesson list so the video fills the screen
+        style={isFullscreen ? styles.hidden : undefined}
         data={[activeTab]}
         keyExtractor={t => String(t)}
         renderItem={() => (

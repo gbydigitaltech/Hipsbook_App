@@ -60,6 +60,9 @@ export const useProfile = create<ProfileState>()(
           fetchProfileError: undefined,
         });
       } catch (err) {
+        // Fetch failed (network/server) -> keep the current profile, don't kick the user out
+        // A real 401 (token no longer valid) is handled by http.ts: it refreshes, and logs out only if that fails
+        if ((err as { isCanceled?: boolean })?.isCanceled) return;
         set({
           fetchProfileError: (err as Error).message,
         });

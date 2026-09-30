@@ -1,7 +1,14 @@
 import { VIDEO_STREAM_BASE_URL, VIDEO_THUMBNAIL_BASE_URL } from '@env';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import Video, { VideoRef } from 'react-native-video';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import Video, { SelectedVideoTrackType, VideoRef } from 'react-native-video';
 import { log, logWarn } from '../../helpers/logger';
 import { useVideoAccess } from '../../hooks/videos/useVideoAccess';
 import { AppColors } from '../../styles/colors';
@@ -11,36 +18,77 @@ import AppText from '../texts/AppText';
 type PlayerProps = {
   mediaId?: string;
   lessonId?: string;
-  /** เล่น HLS URL ตรง ๆ (เช่น live) ข้าม access flow */
+  /** Play an HLS URL directly (e.g. live), skipping the access flow */
   sourceUrl?: string;
-  /** โหมด live: เล่นทันที */
+  /** Live mode: autoplay */
   isLive?: boolean;
   onFullscreenChange?: (isFullscreen: boolean) => void;
   initialFullscreen?: boolean;
   onError?: () => void;
-  /** live: แจ้งเมื่อสตรีมค้าง/กลับมาเล่น (ใช้โชว์ overlay "เดี๋ยวกลับมา") */
+  /** Live: notifies when the stream stalls/resumes (used for the "be right back" overlay) */
   onStalled?: (stalled: boolean) => void;
+  /** Selected height (e.g. 720) | null/undefined = auto */
+  quality?: number | null;
+  /** Reports the available qualities for this stream (high -> low) */
+  onQualities?: (heights: number[]) => void;
+  /** External control (for lives that draw their own UI) */
+  paused?: boolean;
+  muted?: boolean;
+  /** Use OS native controls (default: on unless live) */
+  nativeControls?: boolean;
+  /** Fill the parent instead of a 16:9 box */
+  fill?: boolean;
+  /** Current playback time (seconds) */
+  onProgress?: (currentTime: number) => void;
+  /** Video duration (seconds) */
+  onDuration?: (duration: number) => void;
+  onEnd?: () => void;
+};
+
+export type PlayerHandle = {
+  seek: (seconds: number) => void;
 };
 
 /**
- * Player แบบใช้ "native controls" ของ react-native-video (prop `controls`)
- * ปุ่ม play/seek/fullscreen เป็นของ OS -> วางตำแหน่งเป๊ะ ไม่มีปัญหา control ตกขอบ
- * fullscreen ใช้ native (หมุน + เต็มจอให้เอง)
+ * Player using react-native-video's native controls (the `controls` prop)
+ * play/seek/fullscreen buttons come from the OS -> positioned correctly, no controls off the edge
+ * Fullscreen is native (handles rotation and fullscreen itself)
  */
-const Player = ({
-  mediaId,
-  lessonId,
-  sourceUrl,
-  isLive = false,
-  onFullscreenChange,
-  initialFullscreen = false,
-  onError,
-  onStalled,
-}: PlayerProps) => {
+const Player = forwardRef<PlayerHandle, PlayerProps>(function Player(
+  {
+    mediaId,
+    lessonId,
+    sourceUrl,
+    isLive = false,
+    onFullscreenChange,
+    initialFullscreen = false,
+    onError,
+    onStalled,
+    quality,
+    onQualities,
+    paused,
+    muted,
+    nativeControls,
+    fill = false,
+    onProgress,
+    onDuration,
+    onEnd,
+  }: PlayerProps,
+  ref,
+) {
   const videoRef = useRef<VideoRef>(null);
+  useImperativeHandle(
+    ref,
+    () => ({ seek: (sec: number) => videoRef.current?.seek(sec) }),
+    [],
+  );
+  const useFill = isLive || fill;
+  const showNativeControls = nativeControls ?? !isLive;
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isBuffering, setIsBuffering] = useState(true);
   const [fatalError, setFatalError] = useState(false);
+  // We render the poster ourselves: hide it on the first frame (so it doesn't linger over the video)
+  const [firstFrameShown, setFirstFrameShown] = useState(false);
 
   const {
     streamUrl,
@@ -54,9 +102,10 @@ const Player = ({
     accessRetriedRef.current = false;
     setFatalError(false);
     setIsBuffering(true);
+    setFirstFrameShown(false);
   }, [mediaId, lessonId, sourceUrl]);
 
-  // ล้าง stall timer ตอน unmount
+  // Clear the stall timer on unmount
   useEffect(() => {
     return () => {
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
@@ -84,24 +133,27 @@ const Player = ({
 
   useEffect(() => {
     if (videoUri) {
-      log(
-        'Player',
-        `source=${lessonId ? 'ACCESS' : 'DIRECT'} uri=${videoUri}`,
-      );
+      log('Player', `source=${lessonId ? 'ACCESS' : 'DIRECT'} uri=${videoUri}`);
     }
   }, [videoUri, lessonId]);
 
-  // เข้า fullscreen อัตโนมัติถ้าถูกสั่ง (native จะจัดการหมุน/เต็มจอเอง)
-  const handleLoad = useCallback(() => {
-    setIsBuffering(false);
-    if (initialFullscreen) {
-      videoRef.current?.presentFullscreenPlayer();
-    }
-  }, [initialFullscreen]);
+  // Enter fullscreen automatically when requested (native handles rotation/fullscreen)
+  const handleLoad = useCallback(
+    (e: { duration?: number }) => {
+      setIsBuffering(false);
+      if (typeof e?.duration === 'number' && e.duration > 0) {
+        onDuration?.(e.duration);
+      }
+      if (initialFullscreen) {
+        videoRef.current?.presentFullscreenPlayer();
+      }
+    },
+    [initialFullscreen, onDuration],
+  );
 
   const handleError = useCallback(
     (e: unknown) => {
-      // access flow: retry ครั้งเดียว เผื่อ url หมดอายุ
+      // Access flow: retry once in case the URL expired
       if (lessonId && !accessRetriedRef.current) {
         accessRetriedRef.current = true;
         setIsBuffering(true);
@@ -117,16 +169,17 @@ const Player = ({
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.videoBox}>
+    <View style={useFill ? styles.containerFill : styles.container}>
+      <View style={useFill ? styles.videoBoxFill : styles.videoBox}>
         {videoUri && !fatalError ? (
           <Video
             ref={videoRef}
             source={{ uri: videoUri }}
-            poster={isLive ? undefined : posterUri}
             style={styles.video}
             resizeMode="contain"
-            controls
+            controls={showNativeControls}
+            paused={paused}
+            muted={muted}
             fullscreenOrientation="landscape"
             fullscreenAutorotate
             onLoad={handleLoad}
@@ -134,14 +187,38 @@ const Player = ({
               setIsBuffering(b);
               if (b) {
                 if (!stallTimerRef.current) {
-                  stallTimerRef.current = setTimeout(() => onStalled?.(true), 4000);
+                  stallTimerRef.current = setTimeout(
+                    () => onStalled?.(true),
+                    4000,
+                  );
                 }
               } else {
                 clearStall();
               }
             }}
-            onProgress={() => clearStall()}
+            onReadyForDisplay={() => setFirstFrameShown(true)}
+            onProgress={e => {
+              clearStall();
+              if (e.currentTime > 0) setFirstFrameShown(true);
+              onProgress?.(e.currentTime);
+            }}
+            onEnd={onEnd}
             onError={handleError}
+            selectedVideoTrack={
+              quality
+                ? { type: SelectedVideoTrackType.RESOLUTION, value: quality }
+                : { type: SelectedVideoTrackType.AUTO }
+            }
+            onVideoTracks={e => {
+              const heights = Array.from(
+                new Set(
+                  (e.videoTracks ?? [])
+                    .map(t => t.height)
+                    .filter((h): h is number => typeof h === 'number' && h > 0),
+                ),
+              ).sort((a, b) => b - a);
+              onQualities?.(heights);
+            }}
             onFullscreenPlayerWillPresent={() => onFullscreenChange?.(true)}
             onFullscreenPlayerWillDismiss={() => onFullscreenChange?.(false)}
             playInBackground={false}
@@ -151,6 +228,14 @@ const Player = ({
             progressUpdateInterval={500}
           />
         ) : null}
+
+        {!isLive && posterUri && !firstFrameShown && !fatalError && (
+          <Image
+            source={{ uri: posterUri }}
+            style={styles.poster}
+            resizeMode="contain"
+          />
+        )}
 
         {showBuffering && (
           <View style={styles.overlay} pointerEvents="none">
@@ -176,10 +261,13 @@ const Player = ({
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: { width: '100%', backgroundColor: '#000' },
+  // Live: fill the parent, no OS controls (UI is drawn in LiveViewer)
+  containerFill: { flex: 1, width: '100%', backgroundColor: '#000' },
+  videoBoxFill: { flex: 1, width: '100%', backgroundColor: '#000' },
   videoBox: {
     width: '100%',
     aspectRatio: 16 / 9,
@@ -187,6 +275,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   video: { ...StyleSheet.absoluteFillObject },
+  poster: { ...StyleSheet.absoluteFillObject, pointerEvents: 'none' },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',

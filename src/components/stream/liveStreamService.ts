@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
-import { log, logError } from '../../helpers/logger';
+import { log, logError, logWarn } from '../../helpers/logger';
 import { STREAM_CONFIG, getHlsUrl } from './streamConfig';
 
 export type LiveStreamSession = {
@@ -16,6 +16,10 @@ export type LiveStreamSession = {
   category?: string;
   tags?: string;
   createdAt?: string;
+  /** Live or host image/logo (if the backend provides it) */
+  logoUrl?: string;
+  /** Host/channel name (if the backend provides it) */
+  hostName?: string;
 };
 
 export type CreateStreamParams = {
@@ -89,8 +93,26 @@ export function normalizeLiveStreamSession(raw: any): LiveStreamSession {
   const id = idRaw != null && idRaw !== '' ? String(idRaw) : '';
   const streamKey = String(pick<string>(r, 'streamKey', 'StreamKey') ?? '');
   const ingestUrl = String(pick<string>(r, 'ingestUrl', 'IngestUrl') ?? '');
+  const firstStr = (...keys: string[]): string | undefined => {
+    for (const k of keys) {
+      const v = r[k] ?? r[k.charAt(0).toUpperCase() + k.slice(1)];
+      if (typeof v === 'string' && v.trim()) return v.trim();
+    }
+    return undefined;
+  };
   return {
     id,
+    logoUrl: firstStr(
+      'logoUrl',
+      'logo',
+      'hostAvatar',
+      'hostLogo',
+      'channelLogo',
+      'avatarUrl',
+      'avatar',
+      'profileImage',
+    ),
+    hostName: firstStr('hostName', 'channelName', 'ownerName', 'host'),
     title: String(pick<string>(r, 'title', 'Title') ?? ''),
     description: pick<string>(r, 'description', 'Description'),
     streamKey,
@@ -167,7 +189,8 @@ class LiveStreamService {
     this.client.interceptors.response.use(
       res => {
         const fullUrl = `${res.config.baseURL ?? ''}${res.config.url ?? ''}`;
-        log('Stream', 
+        log(
+          'Stream',
           `[LiveStream] ${
             res.status
           } ${res.config.method?.toUpperCase()} ${fullUrl}`,
@@ -180,22 +203,28 @@ class LiveStreamService {
         const fullUrl = `${err.config?.baseURL ?? ''}${err.config?.url ?? ''}`;
         const method = err.config?.method?.toUpperCase();
         if (status == null) {
-          // ไม่มี response เลย: timeout (ECONNABORTED/ETIMEDOUT) หรือเน็ตหลุด (ERR_NETWORK)
+          // No response at all: timeout (ECONNABORTED/ETIMEDOUT) or network drop (ERR_NETWORK)
+          // That's a network/slow-server issue, not a bug -> warn (no red box in dev)
           const code = err.code ?? 'NO_RESPONSE';
-          logError('Stream',
+          logWarn(
+            'Stream',
             `[LiveStream] FAIL ${code} ${method} ${fullUrl} — ${err.message}`,
           );
         } else {
-          logError('Stream',
+          logError(
+            'Stream',
             `[LiveStream] FAIL ${status} ${method} ${fullUrl}`,
           );
-          logError('Stream',
+          logError(
+            'Stream',
             `[LiveStream] Response:`,
             JSON.stringify(err.response?.data),
           );
         }
 
-        const readable = new Error(`${status ?? err.code ?? 'NO_RESPONSE'}: ${msg}`);
+        const readable = new Error(
+          `${status ?? err.code ?? 'NO_RESPONSE'}: ${msg}`,
+        );
         (readable as any).status = status;
         (readable as any).code = err.code;
         (readable as any).serverData = err.response?.data;
@@ -210,8 +239,12 @@ class LiveStreamService {
       page?: number;
       status?: LiveStreamSession['status'];
     } = {},
+    opts: { signal?: AbortSignal } = {},
   ): Promise<LiveStreamSession[]> {
-    const res = await this.client.get('/livestream', { params });
+    const res = await this.client.get('/livestream', {
+      params,
+      signal: opts.signal,
+    });
     const raw = Array.isArray(res.data) ? res.data : res.data.items ?? [];
     return raw.map((item: any) => normalizeLiveStreamSession(item));
   }
@@ -233,11 +266,16 @@ class LiveStreamService {
 
     log('Stream', '[LiveStream] POST /livestream body:', JSON.stringify(body));
     const res = await this.client.post('/livestream', body);
-    log('Stream', '[LiveStream] POST /livestream raw:', JSON.stringify(res.data));
+    log(
+      'Stream',
+      '[LiveStream] POST /livestream raw:',
+      JSON.stringify(res.data),
+    );
 
     const createdId = parseCreatedStreamId(res.data);
     if (createdId) {
-      log('Stream', 
+      log(
+        'Stream',
         '[LiveStream] POST /livestream คืนค่าแค่ id (string) — ดึงรายละเอียดด้วย GET /livestream/',
         createdId,
       );
