@@ -40,6 +40,8 @@ type AuthState = {
   _hardLogout: () => Promise<void>;
 };
 
+let revalidating: Promise<void> | null = null;
+
 export const useAuth = create<AuthState>()(
   devtools(
     (set, get) => {
@@ -92,7 +94,8 @@ export const useAuth = create<AuthState>()(
           try {
             await apiSignOut();
           } catch (e) {
-            logWarn('Store', 
+            logWarn(
+              'Store',
               'Server sign_out failed; proceeding with local logout:',
               e,
             );
@@ -108,34 +111,71 @@ export const useAuth = create<AuthState>()(
         },
 
         revalidate: async () => {
-          try {
-            set({ loading: true });
+          // One run at a time (app start + foreground can fire together)
+          if (revalidating) return revalidating;
+          revalidating = (async () => {
+            try {
+              // Only the first (bootstrap) run shows the global loading overlay.
+              // Later runs (e.g. app returns to foreground) are silent, so they
+              // don't stack a second overlay on top of a screen's own loading.
+              if (!get().initialized) set({ loading: true });
 
-            const tokens = await getTokens();
-            const access = tokens?.accessToken ?? '';
-            const refresh = tokens?.refreshToken ?? '';
-            const savedProvider = tokens?.provider;
+              const tokens = await getTokens();
+              const access = tokens?.accessToken ?? '';
+              const refresh = tokens?.refreshToken ?? '';
+              const savedProvider = tokens?.provider;
 
-            // No tokens at all -> log out.
-            if (!access && !refresh) {
-              await get()._hardLogout();
-              return;
-            }
+              // No tokens at all -> log out.
+              if (!access && !refresh) {
+                await get()._hardLogout();
+                return;
+              }
 
-            const accessNotExpired = !!access && !isTokenExpired(access);
-            const activateId = access ? getActivateIdFromAccess(access) : null;
+              const accessNotExpired = !!access && !isTokenExpired(access);
+              const activateId = access
+                ? getActivateIdFromAccess(access)
+                : null;
 
-            // Access token still valid.
-            if (accessNotExpired) {
-              if (isActivatedV2(access)) {
+              // Access token still valid.
+              if (accessNotExpired) {
+                if (isActivatedV2(access)) {
+                  set({
+                    isAuthenticated: true,
+                    provider: savedProvider,
+                  });
+                  return;
+                }
+
+                // Not activated -> don't enter the app stack yet.
+                if (activateId !== null && activateId !== '2') {
+                  set({
+                    isAuthenticated: false,
+                    provider: savedProvider,
+                  });
+                  return;
+                }
+
+                // fallback
                 set({
-                  isAuthenticated: true,
+                  isAuthenticated: false,
                   provider: savedProvider,
                 });
                 return;
               }
 
-              // Not activated -> don't enter the app stack yet.
+              // Access expired -> a refresh token is required.
+              if (!refresh) {
+                await get()._hardLogout();
+                return;
+              }
+
+              // Refresh is a JWT and has expired -> log out.
+              if (looksJwt(refresh) && isTokenExpired(refresh)) {
+                await get()._hardLogout();
+                return;
+              }
+
+              // Activation not ready -> don't allow auth yet.
               if (activateId !== null && activateId !== '2') {
                 set({
                   isAuthenticated: false,
@@ -144,65 +184,39 @@ export const useAuth = create<AuthState>()(
                 return;
               }
 
-              // fallback
-              set({
-                isAuthenticated: false,
-                provider: savedProvider,
-              });
-              return;
-            }
+              // Request a new access token.
+              const res = await apiRefreshToken(refresh);
 
-            // Access expired -> a refresh token is required.
-            if (!refresh) {
-              await get()._hardLogout();
-              return;
-            }
+              if (res?.access_token) {
+                // If apiRefreshToken doesn't saveTokens, enable this line.
+                // await saveTokens({ accessToken: res.access_token });
 
-            // Refresh is a JWT and has expired -> log out.
-            if (looksJwt(refresh) && isTokenExpired(refresh)) {
-              await get()._hardLogout();
-              return;
-            }
-
-            // Activation not ready -> don't allow auth yet.
-            if (activateId !== null && activateId !== '2') {
-              set({
-                isAuthenticated: false,
-                provider: savedProvider,
-              });
-              return;
-            }
-
-            // Request a new access token.
-            const res = await apiRefreshToken(refresh);
-
-            if (res?.access_token) {
-              // If apiRefreshToken doesn't saveTokens, enable this line.
-              // await saveTokens({ accessToken: res.access_token });
-
-              if (isActivatedV2(res.access_token)) {
-                const latest = await getTokens();
-                set({
-                  isAuthenticated: true,
-                  provider: latest?.provider ?? savedProvider,
-                });
-                return;
+                if (isActivatedV2(res.access_token)) {
+                  const latest = await getTokens();
+                  set({
+                    isAuthenticated: true,
+                    provider: latest?.provider ?? savedProvider,
+                  });
+                  return;
+                }
               }
-            }
 
-            // Refresh failed or the new token isn't activated yet.
-            const latest = await getTokens();
-            set({
-              isAuthenticated: false,
-              provider: latest?.provider ?? savedProvider,
-            });
-          } catch (err) {
-            logError('Store', 'revalidate/refresh failed:', err);
-            await get()._hardLogout();
-          } finally {
-            // Always finish bootstrap.
-            set({ loading: false, initialized: true });
-          }
+              // Refresh failed or the new token isn't activated yet.
+              const latest = await getTokens();
+              set({
+                isAuthenticated: false,
+                provider: latest?.provider ?? savedProvider,
+              });
+            } catch (err) {
+              logError('Store', 'revalidate/refresh failed:', err);
+              await get()._hardLogout();
+            } finally {
+              // Always finish bootstrap.
+              set({ loading: false, initialized: true });
+              revalidating = null;
+            }
+          })();
+          return revalidating;
         },
       };
     },

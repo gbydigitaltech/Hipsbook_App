@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import AppSpinner from '../../components/loading/AppSpinner';
 import { WebView } from 'react-native-webview';
 
 import AppSafeView from '../../components/views/AppSafeView';
@@ -60,7 +61,7 @@ const TermOfServiceScreen = () => {
         <View style={styles.webWrap}>
           {loading && (
             <View style={styles.loader} pointerEvents="none">
-              <ActivityIndicator size="large" color={AppColors.primary} />
+              <AppSpinner size="large" />
             </View>
           )}
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Animated,
   Dimensions,
   Easing,
@@ -10,6 +9,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import AppSpinner from '../../../components/loading/AppSpinner';
 
 import RoundProfileImage from '../../../components/profiles/RoundProfileImage';
 import AppText from '../../../components/texts/AppText';
@@ -286,10 +286,7 @@ const CourseAboutSheet: React.FC<Props> = ({
                 </View>
 
                 {teachersLoading ? (
-                  <ActivityIndicator
-                    color={AppColors.primary}
-                    style={styles.loading}
-                  />
+                  <AppSpinner style={styles.loading} />
                 ) : (
                   teachers?.map((teacher, index) => {
                     const fullName = `${teacher.first_name ?? ''} ${

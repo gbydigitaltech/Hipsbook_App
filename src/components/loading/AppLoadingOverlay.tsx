@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import {
-  ActivityIndicator,
   Modal,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import AppSpinner from './AppSpinner';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import { thaiSafeLineHeight } from '../../styles/sharedstyles';
@@ -72,7 +72,7 @@ const AppLoadingOverlay: React.FC<AppLoadingOverlayProps> = ({
       <TouchableWithoutFeedback>
         <View style={styles.backdrop}>
           <View style={styles.box}>
-            <ActivityIndicator size="large" color={AppColors.primary} />
+            <AppSpinner size="large" />
             <Text
               style={styles.text}
               maxFontSizeMultiplier={1.2}

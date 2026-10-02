@@ -325,8 +325,7 @@ export default function ProfileChangePasswordScreen() {
             title="บันทึก"
             fontSize={AppFontSize.subtitle}
             contentStyle={styles.buttonContent}
-            loading={isSubmitting && !isValidating}
-            disabled={disableSubmit}
+            disabled={disableSubmit || isSubmitting}
             containerStyle={styles.button}
             onPress={onSubmit}
           />

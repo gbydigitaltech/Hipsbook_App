@@ -79,7 +79,7 @@ const AppDropDown: React.FC<Props> = ({
       </AppText>
 
       <Animated.View style={{ transform: [{ rotate }] }}>
-        <ChevronDownIcon size={iconSize} color="#FFFFFF" />
+        <ChevronDownIcon size={iconSize} color={AppColors.white} />
       </Animated.View>
     </TouchableOpacity>
   );

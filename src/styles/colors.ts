@@ -37,9 +37,33 @@ export const AppColors = {
   whitelistBackground: 'rgba(0,0,0,0.55)',
   cardActive: 'rgba(11,189,190,0.16)',
   tabbarBackground: '#151515',
+
+  /* Controls drawn on top of video / camera */
+  mediaScrim: 'rgba(0,0,0,0.45)',
+  mediaButton: 'rgba(245,245,245,0.25)',
+  mediaTrack: 'rgba(239,239,239,0.33)',
+  mediaBuffered: 'rgba(239,239,239,0.55)',
+
+  /* Rating stars */
+  rating: '#F4A700',
+  ratingEmpty: '#6B6B6B',
+
+  /* Live */
+  liveReady: '#F4A700',
+  chip: '#373737',
+
   progressTrack: '#FFFFFF80',
   appButtonGradient: ['#0BBDBE', '#055858'] as string[],
 } as const;
+
+/** Floating heart colors on live screens */
+export const LIVE_HEART_COLORS = [
+  '#ED171F',
+  '#D24449',
+  '#F56A6F',
+  '#FF575D',
+  '#E34A42',
+] as const;
 
 /** Preset avatar background colors for user placeholders */
 export const AVATAR_COLORS = [

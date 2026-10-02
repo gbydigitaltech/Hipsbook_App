@@ -21,19 +21,21 @@ import Orientation from 'react-native-orientation-locker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
+import { AppColors } from '../../styles/colors';
+import { AppFontSize } from '../../styles/sharedstyles';
 import AppText from '../texts/AppText';
 import Player, { PlayerHandle } from './Player';
 
 /* Same colors as the live viewer */
 const C = {
-  bg: '#000000',
-  accent: '#E34A42',
-  white: '#FFFFFF',
-  playCircle: 'rgba(245,245,245,0.25)',
-  track: 'rgba(239,239,239,0.33)',
-  buffered: 'rgba(239,239,239,0.55)',
-  menu: '#1C1C1C',
-  muted: '#C4C4C4',
+  bg: AppColors.black,
+  accent: AppColors.primary,
+  white: AppColors.white,
+  playCircle: AppColors.mediaButton,
+  track: AppColors.mediaTrack,
+  buffered: AppColors.mediaBuffered,
+  menu: AppColors.sheet,
+  muted: AppColors.textSecondary,
 };
 
 const CONTROLS_HIDE_MS = 3000;
@@ -316,7 +318,7 @@ const LessonPlayer = ({
           height: scale(32),
           paddingHorizontal: scale(12),
           borderRadius: 99,
-          backgroundColor: 'rgba(0,0,0,0.55)',
+          backgroundColor: AppColors.scrim,
           flexDirection: 'row',
           alignItems: 'center',
           gap: scale(5),
@@ -387,7 +389,7 @@ const LessonPlayer = ({
 
         menuBackdrop: {
           ...StyleSheet.absoluteFillObject,
-          backgroundColor: 'rgba(0,0,0,0.55)',
+          backgroundColor: AppColors.scrim,
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -458,7 +460,7 @@ const LessonPlayer = ({
           </TouchableOpacity>
           <AppText
             fontWeight="medium"
-            fontSize={16}
+            fontSize={AppFontSize.subtitle}
             numberOfLines={1}
             style={[styles.topTitle, styles.shadow]}
           >
@@ -529,7 +531,11 @@ const LessonPlayer = ({
             size={ic(14)}
             color={C.white}
           />
-          <AppText fontSize={14} fontWeight="medium" style={styles.white}>
+          <AppText
+            fontSize={AppFontSize.body}
+            fontWeight="medium"
+            style={styles.white}
+          >
             {skipInfo.dir < 0 ? '-' : '+'}
             {skipInfo.sec} วิ
           </AppText>
@@ -579,7 +585,10 @@ const LessonPlayer = ({
                 style={styles.shadow}
               />
             </TouchableOpacity>
-            <AppText fontSize={12} style={[styles.white, styles.shadow]}>
+            <AppText
+              fontSize={AppFontSize.caption}
+              style={[styles.white, styles.shadow]}
+            >
               {formatTime(shownTime)} / {formatTime(duration)}
             </AppText>
 
@@ -596,7 +605,10 @@ const LessonPlayer = ({
                 color={C.white}
                 style={styles.shadow}
               />
-              <AppText fontSize={12} style={[styles.white, styles.shadow]}>
+              <AppText
+                fontSize={AppFontSize.caption}
+                style={[styles.white, styles.shadow]}
+              >
                 {qualityLabel}
               </AppText>
             </TouchableOpacity>
@@ -627,7 +639,7 @@ const LessonPlayer = ({
           }}
         >
           <Pressable style={styles.menuCard} onPress={() => {}}>
-            <AppText fontSize={12} style={styles.menuTitle}>
+            <AppText fontSize={AppFontSize.caption} style={styles.menuTitle}>
               ความละเอียด
             </AppText>
             {[null, ...qualities].map(q => {
@@ -643,7 +655,7 @@ const LessonPlayer = ({
                   }}
                 >
                   <AppText
-                    fontSize={16}
+                    fontSize={AppFontSize.subtitle}
                     fontWeight={active ? 'medium' : 'regular'}
                     style={styles.white}
                   >

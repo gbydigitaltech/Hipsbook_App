@@ -503,7 +503,6 @@ export default function ProfileEditInfoScreen() {
               fontSize={AppFontSize.subtitle}
               onPress={handleSubmit(onSubmit)}
               containerStyle={styles.button}
-              loading={isBusy}
               disabled={isBusy}
               contentStyle={styles.buttonContent}
             />

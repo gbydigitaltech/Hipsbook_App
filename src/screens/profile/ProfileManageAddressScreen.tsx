@@ -347,7 +347,6 @@ const ProfileManageAddressScreen = () => {
               />
             </View>
           </View>
-
         </View>
       </AppScrollView>
 
@@ -368,13 +367,11 @@ const ProfileManageAddressScreen = () => {
           contentStyle={styles.buttonContent}
           fontSize={AppFontSize.subtitle}
           onPress={handleSubmit(onSubmit)}
-          loading={submitLoading}
           disabled={busy}
         />
       </View>
 
       <AppLoadingOverlay
-        key={loadingMode}
         visible={loadingMode !== 'idle'}
         message={overlayMessage}
       />

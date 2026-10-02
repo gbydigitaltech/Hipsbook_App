@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   AppState,
   FlatList,
   RefreshControl,
@@ -15,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AppSpinner from '../loading/AppSpinner';
 import LinearGradient from 'react-native-linear-gradient';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
@@ -335,7 +335,7 @@ const StreamSection = () => {
 
       {loadingStreams ? (
         <View style={styles.loadingRow}>
-          <ActivityIndicator size="small" color={AppColors.primary} />
+          <AppSpinner size="small" />
         </View>
       ) : liveStreams.length > 0 ? (
         <>
@@ -355,6 +355,9 @@ const StreamSection = () => {
               <RefreshControl
                 refreshing={loadingStreams}
                 onRefresh={fetchStreams}
+                tintColor={AppColors.primary}
+                colors={[AppColors.primary]}
+                progressBackgroundColor={AppColors.sheet}
               />
             }
           />

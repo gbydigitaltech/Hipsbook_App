@@ -7,7 +7,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import AppSpinner from '../loading/AppSpinner';
 import Video, { SelectedVideoTrackType, VideoRef } from 'react-native-video';
 import { log, logWarn } from '../../helpers/logger';
 import { useVideoAccess } from '../../hooks/videos/useVideoAccess';
@@ -239,7 +240,7 @@ const Player = forwardRef<PlayerHandle, PlayerProps>(function Player(
 
         {showBuffering && (
           <View style={styles.overlay} pointerEvents="none">
-            <ActivityIndicator size="large" color={AppColors.primary} />
+            <AppSpinner size="large" />
           </View>
         )}
 
@@ -264,14 +265,14 @@ const Player = forwardRef<PlayerHandle, PlayerProps>(function Player(
 });
 
 const styles = StyleSheet.create({
-  container: { width: '100%', backgroundColor: '#000' },
+  container: { width: '100%', backgroundColor: AppColors.black },
   // Live: fill the parent, no OS controls (UI is drawn in LiveViewer)
-  containerFill: { flex: 1, width: '100%', backgroundColor: '#000' },
-  videoBoxFill: { flex: 1, width: '100%', backgroundColor: '#000' },
+  containerFill: { flex: 1, width: '100%', backgroundColor: AppColors.black },
+  videoBoxFill: { flex: 1, width: '100%', backgroundColor: AppColors.black },
   videoBox: {
     width: '100%',
     aspectRatio: 16 / 9,
-    backgroundColor: '#000',
+    backgroundColor: AppColors.black,
     overflow: 'hidden',
   },
   video: { ...StyleSheet.absoluteFillObject },

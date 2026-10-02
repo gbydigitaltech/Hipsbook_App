@@ -23,6 +23,7 @@ import {
   iosSafeTop,
   sharedPaddingHorizontal,
 } from '../../styles/sharedstyles';
+import { AppColors } from '../../styles/colors';
 import { AppStackParamList } from '../../types/data/navigation/navigation.types';
 import ClassroomHeader, { ClassroomTabKey } from './components/ClassroomHeader';
 import CourseAboutSheet from './components/CourseAboutSheet';
@@ -382,7 +383,7 @@ const ClassroomScreen = () => {
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        rootView: { flex: 1, backgroundColor: '#000000' },
+        rootView: { flex: 1, backgroundColor: AppColors.black },
         hidden: { display: 'none' },
         contentTab: {
           paddingHorizontal: scale(sharedPaddingHorizontal),

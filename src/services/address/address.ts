@@ -3,7 +3,7 @@ import {
   ProvinceListResponse,
   SubdistrictListResponse,
 } from '../../types/data/address/address.types';
-import { privateApi, request } from '../http';
+import { publicApi, request } from '../http';
 
 const toNum = (v: string | number, fieldName = 'ID'): number => {
   const n = Number(v);
@@ -16,7 +16,7 @@ const toNum = (v: string | number, fieldName = 'ID'): number => {
 export const apiGetProvinces = (
   signal?: AbortSignal,
 ): Promise<ProvinceListResponse> => {
-  return request(privateApi.post('/backoffice/province', {}, { signal }));
+  return request(publicApi.post('/backoffice/province', {}, { signal }));
 };
 
 export const apiGetDistrictsByProvince = (
@@ -26,7 +26,12 @@ export const apiGetDistrictsByProvince = (
   const pid = toNum(provinceId, 'province ID');
 
   return request(
-    privateApi.post('/backoffice/district', { province: pid }, { signal }),
+    publicApi.post(
+      '/backoffice/district',
+      // API expects a string id, e.g. "94"
+      { province: String(pid) },
+      { signal },
+    ),
   );
 };
 
@@ -37,6 +42,11 @@ export const apiGetSubdistrictsByDistrict = (
   const did = toNum(districtId, 'district ID');
 
   return request(
-    privateApi.post('/backoffice/subdistrict', { district: did }, { signal }),
+    publicApi.post(
+      '/backoffice/subdistrict',
+      // API expects a string id, e.g. "9410"
+      { district: String(did) },
+      { signal },
+    ),
   );
 };

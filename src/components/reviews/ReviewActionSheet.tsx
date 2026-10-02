@@ -56,7 +56,7 @@ const ReviewActionSheet: React.FC<Props> = ({
   visible,
   onClose,
   title = 'แชร์ประสบการณ์การเรียนรู้ของคุณ',
-  placeholder = 'แสดงความคิดเห็น...',
+  placeholder = 'แสดงความคิดเห็น (ไม่บังคับ)',
   disabled = false,
   fontSize = IS_TABLET ? 20 : 16,
   fontWeight = 'regular',
@@ -65,8 +65,8 @@ const ReviewActionSheet: React.FC<Props> = ({
   onPressBack,
   onPressSubmit,
   showRating = true,
-  requireRating = false,
-  requireText = true,
+  requireRating = true,
+  requireText = false,
   submitLabel = 'เขียนรีวิว',
 }) => {
   const { scale, verticalScale, responsiveRadius, moderateScale } =

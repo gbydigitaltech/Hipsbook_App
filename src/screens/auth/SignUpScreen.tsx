@@ -214,300 +214,302 @@ const SignUpScreen = () => {
 
       <AppSafeView style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.flex1}>
-          <KeyboardAwareScrollView
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.scrollContent}
-            enableOnAndroid
-            enableAutomaticScroll
-            extraScrollHeight={20}
-            extraHeight={120}
-            keyboardOpeningTime={250}
-          >
-            <AppScreenHeader />
-
-            <Image
-              source={IMAGES.appLogoFull}
-              style={styles.appLogo}
-              resizeMode="contain"
-            />
-
-            <AppText
-              fontSize={AppFontSize.h1}
-              fontWeight="semiBold"
-              style={styles.title}
+          <View style={styles.flex1}>
+            <KeyboardAwareScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.scrollContent}
+              enableOnAndroid
+              enableAutomaticScroll
+              extraScrollHeight={20}
+              extraHeight={120}
+              keyboardOpeningTime={250}
             >
-              สมัครสมาชิก
+              <AppScreenHeader />
+
+              <Image
+                source={IMAGES.appLogoFull}
+                style={styles.appLogo}
+                resizeMode="contain"
+              />
+
               <AppText
                 fontSize={AppFontSize.h1}
                 fontWeight="semiBold"
-                style={styles.brandText}
+                style={styles.title}
               >
-                {' '}
-                HIPSBOOK
-              </AppText>
-            </AppText>
-
-            <AppText fontSize={AppFontSize.body} style={styles.lead}>
-              สร้างบัญชีเพื่อเริ่มเรียนคอร์สดนตรีของคุณ
-            </AppText>
-
-            <View style={styles.inputField}>
-              <AppTextInputController
-                control={control}
-                name="email"
-                label="อีเมล"
-                labelFontSize={IS_TABLET ? 20 : 16}
-                fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
-                placeholder="กรุณากรอกอีเมล"
-                inputProps={{
-                  inputWrapperStyle: {
-                    minHeight: verticalScale(IS_TABLET ? 64 : 54),
-                  },
-                  autoCapitalize: 'none',
-                  keyboardType: 'email-address',
-                  returnKeyType: 'next',
-                  onEndEditing: async (e: any) => {
-                    const value = e?.nativeEvent?.text?.trim() ?? '';
-                    if (value) await trigger('email');
-                    else clearErrors('email');
-                  },
-                }}
-              />
-
-              <AppTextInputController
-                control={control}
-                name="firstName"
-                label="ชื่อ"
-                labelFontSize={IS_TABLET ? 20 : 16}
-                fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
-                placeholder="กรุณากรอกชื่อ"
-                inputProps={{
-                  inputWrapperStyle: {
-                    minHeight: verticalScale(IS_TABLET ? 64 : 54),
-                  },
-                  returnKeyType: 'next',
-                }}
-              />
-
-              <AppTextInputController
-                control={control}
-                name="lastName"
-                label="นามสกุล"
-                labelFontSize={IS_TABLET ? 20 : 16}
-                fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
-                placeholder="กรุณากรอกนามสกุล"
-                inputProps={{
-                  inputWrapperStyle: {
-                    minHeight: verticalScale(IS_TABLET ? 64 : 54),
-                  },
-                  returnKeyType: 'next',
-                }}
-              />
-
-              <AppTextInputController
-                control={control}
-                name="phone"
-                label="เบอร์โทรศัพท์"
-                labelFontSize={IS_TABLET ? 20 : 16}
-                fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
-                placeholder="กรุณากรอกเบอร์โทรศัพท์"
-                inputProps={{
-                  inputWrapperStyle: {
-                    minHeight: verticalScale(IS_TABLET ? 64 : 54),
-                  },
-                  keyboardType: 'phone-pad',
-                  maxLength: 10,
-                  returnKeyType: 'next',
-                  onEndEditing: async (e: any) => {
-                    const value = e?.nativeEvent?.text?.trim() ?? '';
-                    if (value) await trigger('phone');
-                    else clearErrors('phone');
-                  },
-                }}
-              />
-
-              <TouchableOpacity
-                activeOpacity={1}
-                onPress={handleOpenBirthdayPicker}
-              >
-                <View pointerEvents="none">
-                  <AppTextInputController
-                    control={control}
-                    name="birthday"
-                    label="วันเกิด"
-                    labelFontSize={IS_TABLET ? 20 : 16}
-                    fontSize={AppFontSize.subtitle}
-                    errorFontSize={IS_TABLET ? 14 : 12}
-                    placeholder="เลือกวัน"
-                    formatValue={v => (typeof v === 'string' ? v : '')}
-                    inputProps={{
-                      inputWrapperStyle: {
-                        minHeight: verticalScale(IS_TABLET ? 64 : 54),
-                      },
-                      editable: false,
-                      rightIcon: <CalendarIcon size={IS_TABLET ? 24 : 20} />,
-                    }}
-                  />
-                </View>
-              </TouchableOpacity>
-
-              <DatePicker
-                modal
-                open={openDate}
-                date={safeDate}
-                mode="date"
-                locale="th"
-                confirmText="ยืนยัน"
-                cancelText="ยกเลิก"
-                maximumDate={todayEnd}
-                onConfirm={d => {
-                  setBirthdayFromDate(d);
-                  setOpenDate(false);
-                }}
-                onCancel={() => setOpenDate(false)}
-              />
-
-              <AppTextInputController
-                control={control}
-                name="password"
-                label="รหัสผ่าน"
-                labelFontSize={IS_TABLET ? 20 : 16}
-                fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
-                placeholder="กรุณากรอกรหัสผ่าน"
-                showErrorText={false}
-                inputProps={{
-                  inputWrapperStyle: {
-                    minHeight: verticalScale(IS_TABLET ? 64 : 54),
-                  },
-                  secureTextEntry: !showPassword,
-                  autoCapitalize: 'none',
-                  returnKeyType: 'next',
-                  rightIcon: showPassword ? (
-                    <ShowPasswordIcon size={IS_TABLET ? 24 : 20} />
-                  ) : (
-                    <HidePasswordIcon size={IS_TABLET ? 24 : 20} />
-                  ),
-                  onPressRightIcon: () => setShowPassword(s => !s),
-                  onChange: async (e: any) => {
-                    const text =
-                      typeof e === 'string' ? e : e?.nativeEvent?.text ?? '';
-                    setValue('password', text, { shouldDirty: true });
-                    if (text.trim()) await trigger('password');
-                    else clearErrors('password');
-                  },
-                }}
-              />
-
-              <AppText
-                fontSize={AppFontSize.caption}
-                fontWeight="regular"
-                style={{ color: helperColor, marginTop: verticalScale(4) }}
-              >
-                รหัสผ่านต้องมี 8 - 20 ตัวอักษร และประกอบด้วย a-z, A-Z และตัวเลข
-                0-9
+                สมัครสมาชิก
+                <AppText
+                  fontSize={AppFontSize.h1}
+                  fontWeight="semiBold"
+                  style={styles.brandText}
+                >
+                  {' '}
+                  HIPSBOOK
+                </AppText>
               </AppText>
 
-              <AppTextInputController
-                control={control}
-                name="confirmPassword"
-                label="ยืนยันรหัสผ่าน"
-                labelFontSize={IS_TABLET ? 20 : 16}
-                fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
-                placeholder="กรุณากรอกรหัสผ่าน"
-                inputProps={{
-                  inputWrapperStyle: {
-                    minHeight: verticalScale(IS_TABLET ? 64 : 54),
-                  },
-                  secureTextEntry: !showConfirmPassword,
-                  autoCapitalize: 'none',
-                  returnKeyType: 'done',
-                  rightIcon: showConfirmPassword ? (
-                    <ShowPasswordIcon size={IS_TABLET ? 24 : 20} />
-                  ) : (
-                    <HidePasswordIcon size={IS_TABLET ? 24 : 20} />
-                  ),
-                  onPressRightIcon: () => setShowConfirmPassword(s => !s),
-                  onEndEditing: async (e: any) => {
-                    const value = e?.nativeEvent?.text?.trim() ?? '';
-                    if (value) await trigger('confirmPassword');
-                    else clearErrors('confirmPassword');
-                  },
-                }}
-              />
+              <AppText fontSize={AppFontSize.body} style={styles.lead}>
+                สร้างบัญชีเพื่อเริ่มเรียนคอร์สดนตรีของคุณ
+              </AppText>
 
-              <View style={styles.checkBoxArea}>
-                <View>
-                  <AppCheckbox
-                    value={!!isChecked}
-                    onValueChange={async () => {
-                      if (!isChecked) {
-                        await openTermsModal();
-                        return;
-                      }
-                      setIsChecked(false);
-                    }}
-                    size={IS_TABLET ? 24 : 20}
-                  />
+              <View style={styles.inputField}>
+                <AppTextInputController
+                  control={control}
+                  name="email"
+                  label="อีเมล"
+                  labelFontSize={IS_TABLET ? 20 : 16}
+                  fontSize={AppFontSize.subtitle}
+                  errorFontSize={IS_TABLET ? 14 : 12}
+                  placeholder="กรุณากรอกอีเมล"
+                  inputProps={{
+                    inputWrapperStyle: {
+                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                    },
+                    autoCapitalize: 'none',
+                    keyboardType: 'email-address',
+                    returnKeyType: 'next',
+                    onEndEditing: async (e: any) => {
+                      const value = e?.nativeEvent?.text?.trim() ?? '';
+                      if (value) await trigger('email');
+                      else clearErrors('email');
+                    },
+                  }}
+                />
 
-                  {!isChecked && (
-                    <TouchableOpacity
-                      activeOpacity={PRESSED_OPACITY}
-                      onPress={openTermsModal}
-                      style={styles.checkOverlay}
+                <AppTextInputController
+                  control={control}
+                  name="firstName"
+                  label="ชื่อ"
+                  labelFontSize={IS_TABLET ? 20 : 16}
+                  fontSize={AppFontSize.subtitle}
+                  errorFontSize={IS_TABLET ? 14 : 12}
+                  placeholder="กรุณากรอกชื่อ"
+                  inputProps={{
+                    inputWrapperStyle: {
+                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                    },
+                    returnKeyType: 'next',
+                  }}
+                />
+
+                <AppTextInputController
+                  control={control}
+                  name="lastName"
+                  label="นามสกุล"
+                  labelFontSize={IS_TABLET ? 20 : 16}
+                  fontSize={AppFontSize.subtitle}
+                  errorFontSize={IS_TABLET ? 14 : 12}
+                  placeholder="กรุณากรอกนามสกุล"
+                  inputProps={{
+                    inputWrapperStyle: {
+                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                    },
+                    returnKeyType: 'next',
+                  }}
+                />
+
+                <AppTextInputController
+                  control={control}
+                  name="phone"
+                  label="เบอร์โทรศัพท์"
+                  labelFontSize={IS_TABLET ? 20 : 16}
+                  fontSize={AppFontSize.subtitle}
+                  errorFontSize={IS_TABLET ? 14 : 12}
+                  placeholder="กรุณากรอกเบอร์โทรศัพท์"
+                  inputProps={{
+                    inputWrapperStyle: {
+                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                    },
+                    keyboardType: 'phone-pad',
+                    maxLength: 10,
+                    returnKeyType: 'next',
+                    onEndEditing: async (e: any) => {
+                      const value = e?.nativeEvent?.text?.trim() ?? '';
+                      if (value) await trigger('phone');
+                      else clearErrors('phone');
+                    },
+                  }}
+                />
+
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={handleOpenBirthdayPicker}
+                >
+                  <View pointerEvents="none">
+                    <AppTextInputController
+                      control={control}
+                      name="birthday"
+                      label="วันเกิด"
+                      labelFontSize={IS_TABLET ? 20 : 16}
+                      fontSize={AppFontSize.subtitle}
+                      errorFontSize={IS_TABLET ? 14 : 12}
+                      placeholder="เลือกวัน"
+                      formatValue={v => (typeof v === 'string' ? v : '')}
+                      inputProps={{
+                        inputWrapperStyle: {
+                          minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                        },
+                        editable: false,
+                        rightIcon: <CalendarIcon size={IS_TABLET ? 24 : 20} />,
+                      }}
                     />
-                  )}
-                </View>
+                  </View>
+                </TouchableOpacity>
 
-                <View style={styles.termsTextWrap}>
-                  <AppText fontSize={AppFontSize.caption} style={styles.termsText}>
-                    การสมัครใช้งาน เราถือว่าคุณยอมรับ{' '}
+                <DatePicker
+                  modal
+                  open={openDate}
+                  date={safeDate}
+                  mode="date"
+                  locale="th"
+                  confirmText="ยืนยัน"
+                  cancelText="ยกเลิก"
+                  maximumDate={todayEnd}
+                  onConfirm={d => {
+                    setBirthdayFromDate(d);
+                    setOpenDate(false);
+                  }}
+                  onCancel={() => setOpenDate(false)}
+                />
+
+                <AppTextInputController
+                  control={control}
+                  name="password"
+                  label="รหัสผ่าน"
+                  labelFontSize={IS_TABLET ? 20 : 16}
+                  fontSize={AppFontSize.subtitle}
+                  errorFontSize={IS_TABLET ? 14 : 12}
+                  placeholder="กรุณากรอกรหัสผ่าน"
+                  showErrorText={false}
+                  inputProps={{
+                    inputWrapperStyle: {
+                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                    },
+                    secureTextEntry: !showPassword,
+                    autoCapitalize: 'none',
+                    returnKeyType: 'next',
+                    rightIcon: showPassword ? (
+                      <ShowPasswordIcon size={IS_TABLET ? 24 : 20} />
+                    ) : (
+                      <HidePasswordIcon size={IS_TABLET ? 24 : 20} />
+                    ),
+                    onPressRightIcon: () => setShowPassword(s => !s),
+                    onChange: async (e: any) => {
+                      const text =
+                        typeof e === 'string' ? e : e?.nativeEvent?.text ?? '';
+                      setValue('password', text, { shouldDirty: true });
+                      if (text.trim()) await trigger('password');
+                      else clearErrors('password');
+                    },
+                  }}
+                />
+
+                <AppText
+                  fontSize={AppFontSize.caption}
+                  fontWeight="regular"
+                  style={{ color: helperColor, marginTop: verticalScale(4) }}
+                >
+                  รหัสผ่านต้องมี 8 - 20 ตัวอักษร และประกอบด้วย a-z, A-Z
+                  และตัวเลข 0-9
+                </AppText>
+
+                <AppTextInputController
+                  control={control}
+                  name="confirmPassword"
+                  label="ยืนยันรหัสผ่าน"
+                  labelFontSize={IS_TABLET ? 20 : 16}
+                  fontSize={AppFontSize.subtitle}
+                  errorFontSize={IS_TABLET ? 14 : 12}
+                  placeholder="กรุณากรอกรหัสผ่าน"
+                  inputProps={{
+                    inputWrapperStyle: {
+                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                    },
+                    secureTextEntry: !showConfirmPassword,
+                    autoCapitalize: 'none',
+                    returnKeyType: 'done',
+                    rightIcon: showConfirmPassword ? (
+                      <ShowPasswordIcon size={IS_TABLET ? 24 : 20} />
+                    ) : (
+                      <HidePasswordIcon size={IS_TABLET ? 24 : 20} />
+                    ),
+                    onPressRightIcon: () => setShowConfirmPassword(s => !s),
+                    onEndEditing: async (e: any) => {
+                      const value = e?.nativeEvent?.text?.trim() ?? '';
+                      if (value) await trigger('confirmPassword');
+                      else clearErrors('confirmPassword');
+                    },
+                  }}
+                />
+
+                <View style={styles.checkBoxArea}>
+                  <View>
+                    <AppCheckbox
+                      value={!!isChecked}
+                      onValueChange={async () => {
+                        if (!isChecked) {
+                          await openTermsModal();
+                          return;
+                        }
+                        setIsChecked(false);
+                      }}
+                      size={IS_TABLET ? 24 : 20}
+                    />
+
+                    {!isChecked && (
+                      <TouchableOpacity
+                        activeOpacity={PRESSED_OPACITY}
+                        onPress={openTermsModal}
+                        style={styles.checkOverlay}
+                      />
+                    )}
+                  </View>
+
+                  <View style={styles.termsTextWrap}>
                     <AppText
                       fontSize={AppFontSize.caption}
-                      fontWeight="medium"
-                      style={styles.termsLink}
-                      accessibilityRole="link"
-                      onPress={openTermsModal}
+                      style={styles.termsText}
                     >
-                      ข้อกำหนดการใช้งาน
-                    </AppText>{' '}
-                    ของ Hipsbook แล้ว
-                  </AppText>
+                      การสมัครใช้งาน เราถือว่าคุณยอมรับ{' '}
+                      <AppText
+                        fontSize={AppFontSize.caption}
+                        fontWeight="medium"
+                        style={styles.termsLink}
+                        accessibilityRole="link"
+                        onPress={openTermsModal}
+                      >
+                        ข้อกำหนดการใช้งาน
+                      </AppText>{' '}
+                      ของ Hipsbook แล้ว
+                    </AppText>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            <View style={styles.buttonArea}>
-              <AppButton
-                title="สมัครสมาชิก"
-                fontSize={AppFontSize.subtitle}
-                loading={isSubmitting && !isValidating}
-                disabled={!isChecked}
-                onPress={handleSubmit(onSubmit)}
-                contentStyle={styles.button}
-              />
-            </View>
+              <View style={styles.buttonArea}>
+                <AppButton
+                  title="สมัครสมาชิก"
+                  fontSize={AppFontSize.subtitle}
+                  disabled={!isChecked || isSubmitting}
+                  onPress={handleSubmit(onSubmit)}
+                  contentStyle={styles.button}
+                />
+              </View>
 
-            <View style={styles.toSignIn}>
-              <AppText fontSize={AppFontSize.subtitle}>มีบัญชีแล้ว </AppText>
-              <AppText
-                onPress={() => navigation.navigate('SignIn')}
-                accessibilityRole="link"
-                style={{ color: AppColors.primary }}
-                fontSize={AppFontSize.subtitle}
-              >
-                เข้าสู่ระบบ
-              </AppText>
-            </View>
-          </KeyboardAwareScrollView>
-        </View>
+              <View style={styles.toSignIn}>
+                <AppText fontSize={AppFontSize.subtitle}>มีบัญชีแล้ว </AppText>
+                <AppText
+                  onPress={() => navigation.navigate('SignIn')}
+                  accessibilityRole="link"
+                  style={{ color: AppColors.primary }}
+                  fontSize={AppFontSize.subtitle}
+                >
+                  เข้าสู่ระบบ
+                </AppText>
+              </View>
+            </KeyboardAwareScrollView>
+          </View>
         </TouchableWithoutFeedback>
 
         <TermsModal

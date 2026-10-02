@@ -7,7 +7,7 @@ import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { thaiSafeLineHeight } from '../../styles/sharedstyles';
+import { AppFontSize, thaiSafeLineHeight } from '../../styles/sharedstyles';
 import { AppTextProps } from '../../types/ui/texts/text.props';
 import AppText from '../texts/AppText';
 
@@ -23,7 +23,7 @@ interface Props {
 
 /**
  * Collapsible text block that clamps to `maxLines`, adds a bottom fade, and
- * shows an "อ่านเพิ่มเติม / ย่อข้อความ" toggle when the content overflows.
+ * shows a "แสดงเพิ่มเติม / แสดงน้อยลง" toggle when the content overflows.
  * Accepts either an `html` string (rendered via react-native-render-html) or
  * plain-text `children`.
  */
@@ -41,6 +41,7 @@ const ExpandableText: React.FC<Props> = ({
   const [fullHeight, setFullHeight] = useState(0);
 
   const { verticalScale, scale, moderateScale } = useResponsive();
+  const toggleFontSize = moderateScale(AppFontSize.body, 0.5);
 
   const scaledFontSize = moderateScale(fontSize, 0.5);
   const lineHeight = Math.round(scaledFontSize * 1.6);
@@ -99,16 +100,18 @@ const ExpandableText: React.FC<Props> = ({
           bottom: 0,
           height: lineHeight * 2,
         },
+        // Plain text link under the text (no background/border)
         toggleRow: {
           flexDirection: 'row',
           alignItems: 'center',
           alignSelf: 'center',
           gap: scale(4),
           marginTop: verticalScale(10),
+          paddingVertical: verticalScale(4),
         },
         toggleText: {
           color: AppColors.primary,
-          fontSize: scaledFontSize,
+          fontSize: toggleFontSize,
         },
         text: {
           fontSize: scaledFontSize,
@@ -122,6 +125,7 @@ const ExpandableText: React.FC<Props> = ({
       lineHeight,
       isExpanded,
       collapsedHeight,
+      toggleFontSize,
     ],
   );
 
@@ -178,16 +182,17 @@ const ExpandableText: React.FC<Props> = ({
 
   const renderToggle = () => (
     <Pressable
-      style={styles.toggleRow}
+      style={({ pressed }) => [styles.toggleRow, pressed && { opacity: 0.7 }]}
       onPress={() => setIsExpanded(p => !p)}
       hitSlop={8}
+      accessibilityRole="button"
     >
-      <AppText style={styles.toggleText}>
-        {isExpanded ? 'ย่อข้อความ' : 'อ่านเพิ่มเติม'}
+      <AppText style={styles.toggleText} fontWeight="medium">
+        {isExpanded ? 'แสดงน้อยลง' : 'แสดงเพิ่มเติม'}
       </AppText>
       <Ionicons
         name={isExpanded ? 'chevron-up' : 'chevron-down'}
-        size={Math.round(scaledFontSize + 2)}
+        size={Math.round(toggleFontSize + 2)}
         color={AppColors.primary}
       />
     </Pressable>

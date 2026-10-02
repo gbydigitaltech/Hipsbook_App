@@ -763,7 +763,7 @@ const CourseDetailScreen = () => {
                         contentWidth={width - scale(64)}
                         fontSize={AppFontSize.subtitle}
                         maxLines={7}
-                        fadeColors={['rgba(27,27,27,0)', 'rgba(27,27,27,0.98)']}
+                        fadeColors={['rgba(31,31,31,0)', 'rgba(31,31,31,1)']}
                       />
                     </View>
                   ) : (

@@ -191,7 +191,9 @@ const ThreadRow: React.FC<{
                 <RatingIcon
                   key={i}
                   size={IS_TABLET ? 20 : 16}
-                  color={i < filledCount ? '#F4A700' : '#D9D9D9'}
+                  color={
+                    i < filledCount ? AppColors.rating : AppColors.ratingEmpty
+                  }
                 />
               ))}
             </View>

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 import {
   Animated,
   Dimensions,
@@ -16,6 +17,7 @@ import AppText from '../../components/texts/AppText';
 import { IS_IOS, IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { useCourseFilter } from '../../hooks/course/useCourseFilter';
+import CategoryIconBadge from '../../components/category/CategoryIconBadge';
 import { AppColors } from '../../styles/colors';
 import {
   AppFontSize,
@@ -168,35 +170,6 @@ const CourseFilterModal: React.FC<Props> = ({ visible, onClose, onApply }) => {
           flexWrap: 'wrap',
           gap: scale(10),
         },
-        tabBar: {
-          marginTop: verticalScale(12),
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderBottomColor: AppColors.border,
-        },
-        tabBarContent: {
-          gap: scale(22),
-          paddingRight: scale(8),
-        },
-        tabItem: {
-          alignItems: 'center',
-          paddingTop: verticalScale(2),
-        },
-        tabText: {
-          color: AppColors.textSecondary,
-        },
-        tabTextActive: {
-          color: AppColors.white,
-        },
-        tabUnderline: {
-          marginTop: verticalScale(8),
-          height: verticalScale(3),
-          alignSelf: 'stretch',
-          borderRadius: responsiveRadius(AppRadius.pill),
-          backgroundColor: 'transparent',
-        },
-        tabUnderlineActive: {
-          backgroundColor: AppColors.primary,
-        },
         chip: {
           flexDirection: 'row',
           alignItems: 'center',
@@ -207,6 +180,48 @@ const CourseFilterModal: React.FC<Props> = ({ visible, onClose, onApply }) => {
           backgroundColor: AppColors.surface,
           borderWidth: 1,
           borderColor: AppColors.border,
+        },
+        subPanel: {
+          marginTop: verticalScale(12),
+          padding: scale(12),
+          borderRadius: responsiveRadius(AppRadius.md),
+          backgroundColor: AppColors.surfaceSubtle,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: AppColors.border,
+        },
+        subPanelTitle: {
+          color: AppColors.textTertiary,
+        },
+        subPanelTitleStrong: {
+          color: AppColors.textPrimary,
+        },
+        subChips: {
+          marginTop: verticalScale(10),
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: scale(8),
+        },
+        // Lighter than the main type chips: outline style
+        subChip: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: scale(4),
+          paddingHorizontal: scale(12),
+          paddingVertical: verticalScale(6),
+          borderRadius: responsiveRadius(AppRadius.pill),
+          borderWidth: 1,
+          borderColor: AppColors.borderStrong,
+        },
+        subChipSelected: {
+          borderColor: AppColors.primary,
+          backgroundColor: AppColors.surfaceActive,
+        },
+        subChipTextSelected: {
+          color: AppColors.primary,
+        },
+        // Icon chips: badge near the left edge, same height as text chips
+        chipWithIcon: {
+          paddingLeft: scale(12),
         },
         chipSelected: {
           backgroundColor: AppColors.primary,
@@ -326,124 +341,132 @@ const CourseFilterModal: React.FC<Props> = ({ visible, onClose, onApply }) => {
                 ประเภทคอร์ส
               </AppText>
 
-              <View style={styles.tabBar}>
-                <ScrollView
-                  horizontal
-                  bounces={false}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.tabBarContent}
+              <View style={styles.submenuContainer}>
+                <TouchableOpacity
+                  activeOpacity={PRESSED_OPACITY}
+                  style={[
+                    styles.chip,
+                    selectedMenuId === null && styles.chipSelected,
+                  ]}
+                  onPress={resetCourseType}
                 >
-                  <TouchableOpacity
-                    activeOpacity={PRESSED_OPACITY}
-                    style={styles.tabItem}
-                    onPress={resetCourseType}
+                  <AppText
+                    fontSize={AppFontSize.body}
+                    fontWeight="medium"
+                    style={
+                      selectedMenuId === null
+                        ? styles.chipTextSelected
+                        : styles.chipText
+                    }
                   >
-                    <AppText
-                      fontSize={AppFontSize.body}
-                      fontWeight={
-                        selectedMenuId === null ? 'semiBold' : 'medium'
-                      }
-                      style={
-                        selectedMenuId === null
-                          ? styles.tabTextActive
-                          : styles.tabText
+                    ทั้งหมด
+                  </AppText>
+                </TouchableOpacity>
+
+                {filterData?.menu?.map(menu => {
+                  const hasSubmenu = !!menu.submenu && menu.submenu.length > 0;
+                  const selected = isMenuSelected(menu.id);
+
+                  return (
+                    <TouchableOpacity
+                      key={menu.id}
+                      activeOpacity={PRESSED_OPACITY}
+                      style={[
+                        styles.chip,
+                        styles.chipWithIcon,
+                        selected && styles.chipSelected,
+                      ]}
+                      onPress={() =>
+                        hasSubmenu
+                          ? handleSubmenuPress(menu.id, null)
+                          : handleMenuPress(menu.id, false)
                       }
                     >
-                      ทั้งหมด
-                    </AppText>
-                    <View
-                      style={[
-                        styles.tabUnderline,
-                        selectedMenuId === null && styles.tabUnderlineActive,
-                      ]}
-                    />
-                  </TouchableOpacity>
-
-                  {filterData?.menu?.map(menu => {
-                    const hasSubmenu =
-                      !!menu.submenu && menu.submenu.length > 0;
-                    const selected = isMenuSelected(menu.id);
-
-                    return (
-                      <TouchableOpacity
-                        key={menu.id}
-                        activeOpacity={PRESSED_OPACITY}
-                        style={styles.tabItem}
-                        onPress={() =>
-                          hasSubmenu
-                            ? handleSubmenuPress(menu.id, null)
-                            : handleMenuPress(menu.id, false)
+                      <CategoryIconBadge
+                        uri={menu.icon}
+                        categoryId={menu.id}
+                        size={18}
+                        selected={selected}
+                      />
+                      <AppText
+                        fontSize={AppFontSize.body}
+                        fontWeight="medium"
+                        style={
+                          selected ? styles.chipTextSelected : styles.chipText
                         }
                       >
-                        <AppText
-                          fontSize={AppFontSize.body}
-                          fontWeight={selected ? 'semiBold' : 'medium'}
-                          style={
-                            selected ? styles.tabTextActive : styles.tabText
-                          }
-                        >
-                          {menu.label}
-                        </AppText>
-                        <View
-                          style={[
-                            styles.tabUnderline,
-                            selected && styles.tabUnderlineActive,
-                          ]}
-                        />
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
+                        {menu.label}
+                      </AppText>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
 
+              {/* Sub-types of the selected type: grouped in a panel so it's
+                  clear they belong to that type (lighter chips than the main row) */}
               {!!selectedMenu && selectedSubmenu.length > 0 && (
-                <View style={styles.submenuContainer}>
-                  <TouchableOpacity
-                    activeOpacity={PRESSED_OPACITY}
-                    style={[
-                      styles.chip,
-                      isSubmenuSelected(selectedMenu.id, null) &&
-                        styles.chipSelected,
-                    ]}
-                    onPress={() => handleSubmenuPress(selectedMenu.id, null)}
+                <View style={styles.subPanel}>
+                  <AppText
+                    fontSize={AppFontSize.caption}
+                    style={styles.subPanelTitle}
                   >
+                    หมวดย่อยใน{' '}
                     <AppText
-                      fontSize={AppFontSize.body}
-                      fontWeight="medium"
-                      style={
-                        isSubmenuSelected(selectedMenu.id, null)
-                          ? styles.chipTextSelected
-                          : styles.chipText
-                      }
+                      fontSize={AppFontSize.caption}
+                      fontWeight="semiBold"
+                      style={styles.subPanelTitleStrong}
                     >
-                      ทั้งหมด
+                      {selectedMenu.label}
                     </AppText>
-                  </TouchableOpacity>
+                  </AppText>
 
-                  {selectedSubmenu.map(sub => {
-                    const selected = isSubmenuSelected(selectedMenu.id, sub.id);
+                  <View style={styles.subChips}>
+                    {[
+                      { id: null as string | null, label: 'ทั้งหมด' },
+                      ...selectedSubmenu.map(sub => ({
+                        id: sub.id as string | null,
+                        label: sub.label,
+                      })),
+                    ].map(sub => {
+                      const selected = isSubmenuSelected(
+                        selectedMenu.id,
+                        sub.id,
+                      );
 
-                    return (
-                      <TouchableOpacity
-                        key={sub.id}
-                        activeOpacity={PRESSED_OPACITY}
-                        style={[styles.chip, selected && styles.chipSelected]}
-                        onPress={() =>
-                          handleSubmenuPress(selectedMenu.id, sub.id)
-                        }
-                      >
-                        <AppText
-                          fontSize={AppFontSize.body}
-                          fontWeight="medium"
-                          style={
-                            selected ? styles.chipTextSelected : styles.chipText
+                      return (
+                        <TouchableOpacity
+                          key={sub.id ?? 'all'}
+                          activeOpacity={PRESSED_OPACITY}
+                          style={[
+                            styles.subChip,
+                            selected && styles.subChipSelected,
+                          ]}
+                          onPress={() =>
+                            handleSubmenuPress(selectedMenu.id, sub.id)
                           }
                         >
-                          {sub.label}
-                        </AppText>
-                      </TouchableOpacity>
-                    );
-                  })}
+                          {selected && (
+                            <Ionicons
+                              name="checkmark"
+                              size={scale(14)}
+                              color={AppColors.primary}
+                            />
+                          )}
+                          <AppText
+                            fontSize={AppFontSize.caption}
+                            fontWeight="medium"
+                            style={
+                              selected
+                                ? styles.subChipTextSelected
+                                : styles.chipText
+                            }
+                          >
+                            {sub.label}
+                          </AppText>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 </View>
               )}
 

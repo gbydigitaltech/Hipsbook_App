@@ -25,7 +25,7 @@ import AppScrollView from '../../components/views/AppScrollView';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { useBanner } from '../../hooks/banner/useBanner';
-import { useRecommendedCourses } from '../../hooks/course/useRecommendedCourses';
+import { useRecommendedCoursesByCategory } from '../../hooks/course/useRecommendedCoursesByCategory';
 import { useWhitelist } from '../../hooks/course/useWhitelist';
 import { useUpdateLibraryStatus } from '../../hooks/library/useUpdateLibraryStatus';
 import { useOrderCheckout } from '../../hooks/orders/useOrderCheckout';
@@ -55,14 +55,25 @@ type HomeNavigationProp = CompositeNavigationProp<
   HomeStackNavProp
 >;
 
-const HITSONG_CATEGORY_ID = 'd8d7d43b-1ce0-42d2-b68b-006762a7a8c0';
-const MUSIC_CATEGORY_ID = '4627985a-c645-4cda-ab04-edb774485a5d';
-const FOOD_CATEGORY_ID = '593f72b4-e6df-4a65-9bbe-86f0b495690c';
-const GENERAL_SUBJECT_CATEGORY_ID = '30982c38-59ad-41fd-b4d1-70483443cc98';
-const SHORT_COURSE_CATEGORY_ID = '8fa21636-24ed-4ef3-828c-ad3bade07ef9';
-const MUSIC_DEV_CATEGORY_ID = '04712b55-5a76-4fde-8852-9587270e9e19';
-const MASTERCLASS_CATEGORY_ID = '050ee12f-9645-4833-95e6-dcbcae06c346';
-const MELODEON_CATEGORY_ID = '7be46a6d-3153-4759-ac40-7acac1ef7843';
+/**
+ * Categories requested for the home sections. Section titles, icons and
+ * order all come from the API response.
+ */
+const HOME_CATEGORY_IDS = [
+  '593f72b4-e6df-4a65-9bbe-86f0b495690c',
+  '4627985a-c645-4cda-ab04-edb774485a5d',
+  'd8d7d43b-1ce0-42d2-b68b-006762a7a8c0',
+  '8fa21636-24ed-4ef3-828c-ad3bade07ef9',
+  '30982c38-59ad-41fd-b4d1-70483443cc98',
+  '04712b55-5a76-4fde-8852-9587270e9e19',
+  '050ee12f-9645-4833-95e6-dcbcae06c346',
+  '7be46a6d-3153-4759-ac40-7acac1ef7843',
+  '10b02053-6a88-4e2c-9b7e-f8a68fae9b49',
+];
+const HOME_COURSES_PER_CATEGORY = 6;
+
+/** Skeleton sections shown before the first response arrives */
+const SKELETON_SECTIONS = 3;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -118,61 +129,6 @@ const HomeScreen = () => {
     [bannerPairs],
   );
 
-  const hitsongFilters = useMemo(
-    () => ({
-      category: HITSONG_CATEGORY_ID,
-      limit: 10,
-    }),
-    [],
-  );
-
-  const musicFilters = useMemo(
-    () => ({
-      category: MUSIC_CATEGORY_ID,
-      limit: 10,
-    }),
-    [],
-  );
-
-  const foodFilters = useMemo(
-    () => ({
-      category: FOOD_CATEGORY_ID,
-      limit: 10,
-    }),
-    [],
-  );
-
-  const generalSubjectFilters = useMemo(
-    () => ({
-      category: GENERAL_SUBJECT_CATEGORY_ID,
-      limit: 10,
-    }),
-    [],
-  );
-
-  const shortCourseFilters = useMemo(
-    () => ({
-      category: SHORT_COURSE_CATEGORY_ID,
-      limit: 10,
-    }),
-    [],
-  );
-
-  const musicDevFilters = useMemo(
-    () => ({ category: MUSIC_DEV_CATEGORY_ID, limit: 10 }),
-    [],
-  );
-
-  const masterclassFilters = useMemo(
-    () => ({ category: MASTERCLASS_CATEGORY_ID, limit: 10 }),
-    [],
-  );
-
-  const melodeonFilters = useMemo(
-    () => ({ category: MELODEON_CATEGORY_ID, limit: 10 }),
-    [],
-  );
-
   const handleCoursePress = useCallback(
     (course: SliderCourseItem) => {
       navigation.navigate('CourseDetail', { id: course.id });
@@ -197,67 +153,25 @@ const HomeScreen = () => {
     [navigation],
   );
 
-  /** Quick shortcuts to each category's course list. */
+  // All home sections in ONE request (list-by-category)
+  const { sections, loading: isRecommendLoading } =
+    useRecommendedCoursesByCategory({
+      categories: HOME_CATEGORY_IDS,
+      limit: HOME_COURSES_PER_CATEGORY,
+      onCoursePress: handleCoursePress,
+    });
+
+  /** Quick shortcuts to each category's course list (from the API) */
   const quickNavItems = useMemo<QuickNavItem[]>(
-    () => [
-      {
-        key: 'hitsong',
-        label: 'Hitsong',
-        icon: 'flame-outline',
-        onPress: () => handleSeeAllCourses(HITSONG_CATEGORY_ID, 'Hitsong'),
-      },
-      {
-        key: 'music',
-        label: 'ดนตรี',
-        icon: 'musical-notes-outline',
-        onPress: () => handleSeeAllCourses(MUSIC_CATEGORY_ID, 'ดนตรี'),
-      },
-      {
-        key: 'food',
-        label: 'อาหาร',
-        icon: 'restaurant-outline',
-        onPress: () => handleSeeAllCourses(FOOD_CATEGORY_ID, 'อาหาร'),
-      },
-      {
-        key: 'general',
-        label: 'วิชาเรียนทั่วไป',
-        icon: 'school-outline',
-        onPress: () =>
-          handleSeeAllCourses(GENERAL_SUBJECT_CATEGORY_ID, 'วิชาเรียนทั่วไป'),
-      },
-      {
-        key: 'short',
-        label: 'หลักสูตรระยะสั้น',
-        icon: 'time-outline',
-        onPress: () =>
-          handleSeeAllCourses(SHORT_COURSE_CATEGORY_ID, 'หลักสูตรระยะสั้น'),
-      },
-      {
-        key: 'musicDev',
-        label: 'ศูนย์ส่งเสริมพัฒนาดนตรี',
-        icon: 'headset-outline',
-        onPress: () =>
-          handleSeeAllCourses(
-            MUSIC_DEV_CATEGORY_ID,
-            'ศูนย์ส่งเสริมพัฒนาดนตรี',
-          ),
-      },
-      {
-        key: 'masterclass',
-        label: 'Masterclass',
-        icon: 'ribbon-outline',
-        onPress: () =>
-          handleSeeAllCourses(MASTERCLASS_CATEGORY_ID, 'Masterclass'),
-      },
-      {
-        key: 'melodeon',
-        label: 'สมาคมเมโลเดียน',
-        icon: 'people-outline',
-        onPress: () =>
-          handleSeeAllCourses(MELODEON_CATEGORY_ID, 'สมาคมเมโลเดียน'),
-      },
-    ],
-    [handleSeeAllCourses],
+    () =>
+      sections.map(section => ({
+        key: section.id,
+        label: section.label,
+        // API icon; CategoryIconBadge picks a fallback when it's null
+        iconUri: section.icon,
+        onPress: () => handleSeeAllCourses(section.id, section.label),
+      })),
+    [sections, handleSeeAllCourses],
   );
 
   const handleToggleWhitelist = useCallback(
@@ -350,70 +264,6 @@ const HomeScreen = () => {
     });
   }, []);
 
-  const {
-    recommendedCourses: rawHitsongCourses,
-    loadingRecommendedCourses: isHitsongLoading,
-  } = useRecommendedCourses({
-    onCoursePress: handleCoursePress,
-    filters: hitsongFilters,
-  });
-
-  const {
-    recommendedCourses: rawMusicCourses,
-    loadingRecommendedCourses: isMusicLoading,
-  } = useRecommendedCourses({
-    onCoursePress: handleCoursePress,
-    filters: musicFilters,
-  });
-
-  const {
-    recommendedCourses: rawFoodCourses,
-    loadingRecommendedCourses: isFoodLoading,
-  } = useRecommendedCourses({
-    onCoursePress: handleCoursePress,
-    filters: foodFilters,
-  });
-
-  const {
-    recommendedCourses: rawGeneralSubjectCourses,
-    loadingRecommendedCourses: isGeneralSubjectLoading,
-  } = useRecommendedCourses({
-    onCoursePress: handleCoursePress,
-    filters: generalSubjectFilters,
-  });
-
-  const {
-    recommendedCourses: rawShortCourseCourses,
-    loadingRecommendedCourses: isShortCourseLoading,
-  } = useRecommendedCourses({
-    onCoursePress: handleCoursePress,
-    filters: shortCourseFilters,
-  });
-
-  const {
-    recommendedCourses: rawMusicDevCourses,
-    loadingRecommendedCourses: isMusicDevLoading,
-  } = useRecommendedCourses({
-    onCoursePress: handleCoursePress,
-    filters: musicDevFilters,
-  });
-
-  const {
-    recommendedCourses: rawMasterclassCourses,
-    loadingRecommendedCourses: isMasterclassLoading,
-  } = useRecommendedCourses({
-    onCoursePress: handleCoursePress,
-    filters: masterclassFilters,
-  });
-
-  const {
-    recommendedCourses: rawMelodeonCourses,
-    loadingRecommendedCourses: isMelodeonLoading,
-  } = useRecommendedCourses({
-    onCoursePress: handleCoursePress,
-    filters: melodeonFilters,
-  });
-
   const attachCourseActions = useCallback(
     (courses: SliderCourseItem[]) =>
       courses.map(course => ({
@@ -456,44 +306,16 @@ const HomeScreen = () => {
     ],
   );
 
-  const hitsongCourses = useMemo(
-    () => attachCourseActions(rawHitsongCourses),
-    [attachCourseActions, rawHitsongCourses],
-  );
-
-  const musicCourses = useMemo(
-    () => attachCourseActions(rawMusicCourses),
-    [attachCourseActions, rawMusicCourses],
-  );
-
-  const foodCourses = useMemo(
-    () => attachCourseActions(rawFoodCourses),
-    [attachCourseActions, rawFoodCourses],
-  );
-
-  const generalSubjectCourses = useMemo(
-    () => attachCourseActions(rawGeneralSubjectCourses),
-    [attachCourseActions, rawGeneralSubjectCourses],
-  );
-
-  const shortCourseCourses = useMemo(
-    () => attachCourseActions(rawShortCourseCourses),
-    [attachCourseActions, rawShortCourseCourses],
-  );
-
-  const musicDevCourses = useMemo(
-    () => attachCourseActions(rawMusicDevCourses),
-    [attachCourseActions, rawMusicDevCourses],
-  );
-
-  const masterclassCourses = useMemo(
-    () => attachCourseActions(rawMasterclassCourses),
-    [attachCourseActions, rawMasterclassCourses],
-  );
-
-  const melodeonCourses = useMemo(
-    () => attachCourseActions(rawMelodeonCourses),
-    [attachCourseActions, rawMelodeonCourses],
+  // Sections with their course actions attached; empty categories are hidden
+  const homeSections = useMemo(
+    () =>
+      sections
+        .filter(section => section.courses.length > 0)
+        .map(section => ({
+          ...section,
+          courses: attachCourseActions(section.courses),
+        })),
+    [sections, attachCourseActions],
   );
 
   useFocusEffect(
@@ -664,129 +486,35 @@ const HomeScreen = () => {
           <CategoryQuickNav items={quickNavItems} />
         </View>
 
-        <View style={styles.courseSection}>
-          <HomeCourseSection
-            title="อาหาร"
-            data={foodCourses}
-            variant="vertical"
-            useSectionHeader
-            loading={isFoodLoading}
-            skeletonCount={3}
-            onPressSeeAll={() => handleSeeAllCourses(FOOD_CATEGORY_ID, 'อาหาร')}
-            autoSlideInterval={5000}
-          />
-        </View>
-
-        <View style={styles.courseSection}>
-          <HomeCourseSection
-            title="ดนตรี"
-            data={musicCourses}
-            variant="vertical"
-            useSectionHeader
-            loading={isMusicLoading}
-            skeletonCount={3}
-            onPressSeeAll={() =>
-              handleSeeAllCourses(MUSIC_CATEGORY_ID, 'ดนตรี')
-            }
-            autoSlideInterval={5000}
-          />
-        </View>
-
-        <View style={styles.courseSection}>
-          <HomeCourseSection
-            title="Hitsong"
-            data={hitsongCourses}
-            variant="vertical"
-            useSectionHeader
-            loading={isHitsongLoading}
-            skeletonCount={3}
-            onPressSeeAll={() =>
-              handleSeeAllCourses(HITSONG_CATEGORY_ID, 'Hitsong')
-            }
-            autoSlideInterval={4500}
-          />
-        </View>
-
-        <View style={styles.courseSection}>
-          <HomeCourseSection
-            title="หลักสูตรระยะสั้น"
-            data={shortCourseCourses}
-            variant="vertical"
-            useSectionHeader
-            loading={isShortCourseLoading}
-            skeletonCount={3}
-            onPressSeeAll={() =>
-              handleSeeAllCourses(SHORT_COURSE_CATEGORY_ID, 'หลักสูตรระยะสั้น')
-            }
-            autoSlideInterval={5500}
-          />
-        </View>
-
-        <View style={styles.courseSection}>
-          <HomeCourseSection
-            title="วิชาเรียนทั่วไป"
-            data={generalSubjectCourses}
-            variant="vertical"
-            useSectionHeader
-            loading={isGeneralSubjectLoading}
-            skeletonCount={3}
-            onPressSeeAll={() =>
-              handleSeeAllCourses(
-                GENERAL_SUBJECT_CATEGORY_ID,
-                'วิชาเรียนทั่วไป',
-              )
-            }
-            autoSlideInterval={6500}
-          />
-        </View>
-
-        <View style={styles.courseSection}>
-          <HomeCourseSection
-            title="ศูนย์ส่งเสริมพัฒนาดนตรี"
-            data={musicDevCourses}
-            variant="vertical"
-            useSectionHeader
-            loading={isMusicDevLoading}
-            skeletonCount={3}
-            onPressSeeAll={() =>
-              handleSeeAllCourses(
-                MUSIC_DEV_CATEGORY_ID,
-                'ศูนย์ส่งเสริมพัฒนาดนตรี',
-              )
-            }
-            autoSlideInterval={6000}
-          />
-        </View>
-
-        <View style={styles.courseSection}>
-          <HomeCourseSection
-            title="Masterclass"
-            data={masterclassCourses}
-            variant="vertical"
-            useSectionHeader
-            loading={isMasterclassLoading}
-            skeletonCount={3}
-            onPressSeeAll={() =>
-              handleSeeAllCourses(MASTERCLASS_CATEGORY_ID, 'Masterclass')
-            }
-            autoSlideInterval={6000}
-          />
-        </View>
-
-        <View style={styles.courseSection}>
-          <HomeCourseSection
-            title="สมาคมเมโลเดียน"
-            data={melodeonCourses}
-            variant="vertical"
-            useSectionHeader
-            loading={isMelodeonLoading}
-            skeletonCount={3}
-            onPressSeeAll={() =>
-              handleSeeAllCourses(MELODEON_CATEGORY_ID, 'สมาคมเมโลเดียน')
-            }
-            autoSlideInterval={6000}
-          />
-        </View>
+        {isRecommendLoading
+          ? Array.from({ length: SKELETON_SECTIONS }, (_, i) => (
+              <View key={`skeleton-${i}`} style={styles.courseSection}>
+                <HomeCourseSection
+                  title=""
+                  data={[]}
+                  variant="vertical"
+                  useSectionHeader
+                  loading
+                  skeletonCount={3}
+                />
+              </View>
+            ))
+          : homeSections.map((section, index) => (
+              <View key={section.id} style={styles.courseSection}>
+                <HomeCourseSection
+                  title={section.label}
+                  data={section.courses}
+                  variant="vertical"
+                  useSectionHeader
+                  skeletonCount={3}
+                  onPressSeeAll={() =>
+                    handleSeeAllCourses(section.id, section.label)
+                  }
+                  // Slightly different timing per section so they don't slide in sync
+                  autoSlideInterval={4500 + (index % 4) * 500}
+                />
+              </View>
+            ))}
 
         <View style={styles.recommendedTeacherSection}>
           <AppSectionHeader

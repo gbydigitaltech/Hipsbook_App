@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Animated,
   AppState,
@@ -26,6 +25,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import AppSpinner from '../loading/AppSpinner';
 import {
   ApiVideoLiveStreamMethods,
   ApiVideoLiveStreamView,
@@ -38,7 +38,7 @@ import {
 import { IS_TABLET } from '../../constants/platform';
 import { logError } from '../../helpers/logger';
 import { useResponsive } from '../../helpers/responsive';
-import { AppColors } from '../../styles/colors';
+import { AppColors, LIVE_HEART_COLORS } from '../../styles/colors';
 import { AppFontSize } from '../../styles/sharedstyles';
 import { launchImageLibrary } from 'react-native-image-picker';
 import {
@@ -168,25 +168,25 @@ const AUDIENCE_OPTIONS: {
   { key: 'private', label: 'ส่วนตัว', api: 'Private' },
 ];
 
-/* Setup screen colors (per design) */
+/* Setup screen colors (Figma design mapped to the app theme) */
 const SC = {
-  bg: '#000000',
-  title: '#D9D9D9',
-  backCircle: 'rgba(217,217,217,0.1)',
-  field: 'rgba(255,255,255,0.1)',
-  placeholder: '#676767',
-  placeholder2: '#727272',
-  card: '#191919',
-  sub: '#848484',
-  hint: '#C4C4C4',
-  cam: '#8D8D8D',
-  dash: '#505050',
-  addTile: '#1D1D1D',
-  addDash: '#CECECE',
-  addIcon: '#878787',
-  ready: '#F4A700',
-  primary: '#0BBDBE',
-  toggleOff: 'rgba(153,153,153,0.3)',
+  bg: AppColors.black,
+  title: AppColors.textPrimary,
+  backCircle: AppColors.surface,
+  field: AppColors.backgroundInteractive,
+  placeholder: AppColors.textTertiary,
+  placeholder2: AppColors.textTertiary,
+  card: AppColors.cardBackground,
+  sub: AppColors.textTertiary,
+  hint: AppColors.textSecondary,
+  cam: AppColors.textTertiary,
+  dash: AppColors.borderStrong,
+  addTile: AppColors.cardBackground,
+  addDash: AppColors.textTertiary,
+  addIcon: AppColors.textTertiary,
+  ready: AppColors.liveReady,
+  primary: AppColors.primary,
+  toggleOff: AppColors.surfaceStrong,
 };
 
 const toggleStyles = StyleSheet.create({
@@ -204,7 +204,7 @@ const toggleStyles = StyleSheet.create({
     width: 39,
     height: 24,
     borderRadius: 100,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: AppColors.white,
   },
 });
 
@@ -227,17 +227,17 @@ const DesignToggle = ({
   </Pressable>
 );
 
-/* Host screen colors (per design) */
+/* Host screen colors (Figma design mapped to the app theme) */
 const HC = {
-  danger: '#E34A42',
-  white: '#FFFFFF',
-  endPill: '#3A3A3A',
-  viewerPill: 'rgba(53,53,53,0.5)',
-  circle: '#2D2D2D',
-  icon: '#D9D9D9',
-  menu: '#1C1C1C',
+  danger: AppColors.danger,
+  white: AppColors.white,
+  endPill: AppColors.borderStrong,
+  viewerPill: AppColors.mediaScrim,
+  circle: AppColors.sheetRaised,
+  icon: AppColors.grayLight,
+  menu: AppColors.sheet,
 };
-const HEART_COLORS = ['#ED171F', '#D24449', '#F56A6F', '#FF575D', '#E34A42'];
+const HEART_COLORS = LIVE_HEART_COLORS;
 
 /** Floating heart (random color/size/tilt per design); notifies when done so it can be removed */
 const FloatingHeart = ({ onDone }: { onDone: () => void }) => {
@@ -781,7 +781,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           paddingBottom: insets.bottom + verticalScale(24),
         },
         label: {
-          color: '#FFFFFF',
+          color: AppColors.white,
           marginLeft: scale(6.5),
           marginTop: verticalScale(14),
           marginBottom: verticalScale(10),
@@ -827,7 +827,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           height: scale(28),
           paddingHorizontal: scale(10),
           borderRadius: 99,
-          backgroundColor: 'rgba(255,255,255,0.12)',
+          backgroundColor: AppColors.surface,
           flexDirection: 'row',
           alignItems: 'center',
           gap: scale(5),
@@ -839,13 +839,13 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           width: scale(38),
           height: scale(38),
           borderRadius: scale(19),
-          backgroundColor: 'rgba(0,0,0,0.45)',
+          backgroundColor: AppColors.mediaScrim,
           justifyContent: 'center',
           alignItems: 'center',
         },
         camFull: {
           ...StyleSheet.absoluteFillObject,
-          backgroundColor: '#000',
+          backgroundColor: AppColors.black,
           zIndex: 20,
         },
         camTop: {
@@ -863,7 +863,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           borderRadius: 99,
           borderWidth: 1,
           borderColor: SC.ready,
-          backgroundColor: 'rgba(0,0,0,0.45)',
+          backgroundColor: AppColors.mediaScrim,
           flexDirection: 'row',
           alignItems: 'center',
           gap: scale(5),
@@ -919,7 +919,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           paddingHorizontal: scale(11),
           paddingTop: verticalScale(9),
           paddingBottom: verticalScale(4),
-          color: '#FFFFFF',
+          color: AppColors.white,
           fontSize: 16,
           fontFamily: 'IBMPlexSansThai-Regular',
         },
@@ -994,7 +994,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           backgroundColor: AppColors.surface,
         },
         creatingHintText: { color: AppColors.textSecondary },
-        previewContainer: { flex: 1, backgroundColor: '#000' },
+        previewContainer: { flex: 1, backgroundColor: AppColors.black },
         zoomBadge: {
           position: 'absolute',
           alignSelf: 'center',
@@ -1002,7 +1002,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           paddingHorizontal: scale(14),
           height: scale(32),
           borderRadius: 99,
-          backgroundColor: 'rgba(0,0,0,0.55)',
+          backgroundColor: AppColors.scrim,
           justifyContent: 'center',
           zIndex: 5,
         },
@@ -1134,7 +1134,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           <View style={styles.header}>
             <AppText
               fontWeight="medium"
-              fontSize={16}
+              fontSize={AppFontSize.subtitle}
               style={styles.headerTitle}
             >
               Start live
@@ -1147,7 +1147,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               <Ionicons
                 name="chevron-back"
                 size={IS_TABLET ? 22 : 18}
-                color="#FFFFFF"
+                color={AppColors.white}
               />
             </TouchableOpacity>
           </View>
@@ -1157,7 +1157,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           // Loading screen before going live: centered, works in portrait and landscape (16:9)
           <View style={styles.creatingOverlay}>
             <View style={styles.creatingSpinner}>
-              <ActivityIndicator size="large" color={AppColors.primary} />
+              <AppSpinner size="large" />
             </View>
             <AppText
               fontWeight="semiBold"
@@ -1223,7 +1223,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                     style={[styles.readyDot, !camChecked && styles.idleDot]}
                   />
                   <AppText
-                    fontSize={12}
+                    fontSize={AppFontSize.caption}
                     style={camChecked ? styles.readyText : styles.idleText}
                   >
                     {camChecked ? 'พร้อมออกอากาศ' : 'ยังไม่ได้เช็คกล้อง'}
@@ -1238,13 +1238,16 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                   <Ionicons
                     name="camera-reverse-outline"
                     size={IS_TABLET ? 16 : 14}
-                    color="#FFFFFF"
+                    color={AppColors.white}
                   />
-                  <AppText fontSize={12} style={styles.white}>
+                  <AppText fontSize={AppFontSize.caption} style={styles.white}>
                     {isFrontCamera ? 'กล้องหน้า' : 'กล้องหลัง'}
                   </AppText>
                 </TouchableOpacity>
-                <AppText fontSize={12} style={styles.previewHint}>
+                <AppText
+                  fontSize={AppFontSize.caption}
+                  style={styles.previewHint}
+                >
                   {camChecked
                     ? 'แตะเพื่อเช็คกล้องอีกครั้ง'
                     : 'แตะเพื่อเปิดกล้อง เช็คความพร้อมก่อนเริ่ม'}
@@ -1252,7 +1255,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               </Pressable>
 
               {/* Live cover */}
-              <AppText fontSize={16} style={styles.label}>
+              <AppText fontSize={AppFontSize.subtitle} style={styles.label}>
                 ปกไลฟ์
               </AppText>
               <View style={styles.coverRow}>
@@ -1275,7 +1278,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               </View>
 
               {/* Title */}
-              <AppText fontSize={16} style={styles.label}>
+              <AppText fontSize={AppFontSize.subtitle} style={styles.label}>
                 หัวข้อไลฟ์
               </AppText>
               <TextInput
@@ -1288,7 +1291,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               />
 
               {/* Description */}
-              <AppText fontSize={16} style={styles.label}>
+              <AppText fontSize={AppFontSize.subtitle} style={styles.label}>
                 คำบรรยาย
               </AppText>
               <TextInput
@@ -1301,7 +1304,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               />
 
               {/* Who can watch */}
-              <AppText fontSize={16} style={styles.label}>
+              <AppText fontSize={AppFontSize.subtitle} style={styles.label}>
                 ใครดูได้บ้าง
               </AppText>
               <View style={styles.segRow}>
@@ -1314,7 +1317,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                       onPress={() => setAudience(o.key)}
                     >
                       <AppText
-                        fontSize={16}
+                        fontSize={AppFontSize.subtitle}
                         fontWeight={active ? 'medium' : 'regular'}
                         style={styles.white}
                       >
@@ -1326,7 +1329,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               </View>
 
               {/* Live format */}
-              <AppText fontSize={16} style={styles.label}>
+              <AppText fontSize={AppFontSize.subtitle} style={styles.label}>
                 รูปแบบไลฟ์
               </AppText>
               <View style={styles.segRow}>
@@ -1339,7 +1342,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                       onPress={() => setLandscape(o.landscape)}
                     >
                       <AppText
-                        fontSize={16}
+                        fontSize={AppFontSize.subtitle}
                         fontWeight={active ? 'medium' : 'regular'}
                         style={styles.white}
                       >
@@ -1350,13 +1353,13 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 })}
               </View>
               {landscape && (
-                <AppText fontSize={12} style={styles.segHint}>
+                <AppText fontSize={AppFontSize.caption} style={styles.segHint}>
                   กดเริ่มไลฟ์แล้วจอจะหมุนเป็นแนวนอน ให้ถือมือถือแนวนอน
                 </AppText>
               )}
 
               {/* Stream quality (existing option, same style as above) */}
-              <AppText fontSize={16} style={styles.label}>
+              <AppText fontSize={AppFontSize.subtitle} style={styles.label}>
                 คุณภาพการถ่ายทอด
               </AppText>
               <View style={styles.segRow}>
@@ -1369,7 +1372,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                       onPress={() => setQuality(q)}
                     >
                       <AppText
-                        fontSize={16}
+                        fontSize={AppFontSize.subtitle}
                         fontWeight={active ? 'medium' : 'regular'}
                         style={styles.white}
                       >
@@ -1379,7 +1382,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                   );
                 })}
               </View>
-              <AppText fontSize={12} style={styles.segHint}>
+              <AppText fontSize={AppFontSize.caption} style={styles.segHint}>
                 {STREAM_QUALITY_PRESETS[quality].hint}
               </AppText>
 
@@ -1389,12 +1392,15 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                   <View style={styles.settingText}>
                     <AppText
                       fontWeight="medium"
-                      fontSize={16}
+                      fontSize={AppFontSize.subtitle}
                       style={styles.white}
                     >
                       เปิดให้แชทได้
                     </AppText>
-                    <AppText fontSize={12} style={styles.settingSub}>
+                    <AppText
+                      fontSize={AppFontSize.caption}
+                      style={styles.settingSub}
+                    >
                       ผู้ชมพิมพ์คุยระหว่างไลฟ์
                     </AppText>
                   </View>
@@ -1404,12 +1410,15 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                   <View style={styles.settingText}>
                     <AppText
                       fontWeight="medium"
-                      fontSize={16}
+                      fontSize={AppFontSize.subtitle}
                       style={styles.white}
                     >
                       บันทึกไลฟ์อัตโนมัติ
                     </AppText>
-                    <AppText fontSize={12} style={styles.settingSub}>
+                    <AppText
+                      fontSize={AppFontSize.caption}
+                      style={styles.settingSub}
+                    >
                       ดูย้อนหลังได้หลังจบไลฟ์
                     </AppText>
                   </View>
@@ -1431,11 +1440,15 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={['#0BBDBE', 'rgba(11,189,190,0.48)']}
+                  colors={AppColors.appButtonGradient}
                   locations={[0.0978, 1]}
                   style={StyleSheet.absoluteFill}
                 />
-                <AppText fontWeight="medium" fontSize={16} style={styles.white}>
+                <AppText
+                  fontWeight="medium"
+                  fontSize={AppFontSize.subtitle}
+                  style={styles.white}
+                >
                   เริ่มไลฟ์
                 </AppText>
               </TouchableOpacity>
@@ -1477,14 +1490,20 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 {streamStatus === 'live' ? (
                   <View style={[styles.pill, styles.livePill]}>
                     <View style={styles.liveDot} />
-                    <AppText fontSize={12} style={styles.white}>
+                    <AppText
+                      fontSize={AppFontSize.caption}
+                      style={styles.white}
+                    >
                       Live
                     </AppText>
                   </View>
                 ) : (
                   <View style={[styles.pill, styles.waitPill]}>
-                    <ActivityIndicator size="small" color={HC.white} />
-                    <AppText fontSize={12} style={styles.white}>
+                    <AppSpinner size="small" color={HC.white} />
+                    <AppText
+                      fontSize={AppFontSize.caption}
+                      style={styles.white}
+                    >
                       {streamStatus === 'error'
                         ? 'กำลังเชื่อมต่อใหม่...'
                         : 'กำลังเชื่อมต่อ...'}
@@ -1492,7 +1511,10 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                   </View>
                 )}
                 <View style={[styles.pill, styles.timePill]}>
-                  <AppText fontSize={12} style={styles.timeText}>
+                  <AppText
+                    fontSize={AppFontSize.caption}
+                    style={styles.timeText}
+                  >
                     {formatHms(duration)}
                   </AppText>
                 </View>
@@ -1502,7 +1524,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                     size={IS_TABLET ? 16 : 13}
                     color={HC.white}
                   />
-                  <AppText fontSize={12} style={styles.white}>
+                  <AppText fontSize={AppFontSize.caption} style={styles.white}>
                     {viewerCount}
                   </AppText>
                 </View>
@@ -1521,7 +1543,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                   onPress={handleStopStream}
                   hitSlop={8}
                 >
-                  <AppText fontSize={12} style={styles.white}>
+                  <AppText fontSize={AppFontSize.caption} style={styles.white}>
                     จบไลฟ์
                   </AppText>
                 </TouchableOpacity>
@@ -1532,7 +1554,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 <View style={styles.zoomBadge} pointerEvents="none">
                   <AppText
                     fontWeight="medium"
-                    fontSize={14}
+                    fontSize={AppFontSize.body}
                     style={styles.white}
                   >
                     {zoom.toFixed(1)}x
@@ -1596,7 +1618,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                         size={IS_TABLET ? 24 : 20}
                         color={HC.white}
                       />
-                      <AppText fontSize={14} style={styles.white}>
+                      <AppText fontSize={AppFontSize.body} style={styles.white}>
                         กลับกล้อง
                       </AppText>
                     </TouchableOpacity>
@@ -1612,7 +1634,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                         size={IS_TABLET ? 24 : 20}
                         color={isMuted ? HC.danger : HC.white}
                       />
-                      <AppText fontSize={14} style={styles.white}>
+                      <AppText fontSize={AppFontSize.body} style={styles.white}>
                         {isMuted ? 'เปิดไมค์' : 'ปิดไมค์'}
                       </AppText>
                     </TouchableOpacity>
@@ -1641,12 +1663,15 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 <Ionicons
                   name="close"
                   size={IS_TABLET ? 24 : 20}
-                  color="#FFFFFF"
+                  color={AppColors.white}
                 />
               </TouchableOpacity>
               <View style={styles.readyPill2}>
                 <View style={styles.readyDot} />
-                <AppText fontSize={12} style={styles.readyText}>
+                <AppText
+                  fontSize={AppFontSize.caption}
+                  style={styles.readyText}
+                >
                   พร้อมออกอากาศ · {landscape ? 'แนวนอน 16:9' : 'แนวตั้ง 9:16'}
                 </AppText>
               </View>
@@ -1659,13 +1684,13 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 <Ionicons
                   name="camera-reverse-outline"
                   size={IS_TABLET ? 24 : 20}
-                  color="#FFFFFF"
+                  color={AppColors.white}
                 />
               </TouchableOpacity>
             </View>
             <View style={styles.camBottom}>
               <AppText
-                fontSize={12}
+                fontSize={AppFontSize.caption}
                 style={[styles.white, styles.previewHintOn]}
               >
                 {isFrontCamera
@@ -1673,7 +1698,11 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                   : 'ถ่างนิ้วเพื่อซูม · ตั้งมือถือให้นิ่งก่อนเริ่ม'}
               </AppText>
               <TouchableOpacity style={styles.camDone} onPress={closeCamCheck}>
-                <AppText fontWeight="medium" fontSize={16} style={styles.white}>
+                <AppText
+                  fontWeight="medium"
+                  fontSize={AppFontSize.subtitle}
+                  style={styles.white}
+                >
                   เรียบร้อย
                 </AppText>
               </TouchableOpacity>

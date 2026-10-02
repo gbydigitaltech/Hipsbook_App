@@ -1,6 +1,7 @@
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import CategoryIconBadge from '../../../components/category/CategoryIconBadge';
 import AppText from '../../../components/texts/AppText';
 import { useResponsive } from '../../../helpers/responsive';
 import { AppColors } from '../../../styles/colors';
@@ -16,7 +17,10 @@ type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 export type QuickNavItem = {
   key: string;
   label: string;
-  icon: IoniconName;
+  /** @deprecated fallback now comes from CategoryIconBadge */
+  icon?: IoniconName;
+  /** Category icon from the API (white glyph PNG, same as the website) */
+  iconUri?: string | null;
   onPress: () => void;
 };
 
@@ -51,7 +55,8 @@ const CategoryQuickNav: React.FC<Props> = ({ items }) => {
           borderColor: AppColors.border,
           borderRadius: responsiveRadius(AppRadius.pill),
           paddingVertical: verticalScale(10),
-          paddingHorizontal: scale(16),
+          paddingLeft: scale(12),
+          paddingRight: scale(16),
         },
         pressed: {
           backgroundColor: AppColors.surface,
@@ -77,10 +82,10 @@ const CategoryQuickNav: React.FC<Props> = ({ items }) => {
           accessibilityLabel={item.label}
           style={({ pressed }) => [styles.chip, pressed && styles.pressed]}
         >
-          <Ionicons
-            name={item.icon}
-            size={scale(16)}
-            color={AppColors.primary}
+          <CategoryIconBadge
+            uri={item.iconUri}
+            categoryId={item.key}
+            size={16}
           />
           <AppText fontSize={AppFontSize.caption} numberOfLines={1}>
             {item.label}

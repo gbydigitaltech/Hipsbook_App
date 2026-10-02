@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import AppSpinner from '../loading/AppSpinner';
 import LinearGradient from 'react-native-linear-gradient';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
@@ -165,7 +165,7 @@ const AppButton: React.FC<AppButtonProps> = ({
         style={[baseContent, contentStyle]}
       >
         {loading ? (
-          <ActivityIndicator
+          <AppSpinner
             size="small"
             color={resolvedFontColor}
             accessibilityLabel="กำลังดำเนินการ"

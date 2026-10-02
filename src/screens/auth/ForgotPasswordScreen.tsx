@@ -159,7 +159,6 @@ const ForgotPasswordScreen: React.FC = () => {
                   onPress={() => !isSubmitting && handleSubmit(onSubmit)()}
                   contentStyle={styles.button}
                   fontSize={AppFontSize.subtitle}
-                  loading={isSubmitting}
                   disabled={isSubmitting}
                 />
               </View>

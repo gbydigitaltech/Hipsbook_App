@@ -22,10 +22,10 @@ const CourseReviewComposerSheet: React.FC<Props> = ({
       visible={visible}
       onClose={onClose}
       title={'แชร์ประสบการณ์การเรียนรู้ของคุณ'}
-      placeholder="แสดงความคิดเห็น..."
+      placeholder="แสดงความคิดเห็น (ไม่บังคับ)"
       showRating
-      requireRating={false}
-      requireText
+      requireRating
+      requireText={false}
       onPressBack={onClose}
       onPressSubmit={onSubmit}
       initialRating={initialData?.rating ?? 0}

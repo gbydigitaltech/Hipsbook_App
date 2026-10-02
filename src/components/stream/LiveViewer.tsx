@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   Animated,
   Image,
   Keyboard,
@@ -21,6 +20,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import AppSpinner from '../loading/AppSpinner';
 import Orientation from 'react-native-orientation-locker';
 import {
   SafeAreaProvider,
@@ -29,7 +29,7 @@ import {
 import { IS_TABLET } from '../../constants/platform';
 import { log, logWarn } from '../../helpers/logger';
 import { useResponsive } from '../../helpers/responsive';
-import { AppColors } from '../../styles/colors';
+import { AppColors, LIVE_HEART_COLORS } from '../../styles/colors';
 import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
 import AppText from '../texts/AppText';
 import Player from '../videos/Player';
@@ -47,13 +47,13 @@ const C = {
   danger: AppColors.danger,
   primary: AppColors.primary,
   white: AppColors.white,
-  chip: '#373737',
+  chip: AppColors.chip,
   panel: AppColors.secondary,
-  playCircle: 'rgba(245,245,245,0.25)',
-  track: 'rgba(239,239,239,0.33)',
+  playCircle: AppColors.mediaButton,
+  track: AppColors.mediaTrack,
   menu: AppColors.sheet,
-  muted: '#C4C4C4',
-  grabber: '#8B8B8B',
+  muted: AppColors.textSecondary,
+  grabber: AppColors.textTertiary,
 };
 
 type LiveViewerProps = {
@@ -80,9 +80,7 @@ const FloatingHeart = ({ onDone }: { onDone: () => void }) => {
   const drift = useRef((Math.random() - 0.5) * 50).current;
   // Random color/size/tilt to feel lively (same style as the host screen)
   const look = useRef({
-    color: ['#ED171F', '#D24449', '#F56A6F', '#FF575D', '#E34A42'][
-      Math.floor(Math.random() * 5)
-    ],
+    color: LIVE_HEART_COLORS[Math.floor(Math.random() * 5)],
     size: 22 + Math.round(Math.random() * 12),
     tilt: Math.random() < 0.5 ? '-15deg' : '15deg',
   }).current;
@@ -424,7 +422,7 @@ const LiveViewerContent = ({
           width: scale(40),
           height: scale(40),
           borderRadius: 99,
-          backgroundColor: 'rgba(0,0,0,0.45)',
+          backgroundColor: AppColors.mediaScrim,
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -481,7 +479,7 @@ const LiveViewerContent = ({
           width: scale(30),
           height: scale(30),
           borderRadius: scale(15),
-          backgroundColor: 'rgba(0,0,0,0.45)',
+          backgroundColor: AppColors.mediaScrim,
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -493,9 +491,9 @@ const LiveViewerContent = ({
           height: scale(isFullscreen ? 68 : 58),
           marginTop: -scale(isFullscreen ? 68 : 58) / 2,
           borderRadius: 999,
-          backgroundColor: 'rgba(0,0,0,0.45)',
+          backgroundColor: AppColors.mediaScrim,
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.25)',
+          borderColor: AppColors.surfaceStrong,
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -521,7 +519,7 @@ const LiveViewerContent = ({
           height: scale(36),
           paddingHorizontal: scale(14),
           borderRadius: 99,
-          backgroundColor: 'rgba(0,0,0,0.45)',
+          backgroundColor: AppColors.mediaScrim,
         },
         fsChatBtnOn: { backgroundColor: C.primary },
         fsLive: {
@@ -584,7 +582,7 @@ const LiveViewerContent = ({
         /* Quality menu */
         menuBackdrop: {
           ...StyleSheet.absoluteFillObject,
-          backgroundColor: 'rgba(0,0,0,0.55)',
+          backgroundColor: AppColors.scrim,
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -609,7 +607,7 @@ const LiveViewerContent = ({
 
         brbOverlay: {
           ...StyleSheet.absoluteFillObject,
-          backgroundColor: 'rgba(0,0,0,0.82)',
+          backgroundColor: AppColors.scrimStrong,
           justifyContent: 'center',
           alignItems: 'center',
           gap: verticalScale(8),
@@ -650,7 +648,7 @@ const LiveViewerContent = ({
           borderRadius: scale(20),
           borderWidth: 2,
           borderColor: C.danger,
-          backgroundColor: '#1C1C1C',
+          backgroundColor: AppColors.sheet,
           overflow: 'hidden',
           justifyContent: 'center',
           alignItems: 'center',
@@ -772,7 +770,7 @@ const LiveViewerContent = ({
           right: scale(8) + insets.right,
           bottom: verticalScale(8) + Math.max(insets.bottom - 8, 0),
           width: panelW - scale(8) - insets.right,
-          backgroundColor: 'rgba(28,28,28,0.97)',
+          backgroundColor: AppColors.sheet,
           borderRadius: scale(16),
           borderWidth: StyleSheet.hairlineWidth,
           borderColor: AppColors.borderStrong,
@@ -874,7 +872,7 @@ const LiveViewerContent = ({
   const liveLabel = (
     <>
       <View style={styles.liveDot} />
-      <AppText fontSize={12} style={styles.white}>
+      <AppText fontSize={AppFontSize.caption} style={styles.white}>
         Live
       </AppText>
     </>
@@ -935,12 +933,12 @@ const LiveViewerContent = ({
           />
           <AppText
             fontWeight="medium"
-            fontSize={16}
+            fontSize={AppFontSize.subtitle}
             style={[styles.white, styles.center]}
           >
             โฮสต์ไม่อยู่แป๊บนึง
           </AppText>
-          <AppText fontSize={12} style={styles.brbSub}>
+          <AppText fontSize={AppFontSize.caption} style={styles.brbSub}>
             เดี๋ยวกลับมา ไม่ต้องปิดหนีนะ 💜
           </AppText>
         </View>
@@ -984,7 +982,7 @@ const LiveViewerContent = ({
           <View style={styles.fsLive}>{liveLabel}</View>
           <AppText
             fontWeight="medium"
-            fontSize={16}
+            fontSize={AppFontSize.subtitle}
             numberOfLines={1}
             style={[styles.topTitle, styles.shadow]}
           >
@@ -1006,7 +1004,11 @@ const LiveViewerContent = ({
               size={cs(18)}
               color={C.white}
             />
-            <AppText fontSize={14} fontWeight="medium" style={styles.white}>
+            <AppText
+              fontSize={AppFontSize.body}
+              fontWeight="medium"
+              style={styles.white}
+            >
               แชท
             </AppText>
           </TouchableOpacity>
@@ -1138,7 +1140,7 @@ const LiveViewerContent = ({
           }}
         >
           <Pressable style={styles.menuCard} onPress={() => {}}>
-            <AppText fontSize={12} style={styles.menuTitle}>
+            <AppText fontSize={AppFontSize.caption} style={styles.menuTitle}>
               ความละเอียด
             </AppText>
             {[null, ...qualities].map(q => {
@@ -1154,7 +1156,7 @@ const LiveViewerContent = ({
                   }}
                 >
                   <AppText
-                    fontSize={16}
+                    fontSize={AppFontSize.subtitle}
                     fontWeight={active ? 'medium' : 'regular'}
                     style={active ? styles.primaryText : styles.white}
                   >
@@ -1184,7 +1186,7 @@ const LiveViewerContent = ({
       {title ? (
         <AppText
           fontWeight="medium"
-          fontSize={16}
+          fontSize={AppFontSize.subtitle}
           numberOfLines={2}
           style={styles.white}
         >
@@ -1195,14 +1197,14 @@ const LiveViewerContent = ({
       <View style={styles.metaRow}>
         <View style={styles.metaGroup}>
           <Ionicons name="people" size={ic(15)} color={C.danger} />
-          <AppText fontSize={12} style={styles.danger}>
+          <AppText fontSize={AppFontSize.caption} style={styles.danger}>
             {viewerCount}
           </AppText>
         </View>
         {startedAt ? (
           <>
             <View style={styles.metaGap} />
-            <AppText fontSize={12} style={styles.white}>
+            <AppText fontSize={AppFontSize.caption} style={styles.white}>
               {formatElapsed(now - startedAt)}
             </AppText>
           </>
@@ -1227,14 +1229,14 @@ const LiveViewerContent = ({
           </View>
         </View>
         <View style={styles.hostCol}>
-          <AppText fontSize={16} style={styles.white}>
+          <AppText fontSize={AppFontSize.subtitle} style={styles.white}>
             {hostName || 'HIPSBOOK'}
           </AppText>
           {chips.length > 0 && (
             <View style={styles.chipRow}>
               {chips.map(c => (
                 <View key={c} style={styles.chip}>
-                  <AppText fontSize={12} style={styles.white}>
+                  <AppText fontSize={AppFontSize.caption} style={styles.white}>
                     {c}
                   </AppText>
                 </View>
@@ -1245,7 +1247,7 @@ const LiveViewerContent = ({
       </View>
 
       {description ? (
-        <AppText fontSize={12} style={styles.desc}>
+        <AppText fontSize={AppFontSize.caption} style={styles.desc}>
           {description}
         </AppText>
       ) : null}
@@ -1263,19 +1265,26 @@ const LiveViewerContent = ({
         {hasError ? (
           <View style={styles.centerBox}>
             <Ionicons name="cloud-offline" size={ic(60)} color={C.muted} />
-            <AppText fontSize={16} style={[styles.white, styles.center]}>
+            <AppText
+              fontSize={AppFontSize.subtitle}
+              style={[styles.white, styles.center]}
+            >
               ไม่สามารถโหลด Live ได้
             </AppText>
             <TouchableOpacity
               onPress={() => setHasError(false)}
               style={styles.retryBtn}
             >
-              <AppText fontWeight="medium" fontSize={16} style={styles.white}>
+              <AppText
+                fontWeight="medium"
+                fontSize={AppFontSize.subtitle}
+                style={styles.white}
+              >
                 ลองใหม่
               </AppText>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleClose} hitSlop={10}>
-              <AppText fontSize={12} style={styles.brbSub}>
+              <AppText fontSize={AppFontSize.caption} style={styles.brbSub}>
                 ปิด
               </AppText>
             </TouchableOpacity>
@@ -1317,7 +1326,7 @@ const LiveViewerContent = ({
                         <View style={styles.accentBar} />
                         <AppText
                           fontWeight="medium"
-                          fontSize={16}
+                          fontSize={AppFontSize.subtitle}
                           style={styles.white}
                         >
                           แชทสด
@@ -1336,7 +1345,10 @@ const LiveViewerContent = ({
                             size={ic(13)}
                             color={AppColors.textSecondary}
                           />
-                          <AppText fontSize={12} style={styles.sideSub}>
+                          <AppText
+                            fontSize={AppFontSize.caption}
+                            style={styles.sideSub}
+                          >
                             {viewerCount.toLocaleString()} คนกำลังดู
                           </AppText>
                         </View>
@@ -1419,12 +1431,12 @@ const LiveViewerContent = ({
           </View>
         ) : (
           <View style={styles.centerBox}>
-            <ActivityIndicator size="large" color={C.danger} />
-            <AppText fontSize={12} style={styles.brbSub}>
+            <AppSpinner size="large" />
+            <AppText fontSize={AppFontSize.caption} style={styles.brbSub}>
               กำลังเตรียม Stream...
             </AppText>
             <TouchableOpacity onPress={handleClose} hitSlop={10}>
-              <AppText fontSize={12} style={styles.brbSub}>
+              <AppText fontSize={AppFontSize.caption} style={styles.brbSub}>
                 ปิด
               </AppText>
             </TouchableOpacity>

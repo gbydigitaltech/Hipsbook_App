@@ -11,10 +11,16 @@ export const useAuthAppStateWatcher = () => {
   const revalidate = useAuth(s => s.revalidate);
 
   useEffect(() => {
+    let prev: AppStateStatus = AppState.currentState;
+
     /** Handle app state changes */
     const handleChange = (state: AppStateStatus) => {
-      // Run revalidation when app becomes active
-      if (state === 'active') {
+      const wasBackground = prev === 'background';
+      prev = state;
+      // Revalidate only when returning from background. iOS also goes
+      // inactive -> active for system dialogs and the photo picker; that
+      // shouldn't trigger a revalidate.
+      if (state === 'active' && wasBackground) {
         revalidate().catch(err =>
           logError('Auth', 'revalidate on foreground failed', err),
         );

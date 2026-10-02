@@ -162,7 +162,9 @@ const ReviewItem: React.FC<Props> = ({
               <RatingIcon
                 key={i}
                 size={IS_TABLET ? 18 : 15}
-                color={i < filledCount ? '#F4A700' : AppColors.borderStrong}
+                color={
+                  i < filledCount ? AppColors.rating : AppColors.ratingEmpty
+                }
               />
             ))}
           </View>

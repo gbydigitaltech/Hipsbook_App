@@ -62,13 +62,23 @@ const ProfileAddressScreen = () => {
     useAddressesProfile();
 
   const [opLoading, setOpLoading] = useState(false);
-  const busy = loading || opLoading;
+  // Full overlay only for the first load; later refetches (on focus / after
+  // delete) update the list silently instead of showing a second overlay.
+  const loadedOnceRef = useRef(false);
+  if (!loading) loadedOnceRef.current = true;
+  const busy = opLoading || (loading && !loadedOnceRef.current);
 
   const [showOverlay, setShowOverlay] = useState(false);
   const overlayStartRef = useRef<number | null>(null);
 
+  // The hook already fetches on mount -> skip the first focus, refetch on return
+  const firstFocusRef = useRef(true);
   useFocusEffect(
     useCallback(() => {
+      if (firstFocusRef.current) {
+        firstFocusRef.current = false;
+        return;
+      }
       refetch?.();
     }, [refetch]),
   );
@@ -325,7 +335,6 @@ const ProfileAddressScreen = () => {
             ))}
           </>
         )}
-
       </AppScrollView>
 
       <AppLoadingOverlay

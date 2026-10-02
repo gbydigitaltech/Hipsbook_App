@@ -359,11 +359,17 @@ const TeacherProfileScreen = () => {
               <View style={styles.statItem}>
                 <View style={styles.statNumberRow}>
                   <StarIcon size={IS_TABLET ? 22 : 18} />
-                  <AppText fontWeight="semiBold" fontSize={AppFontSize.subtitle}>
+                  <AppText
+                    fontWeight="semiBold"
+                    fontSize={AppFontSize.subtitle}
+                  >
                     {ratingText}
                   </AppText>
                 </View>
-                <AppText fontSize={AppFontSize.caption} style={styles.statLabel}>
+                <AppText
+                  fontSize={AppFontSize.caption}
+                  style={styles.statLabel}
+                >
                   คะแนน
                 </AppText>
               </View>
@@ -373,11 +379,17 @@ const TeacherProfileScreen = () => {
               <View style={styles.statItem}>
                 <View style={styles.statNumberRow}>
                   <CommentIcon size={IS_TABLET ? 22 : 18} />
-                  <AppText fontWeight="semiBold" fontSize={AppFontSize.subtitle}>
+                  <AppText
+                    fontWeight="semiBold"
+                    fontSize={AppFontSize.subtitle}
+                  >
                     {reviewText}
                   </AppText>
                 </View>
-                <AppText fontSize={AppFontSize.caption} style={styles.statLabel}>
+                <AppText
+                  fontSize={AppFontSize.caption}
+                  style={styles.statLabel}
+                >
                   รีวิว
                 </AppText>
               </View>
@@ -387,11 +399,17 @@ const TeacherProfileScreen = () => {
               <View style={styles.statItem}>
                 <View style={styles.statNumberRow}>
                   <PlayCircleSolidIcon size={IS_TABLET ? 22 : 18} />
-                  <AppText fontWeight="semiBold" fontSize={AppFontSize.subtitle}>
+                  <AppText
+                    fontWeight="semiBold"
+                    fontSize={AppFontSize.subtitle}
+                  >
                     {teacher?.course_amount ?? 0}
                   </AppText>
                 </View>
-                <AppText fontSize={AppFontSize.caption} style={styles.statLabel}>
+                <AppText
+                  fontSize={AppFontSize.caption}
+                  style={styles.statLabel}
+                >
                   คอร์ส
                 </AppText>
               </View>
@@ -459,11 +477,11 @@ const TeacherProfileScreen = () => {
         </View>
       </AppScrollView>
 
+      {/* One overlay for both states (two Modals would stack) */}
       <AppLoadingOverlay
-        visible={isLoading}
-        message="กำลังโหลดข้อมูลผู้สอน..."
+        visible={isLoading || isProcessing}
+        message={isProcessing ? 'กำลังดำเนินการ' : 'กำลังโหลดข้อมูลผู้สอน...'}
       />
-      <AppLoadingOverlay visible={isProcessing} message="กำลังดำเนินการ" />
     </View>
   );
 };

@@ -166,6 +166,9 @@ const VerticalCourseSliderSkeletonCard = React.memo(() => {
 VerticalCourseSliderSkeletonCard.displayName =
   'VerticalCourseSliderSkeletonCard';
 
+/** Minimum cards in the slider (fewer courses are repeated to fill it) */
+const MIN_VISIBLE_CARDS = 3;
+
 const VerticalCourseSlider: React.FC<VerticalCourseSliderProps> = React.memo(
   ({
     data,
@@ -279,12 +282,26 @@ const VerticalCourseSlider: React.FC<VerticalCourseSliderProps> = React.memo(
 
     if (!data || data.length === 0) return null;
 
-    const shouldLoop = data.length > 1;
+    // Fewer than 3 courses: repeat them so the slider looks like the other
+    // sections (card in the middle + cards peeking on both sides)
+    // Repeat WHOLE cycles only (A B -> A B A B), so the looping slider
+    // never puts the same course next to itself (A B A + loop = ...A A...)
+    const displayData: ItemType[] =
+      data.length >= MIN_VISIBLE_CARDS
+        ? data
+        : Array.from(
+            {
+              length: Math.ceil(MIN_VISIBLE_CARDS / data.length) * data.length,
+            },
+            (_, i) => data[i % data.length],
+          );
+
+    const shouldLoop = displayData.length > 1;
 
     return (
       <View style={[styles.root, containerStyle]}>
         <Carousel<ItemType>
-          data={data}
+          data={displayData}
           renderItem={renderItem}
           style={styles.carousel}
           loop={shouldLoop}

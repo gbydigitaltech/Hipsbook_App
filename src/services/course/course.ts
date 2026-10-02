@@ -128,6 +128,30 @@ export const apiGetRecommendCourseList = async (
   }
 };
 
+// Get recommended courses for several categories in ONE request
+// (home screen sections). Response shape is parsed by the caller.
+export const apiGetRecommendCourseListByCategory = async ({
+  category,
+  limit,
+  signal,
+}: {
+  category: string[];
+  limit?: number;
+  signal?: AbortSignal;
+}): Promise<unknown> => {
+  try {
+    const { data } = await privateApi.post(
+      '/recommend/course/list-by-category',
+      { category, ...(limit ? { limit } : {}) },
+      { signal },
+    );
+
+    return data;
+  } catch (err) {
+    throw asError(err);
+  }
+};
+
 // Get course detail by course id.
 export const apiGetCourseDetail = async ({
   id,

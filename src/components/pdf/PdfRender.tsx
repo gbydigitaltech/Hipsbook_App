@@ -1,11 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
+import AppSpinner from '../loading/AppSpinner';
 import Pdf from 'react-native-pdf';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -168,7 +163,7 @@ const PdfRender: React.FC<PdfRenderProps> = ({ visible, onClose, pdfUrl }) => {
         <View style={styles.body}>
           {loading || !localPath ? (
             <View style={styles.loaderContainer}>
-              <ActivityIndicator size="large" color={AppColors.primary} />
+              <AppSpinner size="large" />
               <AppText style={styles.loaderText}>กำลังโหลด PDF...</AppText>
             </View>
           ) : hasError ? (

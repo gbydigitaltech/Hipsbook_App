@@ -14,13 +14,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  ActivityIndicator,
-  Keyboard,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Keyboard, StyleSheet, TouchableOpacity, View } from 'react-native';
+import AppSpinner from '../../components/loading/AppSpinner';
 import { log, logWarn } from '../../helpers/logger';
 
 import { Ionicons } from '@react-native-vector-icons/ionicons';
@@ -423,10 +418,7 @@ const CourseScreen = () => {
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.emptyWrapper}>
-              <ActivityIndicator
-                size={IS_TABLET ? 'large' : 'small'}
-                color={AppColors.primary}
-              />
+              <AppSpinner size="small" />
               <AppText
                 style={styles.loadMoreText}
                 fontSize={AppFontSize.caption}
@@ -446,10 +438,7 @@ const CourseScreen = () => {
         footer={
           isLoadingMore && courses.length > 0 && hasMore ? (
             <View style={styles.loadMoreRow}>
-              <ActivityIndicator
-                size={IS_TABLET ? 'large' : 'small'}
-                color={AppColors.primary}
-              />
+              <AppSpinner size="small" />
               <AppText
                 style={styles.loadMoreText}
                 fontSize={AppFontSize.caption}

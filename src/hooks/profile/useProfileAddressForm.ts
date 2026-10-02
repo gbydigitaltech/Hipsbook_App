@@ -97,7 +97,10 @@ export function useProfileAddressForm(editingId?: string) {
         setDetailLoading(true);
         hydratingRef.current = true;
 
-        const d = await apiGetProfileAddressById({ id: editingId, signal: c.signal });
+        const d = await apiGetProfileAddressById({
+          id: editingId,
+          signal: c.signal,
+        });
 
         reset({
           firstName: d.first_name ?? '',
@@ -131,14 +134,22 @@ export function useProfileAddressForm(editingId?: string) {
     const di = toNumOrUndef(districtIdRaw);
     const si = toNumOrUndef(subdistrictIdRaw);
 
+    // Wait until the districts of the saved province are loaded
+    if (districtItems.length === 0) return;
+
     const districtExists = di
       ? districtItems.some(it => Number(it.value) === di)
       : true;
-    const subdistrictExists = si
-      ? subdistrictItems.some(it => Number(it.value) === si)
-      : true;
 
-    if (districtExists && subdistrictExists) {
+    // Saved district isn't in the list (stale data) -> stop guarding anyway,
+    // otherwise changing the province would never reset district/subdistrict
+    if (!districtExists) {
+      hydratingRef.current = false;
+      return;
+    }
+
+    // Wait for subdistricts too (if one was saved), then stop guarding
+    if (!si || subdistrictItems.length > 0) {
       hydratingRef.current = false;
     }
   }, [

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import RatingIcon from '../../assets/icons/RatingIcon';
 import { useResponsive } from '../../helpers/responsive';
+import { AppColors } from '../../styles/colors';
 import { PRESSED_OPACITY } from '../../styles/sharedstyles';
 
 type Props = {
@@ -51,7 +52,10 @@ const PressableRating: React.FC<Props> = ({
               i !== 4 && { marginRight: gap },
             ]}
           >
-            <RatingIcon size={size} color={isFilled ? '#F4A700' : '#D9D9D9'} />
+            <RatingIcon
+              size={size}
+              color={isFilled ? AppColors.rating : AppColors.ratingEmpty}
+            />
           </Pressable>
         );
       })}

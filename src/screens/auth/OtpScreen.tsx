@@ -254,7 +254,7 @@ const OtpScreen = () => {
             <View style={styles.buttonArea}>
               <AppButton
                 title="ยืนยันรหัส OTP"
-                loading={isSubmitting}
+                disabled={isSubmitting}
                 onPress={onSubmit}
                 fontSize={AppFontSize.subtitle}
                 contentStyle={styles.button}

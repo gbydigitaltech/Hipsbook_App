@@ -11,12 +11,12 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   Keyboard,
   StyleSheet,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import AppSpinner from '../../../components/loading/AppSpinner';
 import { log, logWarn } from '../../../helpers/logger';
 
 import AppBackground from '../../../components/background/AppBackground';
@@ -552,7 +552,7 @@ const MyCourseScreen = () => {
             ListEmptyComponent={
               isLoading ? (
                 <View style={styles.emptyWrapper}>
-                  <ActivityIndicator size="small" color={AppColors.primary} />
+                  <AppSpinner size="small" />
                   <AppText
                     style={styles.loadMoreText}
                     fontSize={AppFontSize.caption}
@@ -593,7 +593,7 @@ const MyCourseScreen = () => {
               visibleCourses.length > 0 &&
               hasMore ? (
                 <View style={styles.loadMoreRow}>
-                  <ActivityIndicator size="small" color={AppColors.primary} />
+                  <AppSpinner size="small" />
                   <AppText
                     style={styles.loadMoreText}
                     fontSize={AppFontSize.caption}

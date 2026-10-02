@@ -171,13 +171,17 @@ const HostRow = memo(
         />
       ) : (
         <View style={styles.hAvatar}>
-          <Ionicons name="person" size={11} color="#BDBDBD" />
+          <Ionicons name="person" size={11} color={AppColors.textSecondary} />
         </View>
       )}
       {/* Username in primary color | message text in white */}
-      <AppText fontSize={12} numberOfLines={2} style={styles.hText}>
+      <AppText
+        fontSize={AppFontSize.caption}
+        numberOfLines={2}
+        style={styles.hText}
+      >
         {item.user}{' '}
-        <AppText fontSize={12} style={styles.hMsg}>
+        <AppText fontSize={AppFontSize.caption} style={styles.hMsg}>
           {item.text}
         </AppText>
       </AppText>
@@ -205,7 +209,7 @@ const SideRow = memo(
         />
       ) : (
         <View style={styles.sAvatar}>
-          <Ionicons name="person" size={13} color="#BDBDBD" />
+          <Ionicons name="person" size={13} color={AppColors.textSecondary} />
         </View>
       )}
       <AppText fontSize={13} style={styles.sText}>
@@ -436,14 +440,14 @@ const LiveChat = ({
           width: scale(28),
           height: scale(28),
           borderRadius: scale(14),
-          backgroundColor: '#555555',
+          backgroundColor: AppColors.disabled,
           overflow: 'hidden',
           justifyContent: 'center',
           alignItems: 'center',
         },
-        sText: { flex: 1, color: '#FFFFFF', paddingTop: 2 },
+        sText: { flex: 1, color: AppColors.white, paddingTop: 2 },
         sName: { color: AppColors.primary },
-        sMsg: { color: '#FFFFFF' },
+        sMsg: { color: AppColors.white },
         sEmpty: {
           flex: 1,
           justifyContent: 'center',
@@ -508,7 +512,7 @@ const LiveChat = ({
           paddingLeft: scale(12),
           paddingRight: scale(8),
           borderRadius: 99,
-          backgroundColor: 'rgba(0,0,0,0.45)',
+          backgroundColor: AppColors.mediaScrim,
           flexDirection: 'row',
           alignItems: 'center',
           gap: scale(2),
@@ -525,15 +529,15 @@ const LiveChat = ({
           paddingRight: scale(11),
           paddingVertical: verticalScale(1),
           borderRadius: 99,
-          backgroundColor: '#373737',
+          backgroundColor: AppColors.chip,
         },
         hText: { color: AppColors.primary, flexShrink: 1 },
-        hMsg: { color: '#FFFFFF' },
+        hMsg: { color: AppColors.white },
         hAvatar: {
           width: scale(19),
           height: scale(19),
           borderRadius: scale(10),
-          backgroundColor: '#555555',
+          backgroundColor: AppColors.disabled,
           overflow: 'hidden',
           justifyContent: 'center',
           alignItems: 'center',
@@ -549,7 +553,7 @@ const LiveChat = ({
           flex: 1,
           minHeight: scale(49),
           borderRadius: 999,
-          backgroundColor: '#2D2D2D',
+          backgroundColor: AppColors.sheetRaised,
           flexDirection: 'row',
           alignItems: 'center',
           paddingVertical: scale(4),
@@ -560,7 +564,7 @@ const LiveChat = ({
           width: scale(49),
           height: scale(49),
           borderRadius: 999,
-          backgroundColor: '#2D2D2D',
+          backgroundColor: AppColors.sheetRaised,
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -635,7 +639,7 @@ const LiveChat = ({
           // Multiline: grows with the text up to ~4 lines, then scrolls inside
           minHeight: scale(32),
           maxHeight: scale(90),
-          color: '#FFFFFF',
+          color: AppColors.white,
           fontSize: 12,
           fontFamily: 'IBMPlexSansThai-Regular',
           paddingTop: 7,
@@ -652,7 +656,7 @@ const LiveChat = ({
           justifyContent: 'center',
           alignItems: 'center',
         },
-        historyPanel: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
+        historyPanel: { flex: 1, backgroundColor: AppColors.scrim },
         historyHeader: {
           flexDirection: 'row',
           alignItems: 'center',
@@ -675,7 +679,7 @@ const LiveChat = ({
           width: scale(4),
           height: verticalScale(40),
           borderRadius: scale(2),
-          backgroundColor: 'rgba(255,255,255,0.45)',
+          backgroundColor: AppColors.textTertiary,
         },
       }),
     [scale, verticalScale, hostEdge],
@@ -744,10 +748,14 @@ const LiveChat = ({
               onPress={onShowChat}
               hitSlop={8}
             >
-              <AppText fontSize={12} style={styles.hMsg}>
+              <AppText fontSize={AppFontSize.caption} style={styles.hMsg}>
                 แชท
               </AppText>
-              <Ionicons name="chevron-forward" size={14} color="#FFFFFF" />
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={AppColors.white}
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -891,12 +899,16 @@ const LiveChat = ({
               <Ionicons
                 name="send"
                 size={IS_TABLET ? 18 : 15}
-                color={canSubmit ? AppColors.primary : '#FFFFFF'}
+                color={canSubmit ? AppColors.primary : AppColors.white}
               />
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.sHeart} onPress={onLike} hitSlop={6}>
-            <Ionicons name="heart" size={IS_TABLET ? 20 : 17} color="#FFFFFF" />
+            <Ionicons
+              name="heart"
+              size={IS_TABLET ? 20 : 17}
+              color={AppColors.white}
+            />
           </TouchableOpacity>
         </View>
       ) : canSend && isHost ? (
@@ -907,7 +919,7 @@ const LiveChat = ({
               value={input}
               onChangeText={setInput}
               placeholder="พิมพ์ข้อความของคุณ..."
-              placeholderTextColor="#FFFFFF"
+              placeholderTextColor={AppColors.textSecondary}
               multiline
               submitBehavior="newline"
             />
@@ -920,12 +932,16 @@ const LiveChat = ({
               <Ionicons
                 name="send"
                 size={IS_TABLET ? 18 : 15}
-                color={canSubmit ? AppColors.primary : '#FFFFFF'}
+                color={canSubmit ? AppColors.primary : AppColors.white}
               />
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.hCircle} onPress={onLike} hitSlop={6}>
-            <Ionicons name="heart" size={IS_TABLET ? 22 : 18} color="#FFFFFF" />
+            <Ionicons
+              name="heart"
+              size={IS_TABLET ? 22 : 18}
+              color={AppColors.white}
+            />
           </TouchableOpacity>
           {extraAction}
         </View>
@@ -948,7 +964,7 @@ const LiveChat = ({
               value={input}
               onChangeText={setInput}
               placeholder="พิมพ์ข้อความของคุณ..."
-              placeholderTextColor="#FFFFFF"
+              placeholderTextColor={AppColors.textSecondary}
               multiline
               submitBehavior="newline"
             />
@@ -961,12 +977,16 @@ const LiveChat = ({
               <Ionicons
                 name="send"
                 size={IS_TABLET ? 18 : 15}
-                color={canSubmit ? AppColors.primary : '#FFFFFF'}
+                color={canSubmit ? AppColors.primary : AppColors.white}
               />
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.pHeart} onPress={onLike} hitSlop={6}>
-            <Ionicons name="heart" size={IS_TABLET ? 22 : 18} color="#FFFFFF" />
+            <Ionicons
+              name="heart"
+              size={IS_TABLET ? 22 : 18}
+              color={AppColors.white}
+            />
           </TouchableOpacity>
         </View>
       ) : canSend ? (
