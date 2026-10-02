@@ -36,9 +36,9 @@
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data
-          android:scheme="com.hipsbook.app"
+          android:scheme="com.gby.hipsbook.app"
           android:host="callback" />
-        <data android:scheme="line3rdp.com.hipsbook.app" />
+        <data android:scheme="line3rdp.com.gby.hipsbook.app" />
       </intent-filter>
     </activity>
   </application>
