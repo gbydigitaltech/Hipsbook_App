@@ -1,4 +1,4 @@
-package com.gby.hipsbook.app
+package com.hipsbook.app
 
 import android.os.Bundle
 import com.facebook.react.ReactActivity

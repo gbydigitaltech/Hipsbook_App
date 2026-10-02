@@ -26,11 +26,11 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.gby.hipsbook.app</string>
+			<string>com.hipsbook.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.gby.hipsbook.app</string>
-				<string>line3rdp.com.gby.hipsbook.app</string>
+				<string>com.hipsbook.app</string>
+				<string>line3rdp.com.hipsbook.app</string>
 				<string>com.googleusercontent.apps.858623715360-f2p9pg9ktibm1c4alk6bvfjbuedhs512</string>
 			</array>
 		</dict>
