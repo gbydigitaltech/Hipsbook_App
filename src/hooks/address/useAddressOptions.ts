@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { log, logWarn } from '../../helpers/logger';
 import {
   apiGetDistrictsByProvince,
@@ -80,121 +81,132 @@ const toPickerItems = (rows: any[] = []): PickerItem[] =>
     value: Number(row?.id),
   }));
 
+/*
+ * Address data almost never changes, so it is cached for the whole app
+ * session: provinces load once, and every district/subdistrict list that was
+ * opened before shows instantly the next time.
+ */
+const ADDRESS_CACHE = {
+  staleTime: Infinity,
+  gcTime: Infinity,
+} as const;
+
+/** How many subdistrict lists to prefetch in parallel */
+const PREFETCH_CONCURRENCY = 3;
+
+export const addressKeys = {
+  provinces: ['address', 'provinces'] as const,
+  districts: (pid: number) => ['address', 'districts', pid] as const,
+  subdistricts: (did: number) => ['address', 'subdistricts', did] as const,
+};
+
+const fetchProvinces = async (signal?: AbortSignal) =>
+  toRows(await apiGetProvinces(signal)) as Province[];
+
+const fetchDistricts = async (pid: number, signal?: AbortSignal) => {
+  const rows = toRows(await apiGetDistrictsByProvince(pid, signal));
+  const kept = keepChildrenOf(rows, pid, getProvinceId);
+  if (kept.length === 0) {
+    logWarn(
+      'Address',
+      `no districts for province=${pid} (raw rows=${rows.length})`,
+    );
+  } else {
+    log('Address', `districts province=${pid} count=${kept.length}`);
+  }
+  return kept as District[];
+};
+
+const fetchSubdistricts = async (did: number, signal?: AbortSignal) => {
+  const rows = toRows(await apiGetSubdistrictsByDistrict(did, signal));
+  const kept = keepChildrenOf(rows, did, getDistrictId);
+  if (kept.length === 0) {
+    logWarn(
+      'Address',
+      `no subdistricts for district=${did} (raw rows=${rows.length})`,
+    );
+  }
+  return kept as Subdistrict[];
+};
+
+/** Start loading provinces early (e.g. on the address list screen) */
+export const prefetchProvinces = (client: QueryClient) =>
+  client.prefetchQuery({
+    queryKey: addressKeys.provinces,
+    queryFn: ({ signal }) => fetchProvinces(signal),
+    ...ADDRESS_CACHE,
+  });
+
 /** Load province/district/subdistrict options + zipcode helper */
 export function useAddressOptions(
   selectedProvinceId?: number | null,
   selectedDistrictId?: number | null,
 ) {
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [subdistricts, setSubdistricts] = useState<Subdistrict[]>([]);
-
-  const [loadingProvince, setLoadingProvince] = useState(false);
-  const [loadingDistrict, setLoadingDistrict] = useState(false);
-  const [loadingSubdistrict, setLoadingSubdistrict] = useState(false);
-  const [error, setError] = useState<unknown>(null);
-
+  const client = useQueryClient();
   const pid = toNum(selectedProvinceId);
   const did = toNum(selectedDistrictId);
 
-  // Load provinces once
+  const provincesQ = useQuery({
+    queryKey: addressKeys.provinces,
+    queryFn: ({ signal }) => fetchProvinces(signal),
+    ...ADDRESS_CACHE,
+  });
+
+  const districtsQ = useQuery({
+    queryKey: addressKeys.districts(pid ?? 0),
+    queryFn: ({ signal }) => fetchDistricts(pid as number, signal),
+    enabled: !!pid,
+    ...ADDRESS_CACHE,
+  });
+
+  const subdistrictsQ = useQuery({
+    queryKey: addressKeys.subdistricts(did ?? 0),
+    queryFn: ({ signal }) => fetchSubdistricts(did as number, signal),
+    enabled: !!did,
+    ...ADDRESS_CACHE,
+  });
+
+  const districts = useMemo(
+    () => (pid ? districtsQ.data ?? [] : []),
+    [pid, districtsQ.data],
+  );
+  const subdistricts = useMemo(
+    () => (did ? subdistrictsQ.data ?? [] : []),
+    [did, subdistrictsQ.data],
+  );
+
+  // Once districts are in, load their subdistricts in the background (a few
+  // at a time, so a big province like Bangkok doesn't fire 50 requests at
+  // once). Picking a district then shows its list instantly.
   useEffect(() => {
-    const controller = new AbortController();
+    if (!pid || districts.length === 0) return;
+    let cancelled = false;
+    const ids = districts
+      .map((d: any) => toNum(d?.id))
+      .filter((id): id is number => !!id);
 
-    (async () => {
-      try {
-        setLoadingProvince(true);
-        const res = await apiGetProvinces(controller.signal);
-        setProvinces(toRows(res));
-      } catch (e) {
-        if (!isCanceled(e)) {
-          logWarn('Address', 'load provinces failed', e);
-          setError(e);
-        }
-      } finally {
-        setLoadingProvince(false);
+    const worker = async () => {
+      while (!cancelled && ids.length > 0) {
+        const id = ids.shift() as number;
+        await client
+          .prefetchQuery({
+            queryKey: addressKeys.subdistricts(id),
+            queryFn: ({ signal }) => fetchSubdistricts(id, signal),
+            ...ADDRESS_CACHE,
+          })
+          .catch(() => {});
       }
-    })();
+    };
+    for (let i = 0; i < PREFETCH_CONCURRENCY; i++) worker();
 
-    return () => controller.abort();
-  }, []);
-
-  // Load districts when province changes
-  useEffect(() => {
-    setDistricts([]);
-    setSubdistricts([]);
-    if (!pid) return;
-
-    const controller = new AbortController();
-
-    (async () => {
-      try {
-        setLoadingDistrict(true);
-        const res = await apiGetDistrictsByProvince(pid, controller.signal);
-        const rows = toRows(res);
-        const kept = keepChildrenOf(rows, pid, getProvinceId);
-        if (kept.length === 0) {
-          logWarn(
-            'Address',
-            `no districts for province=${pid} (raw rows=${
-              rows.length
-            }) sample=${JSON.stringify(Array.isArray(res) ? res[0] : res)}`,
-          );
-        } else {
-          log('Address', `districts province=${pid} count=${kept.length}`);
-        }
-        setDistricts(kept);
-      } catch (e) {
-        if (!isCanceled(e)) {
-          logWarn('Address', `load districts failed province=${pid}`, e);
-          setError(e);
-        }
-      } finally {
-        setLoadingDistrict(false);
-      }
-    })();
-
-    return () => controller.abort();
-  }, [pid]);
-
-  // Load subdistricts when district changes
-  useEffect(() => {
-    setSubdistricts([]);
-    if (!did) return;
-
-    const controller = new AbortController();
-
-    (async () => {
-      try {
-        setLoadingSubdistrict(true);
-        const res = await apiGetSubdistrictsByDistrict(did, controller.signal);
-        const rows = toRows(res);
-        const kept = keepChildrenOf(rows, did, getDistrictId);
-        if (kept.length === 0) {
-          logWarn(
-            'Address',
-            `no subdistricts for district=${did} (raw rows=${
-              rows.length
-            }) sample=${JSON.stringify(Array.isArray(res) ? res[0] : res)}`,
-          );
-        }
-        setSubdistricts(kept);
-      } catch (e) {
-        if (!isCanceled(e)) {
-          logWarn('Address', `load subdistricts failed district=${did}`, e);
-          setError(e);
-        }
-      } finally {
-        setLoadingSubdistrict(false);
-      }
-    })();
-
-    return () => controller.abort();
-  }, [did]);
+    return () => {
+      cancelled = true;
+    };
+  }, [client, pid, districts]);
 
   const provinceItems = useMemo(
-    () => toPickerItems(provinces as any[]),
-    [provinces],
+    () => toPickerItems((provincesQ.data ?? []) as any[]),
+    [provincesQ.data],
   );
   const districtItems = useMemo(
     () => toPickerItems(districts as any[]),
@@ -206,22 +218,34 @@ export function useAddressOptions(
   );
 
   /** Find zipcode by subdistrict id */
-  const getZipcodeBySubdistrictId = (subdistrictId?: number | null): string => {
-    const sid = toNum(subdistrictId);
-    if (!sid) return '';
-    const found = subdistricts.find((x: any) => Number(x?.id) === sid);
-    const z = (found as any)?.zipcode ?? (found as any)?.zip_code ?? '';
-    return z ? String(z) : '';
-  };
+  const getZipcodeBySubdistrictId = useCallback(
+    (subdistrictId?: number | null): string => {
+      const sid = toNum(subdistrictId);
+      if (!sid) return '';
+      const found = subdistricts.find((x: any) => Number(x?.id) === sid);
+      const z = (found as any)?.zipcode ?? (found as any)?.zip_code ?? '';
+      return z ? String(z) : '';
+    },
+    [subdistricts],
+  );
+
+  const firstError =
+    provincesQ.error ?? districtsQ.error ?? subdistrictsQ.error ?? null;
+  useEffect(() => {
+    if (firstError && !isCanceled(firstError)) {
+      logWarn('Address', 'load address options failed', firstError);
+    }
+  }, [firstError]);
 
   return {
     provinceItems,
     districtItems,
     subdistrictItems,
-    loadingProvince,
-    loadingDistrict,
-    loadingSubdistrict,
-    error,
+    // "loading" only when there is nothing cached yet
+    loadingProvince: provincesQ.isPending,
+    loadingDistrict: !!pid && districtsQ.isPending,
+    loadingSubdistrict: !!did && subdistrictsQ.isPending,
+    error: firstError,
     getZipcodeBySubdistrictId,
   };
 }

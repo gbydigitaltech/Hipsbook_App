@@ -21,6 +21,8 @@ import AppScrollView from '../../components/views/AppScrollView';
 
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
+import { useQueryClient } from '@tanstack/react-query';
+import { prefetchProvinces } from '../../hooks/address/useAddressOptions';
 import { useAddressesProfile } from '../../hooks/profile/useProfileAddress';
 import { AppColors } from '../../styles/colors';
 import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
@@ -60,6 +62,12 @@ const ProfileAddressScreen = () => {
 
   const { items, loading, error, deleteProfileAddress, refetch } =
     useAddressesProfile();
+
+  // Warm up the province list so the add/edit form opens without waiting
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    prefetchProvinces(queryClient);
+  }, [queryClient]);
 
   const [opLoading, setOpLoading] = useState(false);
   // Full overlay only for the first load; later refetches (on focus / after
