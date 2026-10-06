@@ -20,6 +20,8 @@ export type LiveStreamSession = {
   logoUrl?: string;
   /** Host/channel name (if the backend provides it) */
   hostName?: string;
+  /** Live cover/thumbnail image (if the backend provides it) */
+  thumbnailUrl?: string;
 };
 
 export type CreateStreamParams = {
@@ -113,6 +115,15 @@ export function normalizeLiveStreamSession(raw: any): LiveStreamSession {
       'profileImage',
     ),
     hostName: firstStr('hostName', 'channelName', 'ownerName', 'host'),
+    thumbnailUrl: firstStr(
+      'thumbnailUrl',
+      'thumbnail',
+      'coverUrl',
+      'coverImage',
+      'cover',
+      'posterUrl',
+      'previewUrl',
+    ),
     title: String(pick<string>(r, 'title', 'Title') ?? ''),
     description: pick<string>(r, 'description', 'Description'),
     streamKey,
