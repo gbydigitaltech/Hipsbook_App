@@ -77,3 +77,63 @@ index a4f7451..39a4b17 100644
              view.zoomRatio = zoomRatio.floatValue
          }
      }
+diff --git a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnConnectionFailedEvent.kt b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnConnectionFailedEvent.kt
+--- a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnConnectionFailedEvent.kt
++++ b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnConnectionFailedEvent.kt
+@@ -5,7 +5,7 @@
+ import com.facebook.react.uimanager.events.RCTEventEmitter
+ import video.api.reactnative.livestream.ViewProps
+ 
+-class OnConnectionFailedEvent(private val viewTag: Int, private val reason: String?) :
++class OnConnectionFailedEvent(viewTag: Int, private val reason: String?) :
+   Event<OnConnectionFailedEvent>(viewTag) {
+   private val params = Arguments.createMap().apply {
+     putString("code", reason)
+diff --git a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnConnectionSuccessEvent.kt b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnConnectionSuccessEvent.kt
+--- a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnConnectionSuccessEvent.kt
++++ b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnConnectionSuccessEvent.kt
+@@ -4,7 +4,7 @@
+ import com.facebook.react.uimanager.events.RCTEventEmitter
+ import video.api.reactnative.livestream.ViewProps
+ 
+-class OnConnectionSuccessEvent(private val viewTag: Int): Event<OnConnectionSuccessEvent>(viewTag) {
++class OnConnectionSuccessEvent(viewTag: Int): Event<OnConnectionSuccessEvent>(viewTag) {
+   override fun getEventName() = ViewProps.Events.CONNECTION_SUCCESS.eventName
+ 
+   override fun dispatch(rctEventEmitter: RCTEventEmitter) {
+diff --git a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnDisconnectEvent.kt b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnDisconnectEvent.kt
+--- a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnDisconnectEvent.kt
++++ b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnDisconnectEvent.kt
+@@ -4,7 +4,7 @@
+ import com.facebook.react.uimanager.events.RCTEventEmitter
+ import video.api.reactnative.livestream.ViewProps
+ 
+-class OnDisconnectEvent(private val viewTag: Int) :
++class OnDisconnectEvent(viewTag: Int) :
+   Event<OnDisconnectEvent>(viewTag) {
+   override fun getEventName() = ViewProps.Events.DISCONNECTED.eventName
+ 
+diff --git a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnPermissionsDeniedEvent.kt b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnPermissionsDeniedEvent.kt
+--- a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnPermissionsDeniedEvent.kt
++++ b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnPermissionsDeniedEvent.kt
+@@ -5,7 +5,7 @@
+ import com.facebook.react.uimanager.events.RCTEventEmitter
+ import video.api.reactnative.livestream.ViewProps
+ 
+-class OnPermissionsDeniedEvent(private val viewTag: Int, private val permissions: List<String>) :
++class OnPermissionsDeniedEvent(viewTag: Int, private val permissions: List<String>) :
+   Event<OnPermissionsDeniedEvent>(viewTag) {
+   private val params = Arguments.createMap().apply {
+     putArray("permissions", Arguments.fromList(permissions))
+diff --git a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnStartStreamingEvent.kt b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnStartStreamingEvent.kt
+--- a/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnStartStreamingEvent.kt
++++ b/node_modules/@api.video/react-native-livestream/android/src/main/java/video/api/reactnative/livestream/events/OnStartStreamingEvent.kt
+@@ -6,7 +6,7 @@
+ import video.api.reactnative.livestream.ViewProps
+ 
+ class OnStartStreamingEvent(
+-  private val viewTag: Int,
++  viewTag: Int,
+   private val requestId: Int,
+   private val result: Boolean,
+   private val error: String? = null
