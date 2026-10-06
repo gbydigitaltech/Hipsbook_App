@@ -1285,9 +1285,10 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 style={styles.field}
                 value={title}
                 onChangeText={setTitle}
-                placeholder="คืนนี้เล่นอะไรดี…"
+                placeholder="ตั้งชื่อไลฟ์ เช่น สอนกีตาร์เบื้องต้น"
                 placeholderTextColor={SC.placeholder}
                 returnKeyType="next"
+                maxLength={100}
               />
 
               {/* Description */}
@@ -1298,7 +1299,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 style={[styles.field, styles.fieldMulti]}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="เกี่ยวกับ..."
+                placeholder="เล่าให้ผู้ชมรู้ว่าไลฟ์นี้มีอะไร (ไม่บังคับ)"
                 placeholderTextColor={SC.placeholder2}
                 multiline
               />
