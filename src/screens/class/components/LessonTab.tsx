@@ -9,6 +9,7 @@ import AppEmptyState from '../../../components/states/AppEmptyState';
 
 import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
+import { formatClipDuration } from '../../../helpers/clipDuration';
 import { getVideoThumbnailUrl } from '../../../helpers/videoThumbnail';
 import { useListThumbnailPreload } from '../../../helpers/thumbnailPreload';
 
@@ -32,6 +33,8 @@ type LessonItem = {
   activate?: boolean | number | string;
   attachments?: AttachmentItem[];
   groupTitle?: string;
+  duration?: number;
+  str_duration?: string;
 };
 
 type LessonTabProps = {
@@ -201,6 +204,7 @@ const LessonTab: React.FC<LessonTabProps> = ({
             description={item.description}
             price={priceNum}
             mediaId={item.media_id}
+            duration={formatClipDuration(item.str_duration, item.duration)}
             is_free={item.is_free}
             activate={item.activate}
             isPlaying={isPlaying}

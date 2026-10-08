@@ -51,6 +51,7 @@ export type LessonItem = {
   groupTitle?: string;
   description?: string;
   duration?: number;
+  str_duration?: string;
 };
 
 export type DocumentItem = {
@@ -104,6 +105,7 @@ const extractVideoLessons = (groups: any[]): LessonItem[] => {
           typeof v?.duration === 'number'
             ? v.duration
             : Number(v?.duration) || 0,
+        str_duration: v?.str_duration,
       });
     }
   }

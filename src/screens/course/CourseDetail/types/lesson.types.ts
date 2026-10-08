@@ -8,4 +8,9 @@ export interface CourseLesson {
   activate?: boolean;
 
   media_id?: string;
+
+  /** "HH:MM:SS.0" from the API */
+  str_duration?: string;
+  /** milliseconds */
+  duration?: number;
 }

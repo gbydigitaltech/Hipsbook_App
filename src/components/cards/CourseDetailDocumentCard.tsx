@@ -1,4 +1,3 @@
-import { BlurView } from '@react-native-community/blur';
 import React, { useMemo } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -10,6 +9,8 @@ import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import AppButton from '../buttons/AppButton';
 import AppText from '../texts/AppText';
+import LessonCardTitle from './LessonCardTitle';
+import LockedThumbOverlay from './LockedThumbOverlay';
 import {
   AppFontSize,
   AppRadius,
@@ -180,31 +181,22 @@ const CourseDetailDocumentCard: React.FC<Props> = ({
     ],
   );
 
+  const lockOverlay = !canStart ? (
+    <LockedThumbOverlay size={IS_TABLET ? 28 : 24} />
+  ) : null;
+
   const renderThumbnail = () =>
     type === 'audio' ? (
       <View style={styles.audioImage}>
         <AudioIcon />
-        {!canStart && (
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType="dark"
-            blurAmount={4}
-          />
-        )}
+        {lockOverlay}
       </View>
     ) : (
       <View style={styles.coverImageWrapper}>
         <AppText style={styles.pdfBadgeText} fontSize={AppFontSize.caption}>
           PDF
         </AppText>
-
-        {!canStart && (
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType="dark"
-            blurAmount={2}
-          />
-        )}
+        {lockOverlay}
       </View>
     );
 
@@ -214,14 +206,7 @@ const CourseDetailDocumentCard: React.FC<Props> = ({
 
       <View style={styles.infoContainer}>
         <View style={styles.textGroup}>
-          <AppText
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            fontSize={AppFontSize.subtitle}
-            fontWeight="medium"
-          >
-            {title}
-          </AppText>
+          <LessonCardTitle title={title} />
 
           <View style={styles.fileInfo}>
             {!!size && (

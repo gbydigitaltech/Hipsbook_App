@@ -19,6 +19,8 @@ import {
 } from '../../styles/sharedstyles';
 import AppButton from '../buttons/AppButton';
 import AppText from '../texts/AppText';
+import LessonCardTitle from './LessonCardTitle';
+import LockedThumbOverlay from './LockedThumbOverlay';
 
 const formatNumberTH = (n: number) => {
   try {
@@ -245,29 +247,11 @@ const ClassRoomDocumentCard: React.FC<Props> = ({
               {badgeLabel}
             </AppText>
           )}
-
-          {!canStart && (
-            <View
-              pointerEvents="none"
-              style={[
-                StyleSheet.absoluteFill,
-                {
-                  backgroundColor: 'rgba(0, 0, 0, 0.35)',
-                },
-              ]}
-            />
-          )}
+          {!canStart && <LockedThumbOverlay size={IS_TABLET ? 28 : 24} />}
         </View>
 
         <View style={styles.infoContainer}>
-          <AppText
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            fontSize={AppFontSize.subtitle}
-            fontWeight="medium"
-          >
-            {title}
-          </AppText>
+          <LessonCardTitle title={title} />
 
           <View style={styles.fileInfo}>
             {size ? (
