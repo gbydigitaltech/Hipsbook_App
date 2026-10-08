@@ -3,8 +3,13 @@ import React, { useMemo } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { AppFontSize, PRESSED_OPACITY } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  PRESSED_OPACITY,
+} from '../../styles/sharedstyles';
 import AppText from '../texts/AppText';
+import LiveBadge from './LiveBadge';
 import { formatViewers } from './liveFormat';
 import { LiveStreamSession } from './liveStreamService';
 
@@ -22,7 +27,7 @@ const LiveListItem: React.FC<Props> = ({
   onPress,
   onToggleFollow,
 }) => {
-  const { scale } = useResponsive();
+  const { scale, responsiveRadius } = useResponsive();
 
   const styles = useMemo(
     () =>
@@ -31,28 +36,25 @@ const LiveListItem: React.FC<Props> = ({
           flexDirection: 'row',
           padding: scale(6),
           gap: scale(14),
-          borderRadius: scale(8),
-          backgroundColor: AppColors.sheet,
+          borderRadius: responsiveRadius(AppRadius.md),
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: AppColors.border,
+          backgroundColor: AppColors.cardBackground,
         },
         thumb: {
           width: scale(164),
           height: scale(106),
-          borderRadius: scale(6),
+          borderRadius: responsiveRadius(AppRadius.sm),
           overflow: 'hidden',
-          backgroundColor: AppColors.sheetRaised,
+          backgroundColor: AppColors.surfaceSubtle,
           alignItems: 'center',
           justifyContent: 'center',
         },
         fill: { ...StyleSheet.absoluteFillObject },
-        livePill: {
+        liveBadge: {
           position: 'absolute',
           top: scale(6),
-          left: scale(5),
-          height: scale(18),
-          paddingHorizontal: scale(7),
-          borderRadius: 99,
-          backgroundColor: AppColors.danger,
-          justifyContent: 'center',
+          left: scale(6),
         },
         viewers: {
           position: 'absolute',
@@ -63,7 +65,7 @@ const LiveListItem: React.FC<Props> = ({
           flexDirection: 'row',
           alignItems: 'center',
           gap: scale(4),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.mediaScrim,
         },
         white: { color: AppColors.white },
@@ -91,7 +93,7 @@ const LiveListItem: React.FC<Props> = ({
           bottom: 0,
           height: scale(32),
           paddingHorizontal: scale(15),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           justifyContent: 'center',
           backgroundColor: AppColors.surface,
         },
@@ -102,7 +104,7 @@ const LiveListItem: React.FC<Props> = ({
         },
         followTextOn: { color: AppColors.primary },
       }),
-    [scale],
+    [scale, responsiveRadius],
   );
 
   return (
@@ -125,11 +127,7 @@ const LiveListItem: React.FC<Props> = ({
             color={AppColors.textTertiary}
           />
         )}
-        <View style={styles.livePill}>
-          <AppText fontSize={AppFontSize.overline} style={styles.white}>
-            Live
-          </AppText>
-        </View>
+        <LiveBadge style={styles.liveBadge} />
         <View style={styles.viewers}>
           <Ionicons
             name="eye-outline"

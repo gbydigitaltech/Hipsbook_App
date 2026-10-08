@@ -39,7 +39,8 @@ import { IS_TABLET } from '../../constants/platform';
 import { logError } from '../../helpers/logger';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors, LIVE_HEART_COLORS } from '../../styles/colors';
-import { AppFontSize } from '../../styles/sharedstyles';
+import { getFontFamily } from '../../helpers/fontFamilyHelper';
+import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
 import { launchImageLibrary } from 'react-native-image-picker';
 import {
   Gesture,
@@ -193,7 +194,7 @@ const toggleStyles = StyleSheet.create({
   track: {
     width: 64,
     height: 28,
-    borderRadius: 100,
+    borderRadius: AppRadius.pill,
     padding: 2,
     flexDirection: 'row',
     justifyContent: 'flex-start',
@@ -203,7 +204,7 @@ const toggleStyles = StyleSheet.create({
   knob: {
     width: 39,
     height: 24,
-    borderRadius: 100,
+    borderRadius: AppRadius.pill,
     backgroundColor: AppColors.white,
   },
 });
@@ -312,7 +313,8 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
   const { width: winW, height: winH } = useWindowDimensions();
   const isLand = winW > winH;
   // One edge spacing for everything (top row/chat/input bar) + clear of the Dynamic Island/notch via insets
-  const { scale, verticalScale } = useResponsive();
+  const { scale, verticalScale, moderateScale, responsiveRadius } =
+    useResponsive();
   const E = scale(16);
 
   const [title, setTitle] = useState('');
@@ -806,7 +808,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           top: scale(16),
           height: scale(24),
           paddingHorizontal: scale(8),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           borderWidth: 1,
           borderColor: SC.ready,
           flexDirection: 'row',
@@ -826,7 +828,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           top: scale(14),
           height: scale(28),
           paddingHorizontal: scale(10),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
           flexDirection: 'row',
           alignItems: 'center',
@@ -860,7 +862,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
         readyPill2: {
           height: scale(28),
           paddingHorizontal: scale(10),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           borderWidth: 1,
           borderColor: SC.ready,
           backgroundColor: AppColors.mediaScrim,
@@ -879,7 +881,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
         camDone: {
           alignSelf: 'stretch',
           height: scale(46),
-          borderRadius: 100,
+          borderRadius: AppRadius.pill,
           backgroundColor: SC.primary,
           justifyContent: 'center',
           alignItems: 'center',
@@ -914,21 +916,21 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
         },
         field: {
           minHeight: scale(45),
-          borderRadius: scale(8),
+          borderRadius: responsiveRadius(AppRadius.md),
           backgroundColor: SC.field,
           paddingHorizontal: scale(11),
           paddingTop: verticalScale(9),
           paddingBottom: verticalScale(4),
           color: AppColors.white,
-          fontSize: 16,
-          fontFamily: 'IBMPlexSansThai-Regular',
+          fontSize: moderateScale(AppFontSize.body, 0.5),
+          fontFamily: getFontFamily('regular'),
         },
         fieldMulti: { height: scale(99), textAlignVertical: 'top' },
         segRow: { flexDirection: 'row', gap: scale(7) },
         seg: {
           flex: 1,
           height: scale(44),
-          borderRadius: 50,
+          borderRadius: AppRadius.pill,
           backgroundColor: SC.card,
           justifyContent: 'center',
           alignItems: 'center',
@@ -959,7 +961,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           marginTop: verticalScale(21),
           marginHorizontal: scale(12.5),
           height: scale(46),
-          borderRadius: 100,
+          borderRadius: AppRadius.pill,
           overflow: 'hidden',
           justifyContent: 'center',
           alignItems: 'center',
@@ -990,7 +992,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           gap: scale(6),
           paddingHorizontal: scale(12),
           height: scale(30),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
         creatingHintText: { color: AppColors.textSecondary },
@@ -1001,7 +1003,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
           top: '42%',
           paddingHorizontal: scale(14),
           height: scale(32),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.scrim,
           justifyContent: 'center',
           zIndex: 5,
@@ -1026,7 +1028,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
         },
         pill: {
           height: scale(26),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
@@ -1114,6 +1116,8 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
       }),
     [
       insets.top,
+      moderateScale,
+      responsiveRadius,
       insets.bottom,
       insets.left,
       insets.right,
@@ -1137,7 +1141,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               fontSize={AppFontSize.subtitle}
               style={styles.headerTitle}
             >
-              Start live
+              เริ่มไลฟ์
             </AppText>
             <TouchableOpacity
               onPress={handleClose}

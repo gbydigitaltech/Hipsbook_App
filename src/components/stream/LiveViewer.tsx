@@ -421,7 +421,7 @@ const LiveViewerContent = ({
         ctrlCircle: {
           width: scale(40),
           height: scale(40),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.mediaScrim,
           justifyContent: 'center',
           alignItems: 'center',
@@ -460,7 +460,7 @@ const LiveViewerContent = ({
           top: verticalScale(12),
           height: scale(26),
           paddingHorizontal: scale(13),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: C.danger,
           flexDirection: 'row',
           alignItems: 'center',
@@ -518,14 +518,14 @@ const LiveViewerContent = ({
           gap: scale(6),
           height: scale(36),
           paddingHorizontal: scale(14),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.mediaScrim,
         },
         fsChatBtnOn: { backgroundColor: C.primary },
         fsLive: {
           height: scale(26),
           paddingHorizontal: scale(13),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: C.danger,
           flexDirection: 'row',
           alignItems: 'center',
@@ -545,8 +545,8 @@ const LiveViewerContent = ({
           paddingVertical: barPad,
           // Fullscreen: more horizontal padding so the first/last buttons aren't near the rounded ends
           paddingHorizontal: isFullscreen ? scale(26) : barPad,
-          borderRadius: 99,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          borderRadius: AppRadius.pill,
+          backgroundColor: AppColors.mediaScrim,
           flexDirection: 'row',
           alignItems: 'center',
           gap: scale(isFullscreen ? 18 : 14),
@@ -560,7 +560,7 @@ const LiveViewerContent = ({
         track: {
           height: isFullscreen ? 4 : 3.5,
           borderRadius: 3,
-          backgroundColor: 'rgba(255,255,255,0.45)',
+          backgroundColor: AppColors.mediaTrack,
           overflow: 'visible',
         },
         trackFill: {
@@ -661,7 +661,7 @@ const LiveViewerContent = ({
           top: scale(32),
           width: scale(30),
           height: scale(16),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: C.danger,
           justifyContent: 'center',
           alignItems: 'center',
@@ -677,7 +677,7 @@ const LiveViewerContent = ({
         chip: {
           height: scale(20),
           paddingHorizontal: scale(10),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: C.chip,
           justifyContent: 'center',
         },
@@ -728,7 +728,7 @@ const LiveViewerContent = ({
         sheetLive: {
           height: scale(20),
           paddingHorizontal: scale(8),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: C.danger,
           flexDirection: 'row',
           alignItems: 'center',
@@ -796,7 +796,7 @@ const LiveViewerContent = ({
         sideLive: {
           height: scale(18),
           paddingHorizontal: scale(7),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: C.danger,
           flexDirection: 'row',
           alignItems: 'center',
@@ -844,7 +844,7 @@ const LiveViewerContent = ({
           paddingVertical: verticalScale(10),
           paddingHorizontal: scale(24),
           backgroundColor: C.danger,
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
         },
       }),
     [
@@ -1335,8 +1335,11 @@ const LiveViewerContent = ({
                       <View style={styles.sideSubRow}>
                         <View style={styles.sideLive}>
                           <View style={styles.sideLiveDot} />
-                          <AppText fontSize={10} style={styles.white}>
-                            LIVE
+                          <AppText
+                            fontSize={AppFontSize.overline}
+                            style={styles.white}
+                          >
+                            Live
                           </AppText>
                         </View>
                         <View style={styles.sideViewers}>

@@ -8,19 +8,26 @@ import React, {
 } from 'react';
 import {
   AppState,
-  FlatList,
-  Pressable,
   RefreshControl,
   StyleSheet,
-  TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { IS_TABLET } from '../../constants/platform';
 import { logWarn } from '../../helpers/logger';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { AppFontSize, PRESSED_OPACITY } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  PRESSED_OPACITY,
+  sharedTopSpace,
+} from '../../styles/sharedstyles';
 import AppSpinner from '../loading/AppSpinner';
+import Search, { SEARCH_BAR_HEIGHT } from '../search/Search';
+import SegmentedPills from '../segments/SegmentedPills';
+import AppEmptyState from '../states/AppEmptyState';
+import AppFlatList from '../views/AppFlatList';
 import AppText from '../texts/AppText';
 import LiveFeaturedPreview from './LiveFeaturedPreview';
 import LiveListItem from './LiveListItem';
@@ -41,23 +48,20 @@ const TABS: { key: TabKey; label: string }[] = [
 const hostKey = (s: LiveStreamSession) => s.hostName || s.logoUrl || s.id;
 
 /**
- * Live page (Figma "Live"): header + search, a playing preview of one live,
- * filter chips, and the list of lives.
+ * Live page: same header/search/empty-state components as the Course tab,
+ * a playing preview of one live, filter pills, and the list of lives.
  */
 const StreamSection = () => {
-  const { scale, verticalScale } = useResponsive();
-  const insets = useSafeAreaInsets();
+  const { verticalScale, responsiveRadius } = useResponsive();
 
   const [showViewer, setShowViewer] = useState(false);
   const [showPublisher, setShowPublisher] = useState(false);
   const [selectedStream, setSelectedStream] =
     useState<LiveStreamSession | null>(null);
   const [liveStreams, setLiveStreams] = useState<LiveStreamSession[]>([]);
-  const [loadingStreams, setLoadingStreams] = useState(false);
   const [loadedOnce, setLoadedOnce] = useState(false);
 
   const [tab, setTab] = useState<TabKey>('live');
-  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   // TODO: replace with the backend follow API when it exists (local only for now)
   const [followed, setFollowed] = useState<Set<string>>(() => new Set());
@@ -75,7 +79,6 @@ const StreamSection = () => {
   const loadStreams = useCallback(async (silent: boolean) => {
     if (inFlightRef.current && silent) return;
     inFlightRef.current = true;
-    if (!silent) setLoadingStreams(true);
     // Manual refresh: retry once on timeout/network drop | silent refresh: don't, wait for the next round
     const attempts = silent ? 1 : 2;
     try {
@@ -107,13 +110,24 @@ const StreamSection = () => {
       inFlightRef.current = false;
       if (mountedRef.current) {
         setLoadedOnce(true);
-        if (!silent) setLoadingStreams(false);
       }
     }
   }, []);
 
   // For onPress/onRefresh (don't pass the event straight into loadStreams)
   const fetchStreams = useCallback(() => loadStreams(false), [loadStreams]);
+
+  // Spinner under the search bar only while the user pulls to refresh
+  // (reloads after closing a live happen quietly)
+  const [pullRefreshing, setPullRefreshing] = useState(false);
+  const onPullRefresh = useCallback(async () => {
+    setPullRefreshing(true);
+    try {
+      await loadStreams(false);
+    } finally {
+      if (mountedRef.current) setPullRefreshing(false);
+    }
+  }, [loadStreams]);
 
   useEffect(() => {
     fetchStreams();
@@ -211,6 +225,8 @@ const StreamSection = () => {
     return list;
   }, [liveStreams, tab, followed, query]);
 
+  const searchBarHeight = verticalScale(SEARCH_BAR_HEIGHT);
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -218,248 +234,136 @@ const StreamSection = () => {
         // flexGrow lets the empty message fill (and center in) the space left
         content: {
           flexGrow: 1,
-          paddingHorizontal: scale(8),
-          paddingBottom: verticalScale(24),
-          gap: verticalScale(9),
+          gap: verticalScale(IS_TABLET ? 14 : 12),
         },
-        header: {
-          paddingTop: insets.top + verticalScale(12),
-          paddingHorizontal: scale(10),
-          height: insets.top + verticalScale(12) + scale(32),
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+        // Same header as the Course tab: big title + search bar
+        headerRow: {
+          marginTop: sharedTopSpace,
+          marginBottom: verticalScale(IS_TABLET ? 24 : 18),
         },
-        headerTitleWrap: {
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: scale(32),
-          alignItems: 'center',
-          justifyContent: 'center',
+        title: {
+          marginBottom: verticalScale(12),
         },
-        headerTitle: { color: AppColors.grayLight },
-        iconBtn: {
-          width: scale(32),
-          height: scale(32),
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-        searchBox: {
-          marginTop: verticalScale(10),
-          height: scale(40),
-          borderRadius: 99,
-          paddingHorizontal: scale(14),
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: scale(8),
+        goLiveIconBtn: {
+          width: searchBarHeight,
+          height: searchBarHeight,
+          borderRadius: responsiveRadius(AppRadius.md),
           backgroundColor: AppColors.backgroundInteractive,
-        },
-        searchInput: {
-          flex: 1,
-          color: AppColors.white,
-          fontSize: scale(14),
-          paddingVertical: 0,
-        },
-        featured: { marginTop: verticalScale(14) },
-        chips: {
-          marginTop: verticalScale(20),
-          marginBottom: verticalScale(5),
-          flexDirection: 'row',
-          gap: scale(12),
-        },
-        chip: {
-          height: scale(28),
-          paddingHorizontal: scale(12),
-          borderRadius: 99,
+          alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: AppColors.surface,
         },
-        chipActive: {
-          backgroundColor: AppColors.primary,
+        chipsTop: { marginTop: 0 },
+        chips: {
+          marginTop: verticalScale(IS_TABLET ? 20 : 16),
+          marginBottom: verticalScale(4),
         },
-        white: { color: AppColors.white },
+        loading: {
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
         empty: {
           flex: 1,
           justifyContent: 'center',
-          alignItems: 'center',
           paddingVertical: verticalScale(24),
         },
-        emptyText: { color: AppColors.textTertiary, textAlign: 'center' },
-        emptyCard: {
-          height: verticalScale(191),
-          borderRadius: scale(6),
-          backgroundColor: AppColors.sheet,
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: verticalScale(10),
-        },
-        goLiveBtn: {
-          height: scale(36),
-          paddingHorizontal: scale(18),
-          borderRadius: 99,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: scale(6),
-          backgroundColor: AppColors.primary,
-        },
       }),
-    [scale, verticalScale, insets.top],
+    [verticalScale, responsiveRadius, searchBarHeight],
   );
 
-  const header = (
-    <View>
-      <View style={styles.header}>
-        {/* Left: start a live | center: title | right: search */}
-        <Pressable
-          style={styles.iconBtn}
-          onPress={() => setShowPublisher(true)}
-          hitSlop={8}
-          accessibilityLabel="เริ่มไลฟ์"
-        >
-          <Ionicons
-            name="videocam-outline"
-            size={scale(24)}
-            color={AppColors.white}
-          />
-        </Pressable>
-        <View style={styles.headerTitleWrap} pointerEvents="none">
-          <AppText
-            fontSize={AppFontSize.subtitle}
-            fontWeight="medium"
-            style={styles.headerTitle}
-          >
-            Live
-          </AppText>
-        </View>
-        <Pressable
-          style={styles.iconBtn}
-          onPress={() => {
-            setSearchOpen(o => !o);
-            if (searchOpen) setQuery('');
-          }}
-          hitSlop={8}
-          accessibilityLabel="ค้นหาไลฟ์"
-        >
-          <Ionicons
-            name={searchOpen ? 'close' : 'search-outline'}
-            size={scale(24)}
-            color={AppColors.white}
-          />
-        </Pressable>
-      </View>
+  const staticHeader = (
+    <View style={styles.headerRow}>
+      <AppText
+        style={styles.title}
+        fontSize={AppFontSize.h1}
+        fontWeight="semiBold"
+      >
+        ไลฟ์สด
+      </AppText>
 
-      {searchOpen && (
-        <View style={styles.searchBox}>
-          <Ionicons
-            name="search-outline"
-            size={scale(16)}
-            color={AppColors.textTertiary}
-          />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="ค้นหาชื่อไลฟ์หรือผู้ไลฟ์"
-            placeholderTextColor={AppColors.textTertiary}
-            style={styles.searchInput}
-            autoFocus
-            returnKeyType="search"
-          />
-        </View>
+      <Search
+        value={query}
+        onChangeText={setQuery}
+        placeholder="ค้นหาชื่อไลฟ์หรือผู้ไลฟ์"
+        withHorizontalPadding={false}
+        trailingAction={
+          <TouchableOpacity
+            style={styles.goLiveIconBtn}
+            activeOpacity={PRESSED_OPACITY}
+            onPress={() => setShowPublisher(true)}
+            accessibilityRole="button"
+            accessibilityLabel="เริ่มไลฟ์"
+          >
+            <Ionicons
+              name="videocam-outline"
+              size={IS_TABLET ? 24 : 20}
+              color={AppColors.white}
+            />
+          </TouchableOpacity>
+        }
+      />
+    </View>
+  );
+
+  const listHeader = (
+    <View>
+      {/* No one live: skip the box, the list below already says so */}
+      {featured && (
+        <LiveFeaturedPreview
+          stream={featured}
+          paused={showViewer || showPublisher}
+          onPress={handleWatchStream}
+        />
       )}
 
-      <View style={styles.featured}>
-        {featured ? (
-          <LiveFeaturedPreview
-            stream={featured}
-            paused={showViewer || showPublisher}
-            onPress={handleWatchStream}
-          />
-        ) : (
-          <View style={styles.emptyCard}>
-            {!loadedOnce ? (
-              <AppSpinner size="large" />
-            ) : (
-              <>
-                <Ionicons
-                  name="radio-outline"
-                  size={scale(36)}
-                  color={AppColors.textTertiary}
-                />
-                <AppText fontSize={AppFontSize.body} style={styles.emptyText}>
-                  ยังไม่มีใครไลฟ์อยู่ตอนนี้
-                </AppText>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.goLiveBtn,
-                    pressed && { opacity: PRESSED_OPACITY },
-                  ]}
-                  onPress={() => setShowPublisher(true)}
-                >
-                  <Ionicons
-                    name="videocam"
-                    size={scale(16)}
-                    color={AppColors.white}
-                  />
-                  <AppText
-                    fontSize={AppFontSize.body}
-                    fontWeight="medium"
-                    style={styles.white}
-                  >
-                    เริ่มไลฟ์
-                  </AppText>
-                </Pressable>
-              </>
-            )}
-          </View>
-        )}
-      </View>
-
-      <View style={styles.chips}>
-        {TABS.map(t => {
-          const active = tab === t.key;
-          return (
-            <Pressable
-              key={t.key}
-              onPress={() => setTab(t.key)}
-              style={[styles.chip, active && styles.chipActive]}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: active }}
-            >
-              <AppText fontSize={AppFontSize.caption} style={styles.white}>
-                {t.label}
-              </AppText>
-            </Pressable>
-          );
-        })}
+      <View style={[styles.chips, !featured && styles.chipsTop]}>
+        <SegmentedPills
+          options={TABS.map(t => ({ label: t.label, value: t.key }))}
+          value={tab}
+          onChange={setTab}
+          fontSize={AppFontSize.caption}
+          paddingVertical={6}
+          paddingHorizontal={14}
+        />
       </View>
     </View>
   );
 
-  const emptyList = loadedOnce ? (
-    <View style={styles.empty}>
-      <AppText fontSize={AppFontSize.body} style={styles.emptyText}>
-        {query.trim()
+  // First load: one spinner in the middle of the screen (no header/cards yet)
+  const firstLoad = !loadedOnce;
+
+  const emptyList = firstLoad ? (
+    <View style={styles.loading}>
+      <AppSpinner size="large" />
+    </View>
+  ) : (
+    <AppEmptyState
+      containerStyle={styles.empty}
+      icon={query.trim() ? 'search-outline' : 'radio-outline'}
+      title={
+        query.trim()
           ? 'ไม่พบไลฟ์ที่ค้นหา'
           : tab === 'following'
           ? 'ยังไม่มีไลฟ์จากคนที่คุณติดตาม'
-          : 'ยังไม่มีไลฟ์ในตอนนี้'}
-      </AppText>
-    </View>
-  ) : null;
+          : 'ยังไม่มีไลฟ์ในตอนนี้'
+      }
+    />
+  );
 
   return (
     <>
-      <FlatList
+      <AppFlatList
         style={styles.list}
         contentContainerStyle={styles.content}
-        data={visibleStreams}
-        keyExtractor={item => item.id}
-        ListHeaderComponent={header}
+        withHorizontalPadding
+        staticHeader={staticHeader}
+        header={firstLoad ? null : listHeader}
+        data={firstLoad ? [] : visibleStreams}
+        keyExtractor={(item: LiveStreamSession) => item.id}
         ListEmptyComponent={emptyList}
         keyboardShouldPersistTaps="handled"
-        renderItem={({ item }) => (
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }: { item: LiveStreamSession }) => (
           <LiveListItem
             stream={item}
             following={followed.has(hostKey(item))}
@@ -469,12 +373,11 @@ const StreamSection = () => {
         )}
         refreshControl={
           <RefreshControl
-            refreshing={loadingStreams && loadedOnce}
-            onRefresh={fetchStreams}
+            refreshing={pullRefreshing}
+            onRefresh={onPullRefresh}
             tintColor={AppColors.primary}
             colors={[AppColors.primary]}
             progressBackgroundColor={AppColors.sheet}
-            progressViewOffset={insets.top}
           />
         }
       />

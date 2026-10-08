@@ -24,7 +24,8 @@ import FastImage from '@d11/react-native-fast-image';
 import { IS_IOS, IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { AppFontSize } from '../../styles/sharedstyles';
+import { getFontFamily } from '../../helpers/fontFamilyHelper';
+import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
 import CommentIcon from '../../assets/icons/CommentIcon';
 import AppText from '../texts/AppText';
 import useChat, { ChatMessage } from '../../hooks/chat/useChat';
@@ -212,12 +213,16 @@ const SideRow = memo(
           <Ionicons name="person" size={13} color={AppColors.textSecondary} />
         </View>
       )}
-      <AppText fontSize={13} style={styles.sText}>
-        <AppText fontSize={13} fontWeight="medium" style={styles.sName}>
+      <AppText fontSize={AppFontSize.caption} style={styles.sText}>
+        <AppText
+          fontSize={AppFontSize.caption}
+          fontWeight="medium"
+          style={styles.sName}
+        >
           {item.user}
         </AppText>
         {'  '}
-        <AppText fontSize={13} style={styles.sMsg}>
+        <AppText fontSize={AppFontSize.caption} style={styles.sMsg}>
           {item.text}
         </AppText>
       </AppText>
@@ -254,7 +259,7 @@ const LiveChat = ({
   const isSide = variant === 'side';
   const myAvatar = useProfile(st => st.profile?.profile_image);
   const isPanel = variant === 'panel' && !ephemeral;
-  const { scale, verticalScale } = useResponsive();
+  const { scale, verticalScale, moderateScale } = useResponsive();
   const { messages, input, setInput, sendMessage, sending, error } = useChat(
     streamId,
     canSend,
@@ -511,7 +516,7 @@ const LiveChat = ({
           height: scale(28),
           paddingLeft: scale(12),
           paddingRight: scale(8),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.mediaScrim,
           flexDirection: 'row',
           alignItems: 'center',
@@ -528,7 +533,7 @@ const LiveChat = ({
           paddingLeft: scale(3),
           paddingRight: scale(11),
           paddingVertical: verticalScale(1),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.chip,
         },
         hText: { color: AppColors.primary, flexShrink: 1 },
@@ -640,8 +645,8 @@ const LiveChat = ({
           minHeight: scale(32),
           maxHeight: scale(90),
           color: AppColors.white,
-          fontSize: 12,
-          fontFamily: 'IBMPlexSansThai-Regular',
+          fontSize: moderateScale(AppFontSize.caption, 0.5),
+          fontFamily: getFontFamily('regular'),
           paddingTop: 7,
           paddingBottom: 7,
           textAlignVertical: 'center',
@@ -682,7 +687,7 @@ const LiveChat = ({
           backgroundColor: AppColors.textTertiary,
         },
       }),
-    [scale, verticalScale, hostEdge],
+    [scale, verticalScale, moderateScale, hostEdge],
   );
 
   const inputBarPadding = useMemo(
@@ -843,7 +848,7 @@ const LiveChat = ({
             size={IS_TABLET ? 34 : 28}
             color={AppColors.textTertiary}
           />
-          <AppText fontSize={13} style={styles.sEmptyText}>
+          <AppText fontSize={AppFontSize.caption} style={styles.sEmptyText}>
             ยังไม่มีข้อความ{'\n'}เริ่มพูดคุยกันเลย
           </AppText>
         </View>
@@ -919,7 +924,7 @@ const LiveChat = ({
               value={input}
               onChangeText={setInput}
               placeholder="พิมพ์ข้อความของคุณ..."
-              placeholderTextColor={AppColors.textSecondary}
+              placeholderTextColor={AppColors.textTertiary}
               multiline
               submitBehavior="newline"
             />
@@ -964,7 +969,7 @@ const LiveChat = ({
               value={input}
               onChangeText={setInput}
               placeholder="พิมพ์ข้อความของคุณ..."
-              placeholderTextColor={AppColors.textSecondary}
+              placeholderTextColor={AppColors.textTertiary}
               multiline
               submitBehavior="newline"
             />
@@ -996,7 +1001,7 @@ const LiveChat = ({
             value={input}
             onChangeText={setInput}
             placeholder="พิมพ์ข้อความ..."
-            placeholderTextColor={AppColors.grayLight}
+            placeholderTextColor={AppColors.textTertiary}
             multiline
             submitBehavior="newline"
           />
