@@ -226,11 +226,6 @@ const CourseFilterModal: React.FC<Props> = ({ visible, onClose, onApply }) => {
         chipSelected: {
           backgroundColor: AppColors.primary,
           borderColor: AppColors.primary,
-          shadowColor: AppColors.primary,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.35,
-          shadowRadius: 5,
-          elevation: 3,
         },
         chipText: {
           color: AppColors.textSecondary,
