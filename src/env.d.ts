@@ -1,7 +1,6 @@
 declare module '@env' {
   export const API_BASE_URL: string;
   export const RESET_PASSWORD_CALLBACK: string;
-  export const VIDEO_STREAM_BASE_URL: string;
   export const VIDEO_THUMBNAIL_BASE_URL: string;
   export const GOOGLE_WEB_CLIENT_ID: string;
   export const GOOGLE_IOS_CLIENT_ID: string;
