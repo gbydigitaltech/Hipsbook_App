@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import FastImage from '@d11/react-native-fast-image';
 
+import { logWarn } from '../../helpers/logger';
 import { AppColors } from '../../styles/colors';
 
 type ResizeModeKey = 'cover' | 'contain' | 'stretch' | 'center';
@@ -62,7 +63,10 @@ const AppImage: React.FC<Props> = ({
           resizeMode={FastImage.resizeMode[resizeMode]}
           accessibilityLabel={accessibilityLabel}
           onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
+          onError={() => {
+            logWarn('Image', `failed to load ${uri}`);
+            setFailed(true);
+          }}
         />
       )}
 

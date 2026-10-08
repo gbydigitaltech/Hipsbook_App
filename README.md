@@ -57,8 +57,7 @@ cp .env.example .env
 |---|---|
 | `API_BASE_URL` | URL ของ backend API |
 | `RESET_PASSWORD_CALLBACK` | deep link ปลายทางหลังรีเซ็ตรหัสผ่าน |
-| `VIDEO_STREAM_BASE_URL` | base URL ของไฟล์วิดีโอคอร์ส |
-| `VIDEO_THUMBNAIL_BASE_URL` | base URL ของ thumbnail |
+| `VIDEO_THUMBNAIL_BASE_URL` | base URL ของภาพปกวิดีโอบทเรียน (`https://hips-store.com/thumbnail`) |
 | `GOOGLE_WEB_CLIENT_ID` / `GOOGLE_IOS_CLIENT_ID` | Google Sign-In |
 | `TWITTER_CLIENT_ID` | Twitter OAuth |
 | `LINE_CLIENT_ID` | LINE Login |

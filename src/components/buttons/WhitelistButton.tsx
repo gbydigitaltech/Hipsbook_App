@@ -144,12 +144,13 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   iconWrapper: { justifyContent: 'center', alignItems: 'center' },
+  // Same flat shadow in both states (no teal glow when active)
   activeShadow: {
-    shadowColor: AppColors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.45,
-    shadowRadius: 6,
-    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 5,
+    elevation: 3,
   },
   inactiveShadow: {
     shadowColor: '#000',

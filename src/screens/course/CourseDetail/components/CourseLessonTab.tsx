@@ -4,6 +4,7 @@ import CourseDetailLessonCard from '../../../../components/cards/CourseDetailLes
 import AppSectionHeader from '../../../../components/sections/AppSectionHeader';
 import { IS_TABLET } from '../../../../constants/platform';
 import { useResponsive } from '../../../../helpers/responsive';
+import { formatClipDuration } from '../../../../helpers/clipDuration';
 import { getVideoThumbnailUrl } from '../../../../helpers/videoThumbnail';
 import { preloadThumbnails } from '../../../../helpers/thumbnailPreload';
 import { LessonGroup } from '../types/group.types';
@@ -35,7 +36,9 @@ const CourseLessonTab: React.FC<Props> = ({ groups, onPressLesson }) => {
           <AppSectionHeader
             title={group.title}
             titleFontSize={AppFontSize.subtitle}
-            containerStyle={{ marginBottom: verticalScale(IS_TABLET ? 14 : 12) }}
+            containerStyle={{
+              marginBottom: verticalScale(IS_TABLET ? 14 : 12),
+            }}
           />
 
           <View style={{ gap: verticalScale(IS_TABLET ? 20 : 16) }}>
@@ -48,6 +51,10 @@ const CourseLessonTab: React.FC<Props> = ({ groups, onPressLesson }) => {
                 is_free={lesson.is_free}
                 activate={lesson.activate}
                 mediaId={lesson.media_id}
+                duration={formatClipDuration(
+                  lesson.str_duration,
+                  lesson.duration,
+                )}
                 onPressStart={() => onPressLesson(lesson)}
               />
             ))}

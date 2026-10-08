@@ -10,6 +10,6 @@ export interface VideoAccessResponse {
   streamUrl: string;
   lessonId: string;
   courseId: string;
-  /** Video provider, e.g. "jwplayer" (may change in the future). */
+  /** Video provider name reported by the backend. */
   provider: string;
 }

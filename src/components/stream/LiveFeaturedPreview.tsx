@@ -5,12 +5,19 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { AppFontSize, PRESSED_OPACITY } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  PRESSED_OPACITY,
+} from '../../styles/sharedstyles';
 import AppText from '../texts/AppText';
 import Player from '../videos/Player';
 import liveStreamService, { LiveStreamSession } from './liveStreamService';
 import { getHlsUrl, normalizeHlsPlaybackUrl } from './streamConfig';
+import LiveBadge from './LiveBadge';
 import { formatViewers } from './liveFormat';
+
+const BOTTOM_FADE = ['rgba(0,0,0,0)', AppColors.scrimStrong];
 
 type Props = {
   stream: LiveStreamSession;
@@ -24,7 +31,7 @@ type Props = {
  * (Figma "LIVE NOW" card). Tap to open the full viewer.
  */
 const LiveFeaturedPreview: React.FC<Props> = ({ stream, paused, onPress }) => {
-  const { scale, verticalScale } = useResponsive();
+  const { scale, verticalScale, responsiveRadius } = useResponsive();
   const isFocused = useIsFocused();
   const [hlsUrl, setHlsUrl] = useState('');
   const [videoReady, setVideoReady] = useState(false);
@@ -57,21 +64,16 @@ const LiveFeaturedPreview: React.FC<Props> = ({ stream, paused, onPress }) => {
       StyleSheet.create({
         card: {
           height: verticalScale(191),
-          borderRadius: scale(6),
+          borderRadius: responsiveRadius(AppRadius.md),
           overflow: 'hidden',
-          backgroundColor: AppColors.sheet,
+          backgroundColor: AppColors.cardBackground,
         },
         fill: { ...StyleSheet.absoluteFillObject },
         hidden: { opacity: 0 },
-        livePill: {
+        liveBadge: {
           position: 'absolute',
-          top: scale(9),
-          left: scale(11),
-          paddingHorizontal: scale(9),
-          height: scale(23),
-          borderRadius: 99,
-          backgroundColor: AppColors.danger,
-          justifyContent: 'center',
+          top: scale(10),
+          left: scale(10),
         },
         white: { color: AppColors.white },
         bottom: {
@@ -93,7 +95,7 @@ const LiveFeaturedPreview: React.FC<Props> = ({ stream, paused, onPress }) => {
           gap: scale(4),
           paddingHorizontal: scale(8),
           height: scale(24),
-          borderRadius: 99,
+          borderRadius: AppRadius.pill,
           backgroundColor: AppColors.mediaScrim,
         },
         placeholder: {
@@ -102,7 +104,7 @@ const LiveFeaturedPreview: React.FC<Props> = ({ stream, paused, onPress }) => {
           justifyContent: 'center',
         },
       }),
-    [scale, verticalScale],
+    [scale, verticalScale, responsiveRadius],
   );
 
   const playing = !!hlsUrl && isFocused && !paused;
@@ -153,14 +155,10 @@ const LiveFeaturedPreview: React.FC<Props> = ({ stream, paused, onPress }) => {
         </View>
       )}
 
-      <View style={styles.livePill}>
-        <AppText fontSize={AppFontSize.caption} style={styles.white}>
-          LIVE NOW
-        </AppText>
-      </View>
+      <LiveBadge size="md" style={styles.liveBadge} />
 
       <LinearGradient
-        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.75)']}
+        colors={BOTTOM_FADE}
         style={styles.bottom}
         pointerEvents="none"
       >

@@ -1,4 +1,3 @@
-import { BlurView } from '@react-native-community/blur';
 import React, { memo, useMemo } from 'react';
 import {
   Pressable,
@@ -18,6 +17,8 @@ import AppButton from '../buttons/AppButton';
 import AppImage from '../images/AppImage';
 import { IMAGES } from '../../constants/images-paths';
 import AppText from '../texts/AppText';
+import DurationBadge from './DurationBadge';
+import LockedThumbOverlay from './LockedThumbOverlay';
 import {
   AppFontSize,
   AppRadius,
@@ -51,6 +52,8 @@ type LessonCardProps = {
   description?: string;
   price: number;
   mediaId?: string;
+  /** Clip length shown on the thumbnail, e.g. "12:40" */
+  duration?: string;
   is_free?: boolean;
   activate?: boolean | number | string;
   isPlaying?: boolean;
@@ -66,6 +69,7 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
   description,
   price,
   mediaId,
+  duration,
   is_free,
   activate,
   onPressBuy,
@@ -126,18 +130,16 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
             style={styles.coverImage}
             placeholderIcon={IMAGES.appLogoFull}
           />
-          <View style={styles.playIconOverlay}>
-            <PlayCircleIcon size={IS_TABLET ? 44 : 28} />
-          </View>
+          {canStart && (
+            <View style={styles.playIconOverlay}>
+              <PlayCircleIcon size={IS_TABLET ? 44 : 28} />
+            </View>
+          )}
         </View>
 
-        {!canStart && (
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType="dark"
-            blurAmount={2}
-          />
-        )}
+        {/* Not bought yet: dark tint + centred lock */}
+        {!canStart && <LockedThumbOverlay size={IS_TABLET ? 44 : 28} />}
+        {!!duration && <DurationBadge text={duration} />}
       </View>
 
       <View

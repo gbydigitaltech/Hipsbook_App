@@ -1,4 +1,3 @@
-import { VIDEO_STREAM_BASE_URL, VIDEO_THUMBNAIL_BASE_URL } from '@env';
 import React, {
   forwardRef,
   useCallback,
@@ -12,6 +11,7 @@ import AppSpinner from '../loading/AppSpinner';
 import Video, { SelectedVideoTrackType, VideoRef } from 'react-native-video';
 import { log, logWarn } from '../../helpers/logger';
 import { useVideoAccess } from '../../hooks/videos/useVideoAccess';
+import { getVideoThumbnailUrl } from '../../helpers/videoThumbnail';
 import { AppColors } from '../../styles/colors';
 import { AppFontSize } from '../../styles/sharedstyles';
 import AppText from '../texts/AppText';
@@ -121,13 +121,10 @@ const Player = forwardRef<PlayerHandle, PlayerProps>(function Player(
     onStalled?.(false);
   }, [onStalled]);
 
-  const fallbackUri = mediaId
-    ? `${VIDEO_STREAM_BASE_URL}/${mediaId}.m3u8`
-    : undefined;
-  const videoUri = sourceUrl ?? (lessonId ? streamUrl : fallbackUri);
-  const posterUri = mediaId
-    ? `${VIDEO_THUMBNAIL_BASE_URL}/${mediaId}.jpg`
-    : undefined;
+  // Lessons always play the signed streamUrl from the video-access API
+  // (no direct CDN fallback: JW Player is no longer used)
+  const videoUri = sourceUrl ?? (lessonId ? streamUrl : undefined);
+  const posterUri = getVideoThumbnailUrl(mediaId);
 
   const showBuffering =
     (isBuffering || (!!lessonId && accessLoading)) && !fatalError;
