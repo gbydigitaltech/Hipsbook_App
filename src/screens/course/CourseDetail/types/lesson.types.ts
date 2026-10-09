@@ -3,7 +3,7 @@ export interface CourseLesson {
   label: string;
   description?: string;
 
-  price?: number;
+  price?: number | null;
   is_free?: boolean;
   activate?: boolean;
 

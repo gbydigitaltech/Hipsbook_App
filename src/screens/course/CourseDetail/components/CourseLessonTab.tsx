@@ -47,7 +47,7 @@ const CourseLessonTab: React.FC<Props> = ({ groups, onPressLesson }) => {
                 key={lesson.id}
                 title={lesson.label}
                 description={lesson.description}
-                price={lesson.price ?? 0}
+                price={lesson.price}
                 is_free={lesson.is_free}
                 activate={lesson.activate}
                 mediaId={lesson.media_id}

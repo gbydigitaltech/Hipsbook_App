@@ -11,6 +11,7 @@ import {
 import LibraryIcon from '../../assets/icons/course/LibraryIcon';
 import VideoIcon from '../../assets/icons/course/VideoIcon';
 import { useResponsive } from '../../helpers/responsive';
+import { buyLabel, isFreeItem } from '../../helpers/access';
 import { AppColors } from '../../styles/colors';
 import type { CourseCardProps } from '../../types/ui/cards/course-card.props';
 import AppButton from '../buttons/AppButton';
@@ -24,14 +25,6 @@ import {
   AppRadius,
   PRESSED_OPACITY,
 } from '../../styles/sharedstyles';
-
-const formatNumberTH = (n: number) => {
-  try {
-    return new Intl.NumberFormat('th-TH').format(n);
-  } catch {
-    return (n ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-};
 
 const CourseHorizontalCard: React.FC<CourseCardProps> = ({
   label,
@@ -70,11 +63,9 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
     };
   }, [teacher]);
 
-  const normalizedPrice =
-    typeof price === 'number' && !Number.isNaN(price) ? price : 0;
   const inLibrary = !!library || !!library_id;
-  const isFreeCourse = normalizedPrice === 0 || !!is_free;
-  const priceLabel = `ซื้อ ฿${formatNumberTH(normalizedPrice)}`;
+  const isFreeCourse = isFreeItem(price, is_free);
+  const priceLabel = buyLabel(price);
   const learnLabel = startLabel?.trim() || 'เริ่มเรียน';
   const actionLabel = inLibrary ? 'เรียนต่อ' : learnLabel;
 

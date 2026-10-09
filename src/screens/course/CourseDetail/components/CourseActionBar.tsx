@@ -13,6 +13,8 @@ import {
 
 type Props = {
   price: number;
+  /** Course is free (is_free or price 0) */
+  isFree?: boolean;
   actionLabel: string;
   onPressAction: () => void;
   formatPrice: (value: number) => string;
@@ -20,6 +22,7 @@ type Props = {
 
 const CourseActionBar: React.FC<Props> = ({
   price,
+  isFree = false,
   actionLabel,
   onPressAction,
   formatPrice,
@@ -72,7 +75,7 @@ const CourseActionBar: React.FC<Props> = ({
           style={styles.price}
           numberOfLines={1}
         >
-          {price === 0 ? 'ฟรี' : `฿${formatPrice(price)}`}
+          {isFree || price === 0 ? 'ฟรี' : `฿${formatPrice(price)}`}
         </AppText>
       </View>
 

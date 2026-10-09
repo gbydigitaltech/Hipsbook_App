@@ -12,6 +12,7 @@ import VideoIcon from '../../assets/icons/course/VideoIcon';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { getVideoThumbnailUrl } from '../../helpers/videoThumbnail';
+import { buyLabel, canAccessItem } from '../../helpers/access';
 import { AppColors } from '../../styles/colors';
 import AppButton from '../buttons/AppButton';
 import AppImage from '../images/AppImage';
@@ -36,21 +37,10 @@ const stripHtml = (html?: string) => {
     .trim();
 };
 
-// Format number using Thai locale
-const formatNumberTH = (n: number) => {
-  try {
-    return new Intl.NumberFormat('th-TH').format(n);
-  } catch {
-    return (n ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-};
-
-const normalizeFlag = (v: unknown) => v === true || v === 1 || v === '1';
-
 type LessonCardProps = {
   title: string;
   description?: string;
-  price: number;
+  price?: number | null;
   mediaId?: string;
   /** Clip length shown on the thumbnail, e.g. "12:40" */
   duration?: string;
@@ -81,12 +71,10 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
 }) => {
   const { scale, responsiveRadius, verticalScale } = useResponsive();
 
-  const isFreeCourse = Number(price) === 0 || !!is_free;
-  const isActivated = normalizeFlag(activate);
-  const canStart = isFreeCourse || isActivated;
+  const canStart = canAccessItem({ price, is_free, activate });
 
   const cleanDescription = useMemo(() => stripHtml(description), [description]);
-  const paidPriceLabel = `ซื้อ ฿${formatNumberTH(Number(price) || 0)}`;
+  const paidPriceLabel = buyLabel(price);
 
   const cardHeight = IS_TABLET ? 156 : 116;
   const imageWidth = cardHeight * (4 / 3);

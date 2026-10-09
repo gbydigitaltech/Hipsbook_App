@@ -16,6 +16,8 @@ export type CourseDetailResponse = {
   label: string;
 
   price: number;
+  /** Not sent by /course/detail today; read if the backend adds it */
+  is_free?: boolean;
 
   description: string;
 

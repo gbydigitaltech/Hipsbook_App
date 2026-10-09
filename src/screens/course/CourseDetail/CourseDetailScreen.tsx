@@ -26,6 +26,7 @@ import DocumentIcon from '../../../assets/icons/DocumentIcon';
 import AppBackground from '../../../components/background/AppBackground';
 import WhitelistButton from '../../../components/buttons/WhitelistButton';
 import AppLoadingOverlay from '../../../components/loading/AppLoadingOverlay';
+import { isFreeItem } from '../../../helpers/access';
 import ReviewComposer from '../../../components/reviews/ReviewComposer';
 import ReviewLongPressActionSheet from '../../../components/reviews/ReviewLongPressActionSheet';
 import CourseDetailTabs from '../../../components/tabs/CourseDetailTabs';
@@ -371,7 +372,8 @@ const CourseDetailScreen = () => {
   );
 
   const inLibrary = !!course?.library || !!course?.library_id;
-  const isFreeCourse = (course?.price ?? 0) === 0;
+  // Same rule as the cards: flagged free or an actual price of 0
+  const isFreeCourse = isFreeItem(course?.price, course?.is_free);
 
   const primaryActionLabel = useMemo(
     () => (inLibrary || isFreeCourse ? 'เริ่มเรียน' : 'ซื้อคอร์ส'),
@@ -1042,6 +1044,7 @@ const CourseDetailScreen = () => {
       {!reviewComposerVisible && (
         <CourseActionBar
           price={course.price}
+          isFree={isFreeCourse}
           actionLabel={primaryActionLabel}
           onPressAction={handlePrimaryAction}
           formatPrice={formatNumberTH}
