@@ -11,6 +11,7 @@ import ListenIcon from '../../assets/icons/course/ListenIcon';
 import DownloadIcon from '../../assets/icons/DownloadIcon';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
+import { buyLabel, canAccessItem } from '../../helpers/access';
 import { AppColors } from '../../styles/colors';
 import {
   AppFontSize,
@@ -21,16 +22,6 @@ import AppButton from '../buttons/AppButton';
 import AppText from '../texts/AppText';
 import LessonCardTitle from './LessonCardTitle';
 import LockedThumbOverlay from './LockedThumbOverlay';
-
-const formatNumberTH = (n: number) => {
-  try {
-    return new Intl.NumberFormat('th-TH').format(n);
-  } catch {
-    return (n ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-};
-
-const normalizeFlag = (v: unknown) => v === true || v === 1 || v === '1';
 
 export type DocumentType = 'pdf' | 'audio' | 'word' | 'excel' | 'text';
 
@@ -85,7 +76,7 @@ type Props = {
   size?: string;
   length?: string;
   format?: string;
-  price: number;
+  price?: number | null;
   is_free?: boolean;
   activate?: boolean | number | string;
   onPressBuy?: () => void;
@@ -112,11 +103,9 @@ const ClassRoomDocumentCard: React.FC<Props> = ({
   const { scale, responsiveRadius, verticalScale, responsiveSpacing } =
     useResponsive();
 
-  const isFreeDoc = Number(price) === 0 || !!is_free;
-  const isActivated = normalizeFlag(activate);
-  const canStart = isFreeDoc || isActivated;
+  const canStart = canAccessItem({ price, is_free, activate });
 
-  const paidPriceLabel = `ซื้อ ฿${formatNumberTH(Number(price) || 0)}`;
+  const paidPriceLabel = buyLabel(price);
   const badgeLabel = getDocumentBadgeLabel(type);
   const isAudio = type === 'audio';
 

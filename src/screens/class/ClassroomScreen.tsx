@@ -7,14 +7,21 @@ import React, {
   useState,
 } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { log } from '../../helpers/logger';
+import { log, logWarn } from '../../helpers/logger';
 
 import AppBackground from '../../components/background/AppBackground';
 import PdfRender from '../../components/pdf/PdfRender';
 import AppFlatList from '../../components/views/AppFlatList';
 import { IS_IOS, IS_TABLET } from '../../constants/platform';
+import {
+  canAccessItem,
+  isTruthyFlag,
+  needsFreeCheckout,
+  parsePrice,
+} from '../../helpers/access';
 import { useResponsive } from '../../helpers/responsive';
 import { useLibraryLesson } from '../../hooks/library/useLibaryLesson';
+import { useOrderCheckout } from '../../hooks/orders/useOrderCheckout';
 import { useLibraryInfo } from '../../hooks/library/useLibraryInfo';
 import { useLibraryTeacherList } from '../../hooks/library/useLibraryTeacherList';
 
@@ -43,7 +50,8 @@ type AttachmentItem = {
 export type LessonItem = {
   id: string | number;
   label: string;
-  price: number;
+  /** null = API sent no price (treated as locked, not free) */
+  price: number | null;
   media_id?: string;
   is_free?: boolean;
   activate?: boolean | number | string;
@@ -61,7 +69,7 @@ export type DocumentItem = {
   groupTitle?: string;
   media_id?: string;
   url?: string;
-  price?: number;
+  price?: number | null;
   activate?: boolean | number | string;
   is_free?: boolean;
   duration?: number;
@@ -74,8 +82,6 @@ export type DocumentGroup = {
   groupTitle: string;
   items: DocumentItem[];
 };
-
-const normalizeFlag = (v: unknown) => v === true || v === 1 || v === '1';
 
 const extractVideoLessons = (groups: any[]): LessonItem[] => {
   const result: LessonItem[] = [];
@@ -94,7 +100,7 @@ const extractVideoLessons = (groups: any[]): LessonItem[] => {
       result.push({
         id: v?.id ?? v?.media_id ?? `${groupTitle || 'group'}-${result.length}`,
         label: v?.label ?? '',
-        price: Number(v?.price) || 0,
+        price: parsePrice(v?.price),
         media_id: v?.media_id,
         is_free: v?.is_free,
         activate: v?.activate,
@@ -132,7 +138,7 @@ const extractDocuments = (groups: any[]): DocumentGroup[] => {
         label: audio?.label ?? '',
         type: 'audio',
         media_id: audio?.media_id || audio?.id,
-        price: Number(audio?.price) || 0,
+        price: parsePrice(audio?.price),
         activate: audio?.activate,
         is_free: audio?.is_free,
         str_duration: audio?.str_duration,
@@ -147,7 +153,7 @@ const extractDocuments = (groups: any[]): DocumentGroup[] => {
         label: doc?.label ?? '',
         type: 'pdf',
         url: url,
-        price: Number(doc?.price) || 0,
+        price: parsePrice(doc?.price),
         activate: doc?.activate,
         is_free: doc?.is_free,
         str_duration: doc?.str_duration,
@@ -199,7 +205,9 @@ const ClassroomScreen = () => {
   const pdfAutoOpenedRef = useRef(false);
 
   const { data: detailData } = useLibraryInfo(libraryId);
-  const { data, onChangeVideo } = useLibraryLesson(libraryId);
+  const { data, onChangeVideo, refetch } = useLibraryLesson(libraryId);
+  const { checkout } = useOrderCheckout();
+  const claimingRef = useRef(false);
 
   const { teachers, isLoading: teachersLoading } = useLibraryTeacherList({
     libraryId: String(libraryId),
@@ -218,10 +226,9 @@ const ClassroomScreen = () => {
   const relatedDocuments = useMemo(() => extractDocuments(groups), [groups]);
 
   const lessonsForTab = useMemo(() => {
-    if (activeTab === 'LEARN')
-      return lessons.filter(l => normalizeFlag(l.activate));
-    if (activeTab === 'BUY_MORE')
-      return lessons.filter(l => !normalizeFlag(l.activate));
+    // "เรียนได้" = bought OR free; "ซื้อเพิ่ม" = still locked
+    if (activeTab === 'LEARN') return lessons.filter(l => canAccessItem(l));
+    if (activeTab === 'BUY_MORE') return lessons.filter(l => !canAccessItem(l));
     return lessons;
   }, [activeTab, lessons]);
 
@@ -280,7 +287,7 @@ const ClassroomScreen = () => {
     if (selectedLesson) return;
     if (!lessons?.length) return;
 
-    const firstActivated = lessons.find(l => normalizeFlag(l.activate));
+    const firstActivated = lessons.find(l => isTruthyFlag(l.activate));
     if (!firstActivated) return;
 
     setSelectedLesson(firstActivated);
@@ -314,9 +321,40 @@ const ClassroomScreen = () => {
     );
   }, [detailData]);
 
+  /**
+   * A free lesson that isn't in the library yet (activate=false) has to be
+   * claimed with a free checkout before the video-access API will play it.
+   * Returns true when the item can be played now.
+   */
+  const ensureAccess = useCallback(
+    async (item: {
+      id?: string | number;
+      price?: number | null;
+      is_free?: boolean;
+      activate?: boolean | number | string;
+    }) => {
+      if (isTruthyFlag(item.activate)) return true;
+      if (!needsFreeCheckout(item) || item.id == null) return false;
+      if (claimingRef.current) return false;
+
+      claimingRef.current = true;
+      try {
+        await checkout({ course: [], lesson: [String(item.id)] });
+        await refetch();
+        return true;
+      } catch (e) {
+        logWarn('Class', 'claim free lesson failed', item.id, e);
+        return false;
+      } finally {
+        claimingRef.current = false;
+      }
+    },
+    [checkout, refetch],
+  );
+
   const onPressStart = useCallback(
-    (lesson: LessonItem) => {
-      if (!normalizeFlag(lesson.activate)) return;
+    async (lesson: LessonItem) => {
+      if (!(await ensureAccess(lesson))) return;
 
       setSelectedLesson(lesson);
       setPlayingMediaId(lesson.media_id ? String(lesson.media_id) : undefined);
@@ -328,14 +366,14 @@ const ClassroomScreen = () => {
         label: lesson.label,
       });
     },
-    [onChangeVideo],
+    [onChangeVideo, ensureAccess],
   );
 
   const onPlayAudio = useCallback(
-    (doc: DocumentItem) => {
+    async (doc: DocumentItem) => {
       log('Class', 'Playing Audio Media ID:', doc.media_id);
-      if (!normalizeFlag(doc.activate) || !doc.media_id) {
-        log('Class', 'Cannot play: Not activated or No Media ID');
+      if (!doc.media_id || !(await ensureAccess(doc))) {
+        log('Class', 'Cannot play: locked or no media id');
         return;
       }
       setPlayingMediaId(String(doc.media_id));
@@ -349,7 +387,7 @@ const ClassroomScreen = () => {
 
       setDocumentsVisible(false);
     },
-    [onChangeVideo],
+    [onChangeVideo, ensureAccess],
   );
 
   const onPressBuy = useCallback((lesson: LessonItem) => {

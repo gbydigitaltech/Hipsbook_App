@@ -8,6 +8,7 @@ import AppSectionHeader from '../../../components/sections/AppSectionHeader';
 import AppEmptyState from '../../../components/states/AppEmptyState';
 
 import { IS_TABLET } from '../../../constants/platform';
+import { canAccessItem } from '../../../helpers/access';
 import { useResponsive } from '../../../helpers/responsive';
 import { formatClipDuration } from '../../../helpers/clipDuration';
 import { getVideoThumbnailUrl } from '../../../helpers/videoThumbnail';
@@ -27,7 +28,7 @@ type LessonItem = {
   id: string | number;
   label: string;
   description?: string;
-  price: number;
+  price: number | null;
   media_id?: string;
   is_free?: boolean;
   activate?: boolean | number | string;
@@ -47,13 +48,8 @@ type LessonTabProps = {
   onDownloadPdf?: (url: string) => void;
 };
 
-const normalizeFlag = (v: unknown) => v === true || v === 1 || v === '1';
-
-const canAccessLesson = (lesson: LessonItem) => {
-  const isFree = Number(lesson.price) === 0 || !!lesson.is_free;
-  const isActivated = normalizeFlag(lesson.activate);
-  return isFree || isActivated;
-};
+// Free (is_free / price 0) or bought (activate) — shared rule
+const canAccessLesson = (lesson: LessonItem) => canAccessItem(lesson);
 
 const getFileExtension = (value?: string | null) => {
   if (!value) return '';
@@ -172,10 +168,10 @@ const LessonTab: React.FC<LessonTabProps> = ({
 
   const keyExtractor = useCallback((row: Row) => String(row.item.id), []);
 
-  const { onViewableItemsChanged, viewabilityConfig } =
-    useListThumbnailPreload(data, row =>
-      getVideoThumbnailUrl(row.item.media_id, IS_TABLET ? 720 : 480),
-    );
+  const { onViewableItemsChanged, viewabilityConfig } = useListThumbnailPreload(
+    data,
+    row => getVideoThumbnailUrl(row.item.media_id, IS_TABLET ? 720 : 480),
+  );
 
   const renderItem = useCallback(
     ({ item: row }: { item: Row }) => {
@@ -188,7 +184,6 @@ const LessonTab: React.FC<LessonTabProps> = ({
 
       const isPlaying = String(isPlayingId) === lessonId;
       const isExpanded = expandedLessonId === lessonId;
-      const priceNum = Number(item.price) || 0;
 
       return (
         <View style={styles.itemWrap}>
@@ -202,7 +197,7 @@ const LessonTab: React.FC<LessonTabProps> = ({
           <ClassRoomLibraryLessonCard
             title={item.label}
             description={item.description}
-            price={priceNum}
+            price={item.price}
             mediaId={item.media_id}
             duration={formatClipDuration(item.str_duration, item.duration)}
             is_free={item.is_free}
@@ -233,7 +228,7 @@ const LessonTab: React.FC<LessonTabProps> = ({
                     size=""
                     length=""
                     format={attachmentFormat}
-                    price={priceNum}
+                    price={item.price}
                     is_free={item.is_free}
                     activate={item.activate}
                     onPressStart={() => openAttachment(att.url)}

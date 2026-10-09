@@ -6,6 +6,7 @@ import ListenIcon from '../../assets/icons/course/ListenIcon';
 import DownloadIcon from '../../assets/icons/DownloadIcon';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
+import { buyLabel, canAccessItem } from '../../helpers/access';
 import { AppColors } from '../../styles/colors';
 import AppButton from '../buttons/AppButton';
 import AppText from '../texts/AppText';
@@ -17,22 +18,6 @@ import {
   PRESSED_OPACITY,
 } from '../../styles/sharedstyles';
 
-const formatNumberTH = (n: number) => {
-  try {
-    return new Intl.NumberFormat('th-TH').format(n);
-  } catch {
-    return (n ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-};
-
-const normalizeFlag = (value: unknown) =>
-  value === true || value === 1 || value === '1';
-
-const normalizePrice = (value: unknown) => {
-  const numberValue = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(numberValue) ? numberValue : 0;
-};
-
 type DocumentType = 'pdf' | 'audio';
 
 type Props = {
@@ -41,7 +26,7 @@ type Props = {
   size?: string;
   length?: string;
   format?: string;
-  price: number;
+  price?: number | null;
   is_free?: boolean;
   library?: boolean;
   activate?: boolean | number | string;
@@ -67,13 +52,10 @@ const CourseDetailDocumentCard: React.FC<Props> = ({
   const { scale, responsiveRadius, verticalScale, responsiveSpacing } =
     useResponsive();
 
-  const normalizedPrice = normalizePrice(price);
-  const isFreeDoc = normalizedPrice === 0 || normalizeFlag(is_free);
-  const isActivated = normalizeFlag(activate);
 
-  const canStart = isFreeDoc || isActivated;
+  const canStart = canAccessItem({ price, is_free, activate });
 
-  const paidPriceLabel = `ซื้อ ฿${formatNumberTH(normalizedPrice)}`;
+  const paidPriceLabel = buyLabel(price);
   const padding = responsiveSpacing(10);
   const fixedHeight = verticalScale(IS_TABLET ? 140 : 120);
 

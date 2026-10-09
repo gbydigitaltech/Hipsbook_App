@@ -42,20 +42,13 @@ export const useLibraryLesson = (libraryId?: string) => {
     });
   }, []);
 
-  // Fetch lessons when libraryId changes (with abort)
-  useEffect(() => {
-    if (!libraryId) return;
-
-    const controller = new AbortController();
-
-    (async () => {
+  const fetchLessons = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!libraryId) return;
       try {
         setLoading(true);
         setError(null);
-        const res = await apiGetLibraryLesson({
-          libraryId,
-          signal: controller.signal,
-        });
+        const res = await apiGetLibraryLesson({ libraryId, signal });
         setData(res);
       } catch (err: any) {
         if (err?.name === 'AbortError' || err?.name === 'CanceledError') return;
@@ -63,10 +56,19 @@ export const useLibraryLesson = (libraryId?: string) => {
       } finally {
         setLoading(false);
       }
-    })();
+    },
+    [libraryId],
+  );
 
+  // Fetch lessons when libraryId changes (with abort)
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchLessons(controller.signal);
     return () => controller.abort();
-  }, [libraryId]);
+  }, [fetchLessons]);
+
+  /** Reload lessons (e.g. after a free lesson was added to the library) */
+  const refetch = useCallback(() => fetchLessons(), [fetchLessons]);
 
   // Set first lesson once (don't override)
   useEffect(() => {
@@ -78,6 +80,7 @@ export const useLibraryLesson = (libraryId?: string) => {
     data,
     loading,
     error,
+    refetch,
     currentLesson,
     onChangeVideo,
     handleChangePath,

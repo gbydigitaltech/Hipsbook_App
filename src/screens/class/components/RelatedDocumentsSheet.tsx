@@ -235,7 +235,7 @@ const RelatedDocumentsSheet: React.FC<Props> = ({
                             length={doc.str_duration}
                             format={formatLabel}
                             size=""
-                            price={doc.price ?? 0}
+                            price={doc.price}
                             is_free={doc.is_free}
                             activate={doc.activate}
                             onPressStart={() => {
