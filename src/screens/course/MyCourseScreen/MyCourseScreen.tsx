@@ -511,7 +511,12 @@ const MyCourseScreen = () => {
                         onToggleWhitelist: (next: boolean) =>
                           handleToggleWhitelist(item as Course, next),
                       }
-                    : { startLabel: 'เรียนต่อ' })}
+                    : {
+                        // Library items are already owned: always "เรียนต่อ",
+                        // never a buy button (the list API may omit price).
+                        library: true,
+                        startLabel: 'เรียนต่อ',
+                      })}
                   onPress={() => {
                     if (keyboardOpen) return Keyboard.dismiss();
 
