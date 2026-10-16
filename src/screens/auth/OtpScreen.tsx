@@ -18,8 +18,10 @@ import React, {
 import {
   Alert,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { AvoidSoftInput } from 'react-native-avoid-softinput';
@@ -211,88 +213,95 @@ const OtpScreen = () => {
         style={styles.flex1}
         behavior={IS_IOS ? 'padding' : undefined}
       >
-        <AppSafeView style={styles.container}>
-          <AppLoadingOverlay
-            visible={(showInitialLoading && isLoading) || isSubmitting}
-            message={isSubmitting ? 'กำลังยืนยัน OTP...' : 'กำลังเตรียม OTP...'}
-          />
-
-          <AppScreenHeader />
-
-          <Image
-            source={IMAGES.otpMailLogo}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-
-          <View style={styles.titleArea}>
-            <AppText fontWeight="semiBold" fontSize={AppFontSize.h1}>
-              เช็คอีเมลของคุณ
-            </AppText>
-            <AppText fontSize={AppFontSize.body} style={styles.lead}>
-              กรุณากรอกตัวเลข 6 หลัก ที่ทางเราได้ส่งไปยังอีเมล
-            </AppText>
-            <AppText
-              fontWeight="medium"
-              fontSize={AppFontSize.body}
-              style={styles.primaryText}
-            >
-              {email}
-            </AppText>
-          </View>
-
-          <View style={styles.formArea}>
-            <View style={styles.inputField}>
-              <AppOtpInput
-                ref={otpRef}
-                length={6}
-                value={otp}
-                onChangeCode={setOtp}
-              />
-            </View>
-
-            <View style={styles.buttonArea}>
-              <AppButton
-                title="ยืนยันรหัส OTP"
-                disabled={isSubmitting}
-                onPress={onSubmit}
-                fontSize={AppFontSize.subtitle}
-                contentStyle={styles.button}
-              />
-            </View>
-          </View>
-
-          <View style={styles.resendOtp}>
-            <AppText fontSize={AppFontSize.subtitle}>
-              ถ้าคุณยังไม่ได้รับอีเมล{' '}
-              <AppText
-                onPress={() =>
-                  handleResend(() => {
-                    otpRef.current?.clear();
-                    setOtp('');
-                  })
+        {/* Tap outside the OTP boxes to hide the keyboard (same as the other auth screens) */}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View style={styles.flex1}>
+            <AppSafeView style={styles.container}>
+              <AppLoadingOverlay
+                visible={(showInitialLoading && isLoading) || isSubmitting}
+                message={
+                  isSubmitting ? 'กำลังยืนยัน OTP...' : 'กำลังเตรียม OTP...'
                 }
-                accessibilityRole="link"
-                fontWeight="medium"
-                fontSize={AppFontSize.subtitle}
-                style={styles.primaryText}
-              >
-                ส่งซ้ำ
-              </AppText>
-            </AppText>
+              />
 
-            <AppText fontSize={AppFontSize.subtitle}>
-              กรุณากรอก OTP ที่คุณได้รับภายใน{' '}
-              <AppText
-                fontSize={AppFontSize.subtitle}
-                style={styles.primaryText}
-              >
-                {formatTime(remainingMs)}
-              </AppText>{' '}
-              นาที
-            </AppText>
+              <AppScreenHeader />
+
+              <Image
+                source={IMAGES.otpMailLogo}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+
+              <View style={styles.titleArea}>
+                <AppText fontWeight="semiBold" fontSize={AppFontSize.h1}>
+                  เช็คอีเมลของคุณ
+                </AppText>
+                <AppText fontSize={AppFontSize.body} style={styles.lead}>
+                  กรุณากรอกตัวเลข 6 หลัก ที่ทางเราได้ส่งไปยังอีเมล
+                </AppText>
+                <AppText
+                  fontWeight="medium"
+                  fontSize={AppFontSize.body}
+                  style={styles.primaryText}
+                >
+                  {email}
+                </AppText>
+              </View>
+
+              <View style={styles.formArea}>
+                <View style={styles.inputField}>
+                  <AppOtpInput
+                    ref={otpRef}
+                    length={6}
+                    value={otp}
+                    onChangeCode={setOtp}
+                  />
+                </View>
+
+                <View style={styles.buttonArea}>
+                  <AppButton
+                    title="ยืนยันรหัส OTP"
+                    disabled={isSubmitting}
+                    onPress={onSubmit}
+                    fontSize={AppFontSize.subtitle}
+                    contentStyle={styles.button}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.resendOtp}>
+                <AppText fontSize={AppFontSize.subtitle}>
+                  ถ้าคุณยังไม่ได้รับอีเมล{' '}
+                  <AppText
+                    onPress={() =>
+                      handleResend(() => {
+                        otpRef.current?.clear();
+                        setOtp('');
+                      })
+                    }
+                    accessibilityRole="link"
+                    fontWeight="medium"
+                    fontSize={AppFontSize.subtitle}
+                    style={styles.primaryText}
+                  >
+                    ส่งซ้ำ
+                  </AppText>
+                </AppText>
+
+                <AppText fontSize={AppFontSize.subtitle}>
+                  กรุณากรอก OTP ที่คุณได้รับภายใน{' '}
+                  <AppText
+                    fontSize={AppFontSize.subtitle}
+                    style={styles.primaryText}
+                  >
+                    {formatTime(remainingMs)}
+                  </AppText>{' '}
+                  นาที
+                </AppText>
+              </View>
+            </AppSafeView>
           </View>
-        </AppSafeView>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </View>
   );
