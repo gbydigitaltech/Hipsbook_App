@@ -511,7 +511,18 @@ const MyCourseScreen = () => {
                         onToggleWhitelist: (next: boolean) =>
                           handleToggleWhitelist(item as Course, next),
                       }
-                    : { startLabel: 'เรียนต่อ' })}
+                    : {
+                        // Items from the library API are in the user's library:
+                        // pass their library_id so the card shows "เรียนต่อ"
+                        // (same signal as the course list), not a buy button.
+                        // Per-lesson access (activate / free) is checked in
+                        // the classroom.
+                        library_id:
+                          getItemLibraryId(item as LibraryCourseItem) ||
+                          undefined,
+                        library: true,
+                        startLabel: 'เรียนต่อ',
+                      })}
                   onPress={() => {
                     if (keyboardOpen) return Keyboard.dismiss();
 
