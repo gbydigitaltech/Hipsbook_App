@@ -109,7 +109,9 @@ const MyCourseScreen = () => {
   const { scale, verticalScale, responsiveRadius } = useResponsive();
 
   const [tabs, setTabs] = useState(0);
-  const [searchValue, setSearchValue] = useState('');
+  // Each tab keeps its own search, so searching one list doesn't empty the other
+  const [librarySearch, setLibrarySearch] = useState('');
+  const [favoriteSearch, setFavoriteSearch] = useState('');
   const [keyboardOpen, setKeyboardOpen] = useState(false);
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -119,6 +121,10 @@ const MyCourseScreen = () => {
   const navigation = useNavigation<CourseScreenNavProp>();
   const isFavoriteTab = tabs === 1;
 
+  // The search box shows (and edits) the active tab's query
+  const searchValue = isFavoriteTab ? favoriteSearch : librarySearch;
+  const setSearchValue = isFavoriteTab ? setFavoriteSearch : setLibrarySearch;
+
   const {
     courses: libraryCourses,
     isLoading: libraryIsLoading,
@@ -126,11 +132,11 @@ const MyCourseScreen = () => {
     hasMore: libraryHasMore,
     handleLoadMore: libraryHandleLoadMore,
     refetch: libraryRefetch,
-  } = useLibraryList({ searchValue, pageSize: PAGE_SIZE });
+  } = useLibraryList({ searchValue: librarySearch, pageSize: PAGE_SIZE });
 
   const { updateLibraryStatus } = useUpdateLibraryStatus();
 
-  const libraryCourseIds = useMemo(
+  const currentLibraryIds = useMemo(
     () =>
       new Set(
         libraryCourses.map(course => getCourseId(course)).filter(Boolean),
@@ -138,11 +144,27 @@ const MyCourseScreen = () => {
     [libraryCourses],
   );
 
+  // Owned course ids from the last unfiltered library load. While the library
+  // tab is searched, the API returns only matches, so keep the full set to
+  // still hide owned courses from the favorites tab.
+  const [allLibraryIds, setAllLibraryIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!librarySearch.trim()) setAllLibraryIds(currentLibraryIds);
+  }, [librarySearch, currentLibraryIds]);
+
+  const libraryCourseIds = useMemo(
+    () =>
+      librarySearch.trim()
+        ? new Set([...allLibraryIds, ...currentLibraryIds])
+        : currentLibraryIds,
+    [librarySearch, allLibraryIds, currentLibraryIds],
+  );
+
   const favoriteList = useWhitelistStore(s => s.list);
   const whitelistMap = useWhitelistStore(s => s.map);
 
   const filteredFavorites = useMemo(() => {
-    const q = searchValue.trim().toLowerCase();
+    const q = favoriteSearch.trim().toLowerCase();
     let list = favoriteList;
 
     if (q) {
@@ -153,7 +175,7 @@ const MyCourseScreen = () => {
       const courseId = getCourseId(c);
       return !courseId || !libraryCourseIds.has(courseId);
     });
-  }, [favoriteList, searchValue, libraryCourseIds]);
+  }, [favoriteList, favoriteSearch, libraryCourseIds]);
 
   const { courses, isLoading, isLoadingMore, hasMore, handleLoadMore } =
     useMemo(() => {
@@ -423,11 +445,10 @@ const MyCourseScreen = () => {
   }, [libraryCourses, isFavoriteTab]);
 
   useEffect(() => {
-    if (tabs === 1) return;
-    if (!searchValue.trim()) return;
+    if (!librarySearch.trim()) return;
 
     setHiddenLibraryIds([]);
-  }, [tabs, searchValue]);
+  }, [librarySearch]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () =>
