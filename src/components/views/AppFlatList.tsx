@@ -1,9 +1,11 @@
 import React, { forwardRef, useMemo } from 'react';
 import {
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,7 +57,14 @@ const AppFlatList = forwardRef<FlatList, AppFlatListProps>(
       <AppSafeView style={styles.safeContainer}>
         <View style={styles.innerContainer}>
           {staticHeader ? (
-            <View style={styles.staticHeaderWrapper}>{staticHeader}</View>
+            // Tapping the fixed header (title, search row…) hides the keyboard,
+            // like tapping the list below it does
+            <TouchableWithoutFeedback
+              onPress={Keyboard.dismiss}
+              accessible={false}
+            >
+              <View style={styles.staticHeaderWrapper}>{staticHeader}</View>
+            </TouchableWithoutFeedback>
           ) : null}
 
           <FlatList

@@ -366,7 +366,8 @@ const CourseScreen = () => {
         data={courses}
         keyExtractor={item => item.id}
         withHorizontalPadding
-        keyboardShouldPersistTaps="always"
+        // "handled": tapping empty space hides the keyboard; taps on cards/buttons still work
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.courseListContainer}
         onEndReached={() => {
           if (hasMore) handleLoadMore();

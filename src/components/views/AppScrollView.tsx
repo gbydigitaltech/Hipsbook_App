@@ -5,7 +5,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import {
+  Keyboard,
+  LayoutChangeEvent,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -87,7 +93,14 @@ const AppScrollView = forwardRef<any, AppScrollViewProps>(
           }
         >
           {staticHeader ? (
-            <View style={styles.staticHeaderWrapper}>{staticHeader}</View>
+            // Tapping the fixed header (title, search row…) hides the keyboard,
+            // like tapping the list below it does
+            <TouchableWithoutFeedback
+              onPress={Keyboard.dismiss}
+              accessible={false}
+            >
+              <View style={styles.staticHeaderWrapper}>{staticHeader}</View>
+            </TouchableWithoutFeedback>
           ) : null}
 
           <KeyboardAwareScrollView
