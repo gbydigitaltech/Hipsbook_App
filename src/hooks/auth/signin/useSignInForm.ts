@@ -1,6 +1,6 @@
 // src/hooks/auth/signin/useSignInForm.ts
 import { yupResolver } from '@hookform/resolvers/yup';
-import { logError } from '../../../helpers/logger';
+import { log, logError } from '../../../helpers/logger';
 import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Alert } from 'react-native';
@@ -67,7 +67,17 @@ export function useSignInForm(params?: UseSignInFormParams) {
         onSuccess?.(response?.provider);
         reset();
       } catch (err) {
-        logError('Auth', 'sign in error', err);
+        // Wrong email/password (4xx) is an expected outcome, not a bug:
+        // log quietly so the dev error overlay doesn't pop up. Only
+        // unexpected failures (5xx / network) go to console.error.
+        // Log the message only, never the full error (it holds headers).
+        const status = (err as { status?: number })?.status;
+        const message = (err as Error)?.message;
+        if (status && status >= 400 && status < 500) {
+          log('Auth', 'sign in rejected', status, message);
+        } else {
+          logError('Auth', 'sign in error', status, message);
+        }
         Alert.alert(
           'ไม่สามารถเข้าสู่ระบบได้',
           'กรุณาตรวจสอบอีเมลหรือรหัสผ่าน แล้วลองใหม่อีกครั้ง',
