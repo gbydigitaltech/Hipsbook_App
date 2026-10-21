@@ -41,12 +41,16 @@ type Props = {
 
 const { height: screenHeight } = Dimensions.get('window');
 
+/**
+ * Price ranges sent as `price` ("min-max"). Same values as the website:
+ * open-ended "more than" uses "min-null" ("3000+" makes the API fail).
+ */
 const PRICE_OPTIONS = [
   { id: 'all', label: 'ทั้งหมด' },
   { id: '0-0', label: 'ฟรี' },
   { id: '1-1000', label: '1-1,000' },
-  { id: '1000-3000', label: '1,000-3,000' },
-  { id: '3000+', label: 'มากกว่า 3,000' },
+  { id: '1001-3000', label: '1,001-3,000' },
+  { id: '3000-null', label: 'มากกว่า 3,000' },
 ];
 
 const CourseFilterModal: React.FC<Props> = ({ visible, onClose, onApply }) => {
