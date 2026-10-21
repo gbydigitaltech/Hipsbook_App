@@ -5,7 +5,6 @@ import { Ionicons } from '@react-native-vector-icons/ionicons';
 import LikeIcon from '../../assets/icons/LikeIcon';
 import RatingIcon from '../../assets/icons/RatingIcon';
 import ReplyIcon from '../../assets/icons/ReplyIcon';
-import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import RoundProfileImage from '../profiles/RoundProfileImage';
@@ -14,6 +13,8 @@ import {
   AppFontSize,
   AppRadius,
   thaiSafeLineHeight,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 
 interface Props {
@@ -63,7 +64,7 @@ const ReviewItem: React.FC<Props> = ({
           borderWidth: 1,
           borderColor: AppColors.border,
           borderRadius: responsiveRadius(AppRadius.lg),
-          padding: scale(IS_TABLET ? 18 : 14),
+          padding: scale(adaptiveSize(14)),
           gap: verticalScale(12),
         },
         headerRow: {
@@ -75,11 +76,11 @@ const ReviewItem: React.FC<Props> = ({
         ratingRow: {
           flexDirection: 'row',
           alignItems: 'center',
-          gap: scale(IS_TABLET ? 6 : 4),
+          gap: scale(adaptiveSize(4)),
         },
         content: {
           color: AppColors.white,
-          lineHeight: thaiSafeLineHeight(verticalScale(IS_TABLET ? 26 : 22)),
+          lineHeight: thaiSafeLineHeight(verticalScale(adaptiveSize(22))),
         },
         divider: {
           height: StyleSheet.hairlineWidth,
@@ -142,7 +143,7 @@ const ReviewItem: React.FC<Props> = ({
     <Pressable onLongPress={onLongPress} style={styles.card}>
       <View style={styles.headerRow}>
         <RoundProfileImage
-          size={IS_TABLET ? 52 : 44}
+          size={adaptiveSize(44)}
           name={name}
           imageUrl={avatarUri}
         />
@@ -161,7 +162,7 @@ const ReviewItem: React.FC<Props> = ({
             {Array.from({ length: 5 }).map((_, i) => (
               <RatingIcon
                 key={i}
-                size={IS_TABLET ? 18 : 15}
+                size={adaptiveSize(15)}
                 color={
                   i < filledCount ? AppColors.rating : AppColors.ratingEmpty
                 }
@@ -180,7 +181,7 @@ const ReviewItem: React.FC<Props> = ({
           >
             <Ionicons
               name="ellipsis-horizontal"
-              size={IS_TABLET ? 22 : 18}
+              size={AppIconSize.md}
               color={AppColors.textSecondary}
             />
           </Pressable>
@@ -197,10 +198,7 @@ const ReviewItem: React.FC<Props> = ({
 
       <View style={styles.actionsRow}>
         <Pressable style={styles.actionBtn} onPress={onPressReply}>
-          <ReplyIcon
-            size={IS_TABLET ? 22 : 18}
-            color={AppColors.textSecondary}
-          />
+          <ReplyIcon size={AppIconSize.md} color={AppColors.textSecondary} />
           <AppText fontSize={AppFontSize.caption} style={styles.actionText}>
             {initialReplyCount}
           </AppText>
@@ -209,7 +207,7 @@ const ReviewItem: React.FC<Props> = ({
         <Pressable style={styles.actionBtn} onPress={handleToggleLike}>
           <LikeIcon
             color={liked ? AppColors.primary : AppColors.textSecondary}
-            size={IS_TABLET ? 22 : 18}
+            size={AppIconSize.md}
           />
           <Animated.View style={{ transform: [{ translateY }] }}>
             <AppText

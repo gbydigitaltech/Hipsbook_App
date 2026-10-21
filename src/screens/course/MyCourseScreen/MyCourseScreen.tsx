@@ -41,6 +41,7 @@ import {
   AppRadius,
   sharedPaddingHorizontal,
   sharedTopSpace,
+  adaptiveSize,
 } from '../../../styles/sharedstyles';
 
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -230,8 +231,8 @@ const MyCourseScreen = () => {
           marginHorizontal: scale(sharedPaddingHorizontal),
         },
         sectionHeader: {
-          paddingTop: verticalScale(IS_TABLET ? 20 : 16),
-          paddingBottom: verticalScale(IS_TABLET ? 20 : 16),
+          paddingTop: verticalScale(adaptiveSize(16)),
+          paddingBottom: verticalScale(adaptiveSize(16)),
         },
         profileInfo: {
           flex: 1,
@@ -267,14 +268,14 @@ const MyCourseScreen = () => {
         skeletonName: {
           width: scale(IS_TABLET ? 200 : 150),
           maxWidth: '90%',
-          height: verticalScale(IS_TABLET ? 28 : 24),
+          height: verticalScale(adaptiveSize(24)),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.backgroundInteractive,
         },
         skeletonEmail: {
           width: scale(IS_TABLET ? 180 : 130),
           maxWidth: '100%',
-          height: verticalScale(IS_TABLET ? 18 : 14),
+          height: verticalScale(adaptiveSize(14)),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.backgroundInteractive,
         },

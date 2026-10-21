@@ -5,7 +5,11 @@ import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import AppText from '../texts/AppText';
-import { AppRadius, PRESSED_OPACITY } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  PRESSED_OPACITY,
+} from '../../styles/sharedstyles';
 
 type Props = {
   label?: string; // Dropdown label text
@@ -17,7 +21,7 @@ type Props = {
 const AppDropDown: React.FC<Props> = ({
   label = 'ประเภทคอร์ส',
   onPress,
-  fontSize = 16,
+  fontSize = AppFontSize.subtitle,
   iconSize = 14,
 }) => {
   const { scale, verticalScale, responsiveRadius } = useResponsive();

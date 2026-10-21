@@ -12,7 +12,6 @@ import {
 
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 import AppText from '../../../components/texts/AppText';
-import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import { AppColors } from '../../../styles/colors';
 import type { LessonItem } from '../ClassroomScreen';
@@ -20,6 +19,8 @@ import {
   AppFontSize,
   AppRadius,
   thaiSafeLineHeight,
+  AppIconSize,
+  adaptiveSize,
 } from '../../../styles/sharedstyles';
 
 type Props = {
@@ -132,23 +133,23 @@ const LessonDetailSheet: React.FC<Props> = ({
         },
         handle: {
           alignSelf: 'center',
-          width: scale(IS_TABLET ? 54 : 44),
+          width: scale(adaptiveSize(44)),
           height: verticalScale(5),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.surfaceStrong,
-          marginBottom: verticalScale(IS_TABLET ? 36 : 30),
+          marginBottom: verticalScale(adaptiveSize(30)),
         },
         header: {
           alignItems: 'flex-start',
           justifyContent: 'center',
-          marginBottom: verticalScale(IS_TABLET ? 20 : 16),
+          marginBottom: verticalScale(adaptiveSize(16)),
         },
         title: {
           color: AppColors.white,
           textAlign: 'left',
         },
         contentContainer: {
-          paddingBottom: verticalScale(IS_TABLET ? 12 : 8),
+          paddingBottom: verticalScale(adaptiveSize(8)),
         },
         coursePill: {
           flexDirection: 'row',
@@ -159,14 +160,14 @@ const LessonDetailSheet: React.FC<Props> = ({
           paddingVertical: verticalScale(6),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.primary,
-          marginBottom: verticalScale(IS_TABLET ? 14 : 12),
+          marginBottom: verticalScale(adaptiveSize(12)),
         },
         coursePillText: {
           color: AppColors.white,
         },
         lessonTitle: {
           color: AppColors.white,
-          marginBottom: verticalScale(IS_TABLET ? 16 : 12),
+          marginBottom: verticalScale(adaptiveSize(12)),
         },
         metaRow: {
           flexDirection: 'row',
@@ -188,7 +189,7 @@ const LessonDetailSheet: React.FC<Props> = ({
         divider: {
           height: 1,
           backgroundColor: AppColors.surfaceSubtle,
-          marginVertical: verticalScale(IS_TABLET ? 22 : 18),
+          marginVertical: verticalScale(adaptiveSize(18)),
         },
         sectionLabel: {
           color: AppColors.white,
@@ -250,7 +251,7 @@ const LessonDetailSheet: React.FC<Props> = ({
                 <View style={styles.coursePill}>
                   <Ionicons
                     name="book-outline"
-                    size={IS_TABLET ? 16 : 14}
+                    size={AppIconSize.xs}
                     color={AppColors.white}
                   />
                   <AppText
@@ -278,7 +279,7 @@ const LessonDetailSheet: React.FC<Props> = ({
                     <View style={styles.chip}>
                       <Ionicons
                         name="albums-outline"
-                        size={IS_TABLET ? 16 : 14}
+                        size={AppIconSize.xs}
                         color={AppColors.textSecondary}
                       />
                       <AppText
@@ -294,7 +295,7 @@ const LessonDetailSheet: React.FC<Props> = ({
                     <View style={styles.chip}>
                       <Ionicons
                         name="time-outline"
-                        size={IS_TABLET ? 16 : 14}
+                        size={AppIconSize.xs}
                         color={AppColors.textSecondary}
                       />
                       <AppText

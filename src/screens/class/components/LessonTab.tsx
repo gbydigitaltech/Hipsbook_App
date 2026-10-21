@@ -13,6 +13,7 @@ import { useResponsive } from '../../../helpers/responsive';
 import { formatClipDuration } from '../../../helpers/clipDuration';
 import { getVideoThumbnailUrl } from '../../../helpers/videoThumbnail';
 import { useListThumbnailPreload } from '../../../helpers/thumbnailPreload';
+import { adaptiveSize } from '../../../styles/sharedstyles';
 
 type DocumentType = 'pdf' | 'audio' | 'word' | 'excel' | 'text';
 
@@ -126,17 +127,17 @@ const LessonTab: React.FC<LessonTabProps> = ({
     () =>
       StyleSheet.create({
         listContent: {
-          paddingBottom: verticalScale(IS_TABLET ? 18 : 14),
+          paddingBottom: verticalScale(adaptiveSize(14)),
         },
         itemWrap: {
-          marginBottom: verticalScale(IS_TABLET ? 18 : 14),
+          marginBottom: verticalScale(adaptiveSize(14)),
         },
         documentsLesson: {
-          marginTop: verticalScale(IS_TABLET ? 14 : 12),
-          gap: verticalScale(IS_TABLET ? 14 : 12),
+          marginTop: verticalScale(adaptiveSize(12)),
+          gap: verticalScale(adaptiveSize(12)),
         },
         sectionHeader: {
-          marginBottom: verticalScale(IS_TABLET ? 12 : 10),
+          marginBottom: verticalScale(adaptiveSize(10)),
         },
         emptyState: {
           paddingVertical: verticalScale(48),

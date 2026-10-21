@@ -35,12 +35,16 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { IS_TABLET } from '../../constants/platform';
 import { logError } from '../../helpers/logger';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors, LIVE_HEART_COLORS } from '../../styles/colors';
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
-import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  AppIconSize,
+  adaptiveSize,
+} from '../../styles/sharedstyles';
 import { launchImageLibrary } from 'react-native-image-picker';
 import {
   Gesture,
@@ -1150,7 +1154,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
             >
               <Ionicons
                 name="chevron-back"
-                size={IS_TABLET ? 22 : 18}
+                size={AppIconSize.md}
                 color={AppColors.white}
               />
             </TouchableOpacity>
@@ -1181,7 +1185,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                     ? 'phone-landscape-outline'
                     : 'phone-portrait-outline'
                 }
-                size={IS_TABLET ? 18 : 16}
+                size={AppIconSize.sm}
                 color={AppColors.primary}
               />
               <AppText
@@ -1215,7 +1219,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 />
                 <Ionicons
                   name="camera-outline"
-                  size={IS_TABLET ? 34 : 28}
+                  size={AppIconSize.xxl}
                   color={SC.cam}
                 />
                 <View style={styles.previewBorder} pointerEvents="none" />
@@ -1241,7 +1245,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 >
                   <Ionicons
                     name="camera-reverse-outline"
-                    size={IS_TABLET ? 16 : 14}
+                    size={AppIconSize.xs}
                     color={AppColors.white}
                   />
                   <AppText fontSize={AppFontSize.caption} style={styles.white}>
@@ -1275,7 +1279,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 <TouchableOpacity style={styles.addTile} onPress={pickCover}>
                   <Ionicons
                     name="add"
-                    size={IS_TABLET ? 36 : 32}
+                    size={adaptiveSize(32)}
                     color={SC.addIcon}
                   />
                 </TouchableOpacity>
@@ -1526,7 +1530,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                 <View style={[styles.pill, styles.viewerPill]}>
                   <Ionicons
                     name="eye-outline"
-                    size={IS_TABLET ? 16 : 13}
+                    size={adaptiveSize(13)}
                     color={HC.white}
                   />
                   <AppText fontSize={AppFontSize.caption} style={styles.white}>
@@ -1537,7 +1541,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                   <View style={[styles.pill, styles.mutedPill]}>
                     <Ionicons
                       name="mic-off"
-                      size={IS_TABLET ? 16 : 13}
+                      size={adaptiveSize(13)}
                       color={HC.danger}
                     />
                   </View>
@@ -1590,7 +1594,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                     >
                       <Ionicons
                         name="ellipsis-horizontal"
-                        size={IS_TABLET ? 24 : 20}
+                        size={AppIconSize.lg}
                         color={HC.icon}
                       />
                     </TouchableOpacity>
@@ -1620,7 +1624,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                     >
                       <Ionicons
                         name="camera-reverse-outline"
-                        size={IS_TABLET ? 24 : 20}
+                        size={AppIconSize.lg}
                         color={HC.white}
                       />
                       <AppText fontSize={AppFontSize.body} style={styles.white}>
@@ -1636,7 +1640,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
                     >
                       <Ionicons
                         name={isMuted ? 'mic-off' : 'mic-outline'}
-                        size={IS_TABLET ? 24 : 20}
+                        size={AppIconSize.lg}
                         color={isMuted ? HC.danger : HC.white}
                       />
                       <AppText fontSize={AppFontSize.body} style={styles.white}>
@@ -1667,7 +1671,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               >
                 <Ionicons
                   name="close"
-                  size={IS_TABLET ? 24 : 20}
+                  size={AppIconSize.lg}
                   color={AppColors.white}
                 />
               </TouchableOpacity>
@@ -1688,7 +1692,7 @@ const StreamPublisherContent = ({ onClose, closeRef }: ContentProps) => {
               >
                 <Ionicons
                   name="camera-reverse-outline"
-                  size={IS_TABLET ? 24 : 20}
+                  size={AppIconSize.lg}
                   color={AppColors.white}
                 />
               </TouchableOpacity>

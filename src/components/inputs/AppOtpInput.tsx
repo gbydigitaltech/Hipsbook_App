@@ -44,6 +44,9 @@ const AppOtpInput = forwardRef<AppOtpInputRef, AppOtpInputProps>(
       gap, // Optional fixed gap between cells
       containerStyle, // External row style override
       cellStyle, // External per-cell style override
+      cellTextStyle, // External per-cell text style override
+      fontSize: fontSizeProp, // Cell text size before scaling
+      cellSize, // Cell size before scaling
     },
     ref,
   ) => {
@@ -101,10 +104,14 @@ const AppOtpInput = forwardRef<AppOtpInputRef, AppOtpInputProps>(
 
     // Build responsive UI values/styles
     const ui = useMemo(() => {
-      const cellWidth = Math.max(MIN_TAP, scale(50));
-      const cellHeight = Math.max(MIN_TAP, verticalScale(50));
+      const cellWidth = Math.max(MIN_TAP, scale(cellSize?.width ?? 50));
+      // Custom sizes scale with width on both axes so cells keep their shape
+      const cellHeight = Math.max(
+        MIN_TAP,
+        cellSize?.height ? scale(cellSize.height) : verticalScale(50),
+      );
 
-      const baseFont = BASE_FONT_SIZE;
+      const baseFont = fontSizeProp ?? BASE_FONT_SIZE;
       const fontSize = moderateScale(baseFont, 0.5);
 
       const radius = responsiveRadius(BASE_RADIUS);
@@ -146,6 +153,9 @@ const AppOtpInput = forwardRef<AppOtpInputRef, AppOtpInputProps>(
       };
     }, [
       gap,
+      cellSize?.width,
+      cellSize?.height,
+      fontSizeProp,
       containerWidth,
       length,
       MIN_TAP,
@@ -280,7 +290,7 @@ const AppOtpInput = forwardRef<AppOtpInputRef, AppOtpInputProps>(
                   maxFontSizeMultiplier={1.2}
                   allowFontScaling={false}
                 />
-                <AppText style={ui.textStyle}>{show}</AppText>
+                <AppText style={[ui.textStyle, cellTextStyle]}>{show}</AppText>
               </View>
             </Pressable>
           );

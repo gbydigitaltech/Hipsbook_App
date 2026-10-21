@@ -7,7 +7,7 @@ import {
   SegmentedPillsProps,
 } from '../../types/ui/segments/segmented-pills.props';
 import AppText from '../texts/AppText';
-import { PRESSED_OPACITY } from '../../styles/sharedstyles';
+import { AppFontSize, PRESSED_OPACITY } from '../../styles/sharedstyles';
 
 /** Normalize option to { label, value } shape */
 const normalizeOption = <V extends string | number>(option: Option<V>) =>
@@ -21,7 +21,7 @@ function SegmentedPills<V extends string | number>({
   radius = 999, // Pill border radius
   paddingVertical = 4, // Pill vertical padding
   paddingHorizontal = 22, // Pill horizontal padding
-  fontSize = 14, // Text size
+  fontSize = AppFontSize.body, // Text size
   activeBackgroundColor = AppColors.primary, // Selected pill background
   inactiveBackgroundColor = AppColors.backgroundInteractive, // Unselected pill background
   activeTextColor = AppColors.white, // Selected text color

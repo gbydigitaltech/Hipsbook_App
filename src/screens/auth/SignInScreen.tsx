@@ -38,6 +38,8 @@ import {
   androidSafeTop,
   iosSafeTop,
   sharedPaddingHorizontal,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import { AuthStackParamList } from '../../types/data/navigation/navigation.types';
 
@@ -122,20 +124,24 @@ const SignInScreen = () => {
         container: {
           flex: 1,
           alignItems: 'center',
-          paddingHorizontal: scale(sharedPaddingHorizontal),
+          // iPad: wider side margins so fields don't run edge to edge
+          paddingHorizontal: scale(IS_TABLET ? 56 : sharedPaddingHorizontal),
         },
         logo: {
           width: '100%',
-          height: verticalScale(IS_TABLET ? 144 : 120),
+          height: verticalScale(adaptiveSize(120)),
           marginBottom: verticalScale(20),
-          marginTop: IS_IOS
+          // iPad: start a bit lower so the page doesn't hug the top
+          marginTop: IS_TABLET
+            ? verticalScale(48)
+            : IS_IOS
             ? verticalScale(iosSafeTop)
             : verticalScale(androidSafeTop),
         },
         inputField: {
           width: '100%',
           marginTop: verticalScale(20),
-          gap: verticalScale(IS_TABLET ? 4 : 2),
+          gap: verticalScale(adaptiveSize(2)),
         },
         forgotPasswordContainer: {
           flexDirection: 'row',
@@ -169,13 +175,13 @@ const SignInScreen = () => {
           color: AppColors.textTertiary,
         },
         toSignUp: {
-          marginTop: verticalScale(IS_TABLET ? 30 : 24),
+          marginTop: verticalScale(adaptiveSize(24)),
           flexDirection: 'row',
           alignItems: 'center',
         },
         thirdPartySignIn: {
           alignItems: 'center',
-          marginTop: verticalScale(IS_TABLET ? 30 : 24),
+          marginTop: verticalScale(adaptiveSize(24)),
           width: '100%',
         },
         circleButtonsContainer: {
@@ -226,13 +232,13 @@ const SignInScreen = () => {
                   control={control}
                   name="email"
                   label="อีเมล"
-                  labelFontSize={IS_TABLET ? 20 : 16}
+                  labelFontSize={AppFontSize.subtitle}
                   fontSize={AppFontSize.subtitle}
-                  errorFontSize={IS_TABLET ? 14 : 12}
+                  errorFontSize={AppFontSize.caption}
                   placeholder="กรุณากรอกอีเมล"
                   inputProps={{
                     inputWrapperStyle: {
-                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                      minHeight: verticalScale(adaptiveSize(54)),
                     },
                     autoCapitalize: 'none',
                     keyboardType: 'email-address',
@@ -249,20 +255,20 @@ const SignInScreen = () => {
                   control={control}
                   name="password"
                   label="รหัสผ่าน"
-                  labelFontSize={IS_TABLET ? 20 : 16}
+                  labelFontSize={AppFontSize.subtitle}
                   fontSize={AppFontSize.subtitle}
-                  errorFontSize={IS_TABLET ? 14 : 12}
+                  errorFontSize={AppFontSize.caption}
                   placeholder="กรุณากรอกรหัสผ่าน"
                   inputProps={{
                     inputWrapperStyle: {
-                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                      minHeight: verticalScale(adaptiveSize(54)),
                     },
                     secureTextEntry: !showPassword,
                     autoCapitalize: 'none',
                     rightIcon: showPassword ? (
-                      <ShowPasswordIcon size={IS_TABLET ? 24 : 20} />
+                      <ShowPasswordIcon size={AppIconSize.lg} />
                     ) : (
-                      <HidePasswordIcon size={IS_TABLET ? 24 : 20} />
+                      <HidePasswordIcon size={AppIconSize.lg} />
                     ),
                     onPressRightIcon: () => setShowPassword(prev => !prev),
                     onEndEditing: async (e: any) => {
@@ -280,7 +286,7 @@ const SignInScreen = () => {
                       value={isChecked}
                       onValueChange={setIsChecked}
                       disabled={isBusy}
-                      size={IS_TABLET ? 24 : 20}
+                      size={AppIconSize.lg}
                     />
                     <AppText fontSize={AppFontSize.body}>จดจำฉัน</AppText>
                   </View>
@@ -354,25 +360,25 @@ const SignInScreen = () => {
                 <View style={styles.circleButtonsContainer}>
                   <AppCircleIconButton
                     iconSource={IMAGES.googleIcon}
-                    size={IS_TABLET ? 38 : 32}
+                    size={adaptiveSize(32)}
                     onPress={handleGoogleSignIn}
                     disabled={isBusy}
                   />
                   <AppCircleIconButton
                     iconSource={IMAGES.xIcon}
-                    size={IS_TABLET ? 38 : 32}
+                    size={adaptiveSize(32)}
                     onPress={handleTwitterSignIn}
                     disabled={isBusy}
                   />
                   <AppCircleIconButton
                     iconSource={IMAGES.lineIcon}
-                    size={IS_TABLET ? 38 : 32}
+                    size={adaptiveSize(32)}
                     onPress={handleLineSignIn}
                     disabled={isBusy}
                   />
                   <AppCircleIconButton
                     iconSource={IMAGES.appleIcon}
-                    size={IS_TABLET ? 38 : 32}
+                    size={adaptiveSize(32)}
                     onPress={handleAppleSignIn}
                     disabled={isBusy}
                   />

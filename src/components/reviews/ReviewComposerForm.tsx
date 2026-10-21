@@ -1,11 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { IS_TABLET } from '../../constants/platform';
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  adaptiveSize,
+} from '../../styles/sharedstyles';
 import AppButton from '../buttons/AppButton';
 import PressableRating from '../ratings/PressableRating';
 import AppText from '../texts/AppText';
@@ -56,7 +59,7 @@ const ReviewComposerForm: React.FC<Props> = ({
   const [text, setText] = useState<string>(initialText);
   const [submitting, setSubmitting] = useState(false);
 
-  const fontSize = IS_TABLET ? 20 : 16;
+  const fontSize = AppFontSize.subtitle;
 
   const canSubmit = useMemo(() => {
     if (disabled) return false;
@@ -95,25 +98,25 @@ const ReviewComposerForm: React.FC<Props> = ({
         ratingWrap: {
           alignItems: 'center',
           marginTop: verticalScale(4),
-          marginBottom: verticalScale(IS_TABLET ? 18 : 14),
+          marginBottom: verticalScale(adaptiveSize(14)),
         },
         ratingLabel: {
           color: AppColors.white,
-          marginBottom: verticalScale(IS_TABLET ? 14 : 12),
+          marginBottom: verticalScale(adaptiveSize(12)),
         },
         ratingHint: {
           color: AppColors.primary,
-          marginTop: verticalScale(IS_TABLET ? 12 : 10),
+          marginTop: verticalScale(adaptiveSize(10)),
         },
         inputLabel: {
           color: AppColors.white,
-          marginBottom: verticalScale(IS_TABLET ? 10 : 8),
+          marginBottom: verticalScale(adaptiveSize(8)),
         },
         input: {
-          minHeight: verticalScale(IS_TABLET ? 150 : 124),
-          maxHeight: verticalScale(IS_TABLET ? 180 : 150),
-          paddingHorizontal: scale(IS_TABLET ? 18 : 14),
-          paddingVertical: verticalScale(IS_TABLET ? 12 : 10),
+          minHeight: verticalScale(adaptiveSize(124)),
+          maxHeight: verticalScale(adaptiveSize(150)),
+          paddingHorizontal: scale(adaptiveSize(14)),
+          paddingVertical: verticalScale(adaptiveSize(10)),
           borderRadius: responsiveRadius(AppRadius.md),
           borderWidth: 1,
           borderColor: AppColors.border,
@@ -125,8 +128,8 @@ const ReviewComposerForm: React.FC<Props> = ({
         },
         actionsRow: {
           flexDirection: 'row',
-          gap: scale(IS_TABLET ? 14 : 12),
-          marginTop: verticalScale(IS_TABLET ? 22 : 18),
+          gap: scale(adaptiveSize(12)),
+          marginTop: verticalScale(adaptiveSize(18)),
         },
         backBtn: { flex: 1 },
         submitBtn: { flex: 1.6 },
@@ -165,8 +168,8 @@ const ReviewComposerForm: React.FC<Props> = ({
             value={rating}
             disabled={disabled || submitting}
             onChange={setRating}
-            size={IS_TABLET ? 40 : 34}
-            spacing={IS_TABLET ? 12 : 10}
+            size={adaptiveSize(34)}
+            spacing={adaptiveSize(10)}
           />
 
           <AppText

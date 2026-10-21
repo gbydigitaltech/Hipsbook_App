@@ -25,7 +25,12 @@ import { IS_IOS, IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
-import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  AppIconSize,
+  adaptiveSize,
+} from '../../styles/sharedstyles';
 import CommentIcon from '../../assets/icons/CommentIcon';
 import AppText from '../texts/AppText';
 import useChat, { ChatMessage } from '../../hooks/chat/useChat';
@@ -418,7 +423,7 @@ const LiveChat = ({
           paddingHorizontal: scale(16),
           paddingVertical: verticalScale(8),
           color: AppColors.white,
-          fontSize: IS_TABLET ? 16 : 14,
+          fontSize: AppFontSize.body,
         },
         sendBtn: {
           width: scale(40),
@@ -782,7 +787,7 @@ const LiveChat = ({
               >
                 <Ionicons
                   name="close"
-                  size={IS_TABLET ? 24 : 20}
+                  size={AppIconSize.lg}
                   color={AppColors.white}
                 />
               </TouchableOpacity>
@@ -845,7 +850,7 @@ const LiveChat = ({
         <View style={styles.sEmpty}>
           <Ionicons
             name="chatbubbles-outline"
-            size={IS_TABLET ? 34 : 28}
+            size={AppIconSize.xxl}
             color={AppColors.textTertiary}
           />
           <AppText fontSize={AppFontSize.caption} style={styles.sEmptyText}>
@@ -903,7 +908,7 @@ const LiveChat = ({
             >
               <Ionicons
                 name="send"
-                size={IS_TABLET ? 18 : 15}
+                size={adaptiveSize(15)}
                 color={canSubmit ? AppColors.primary : AppColors.white}
               />
             </TouchableOpacity>
@@ -911,7 +916,7 @@ const LiveChat = ({
           <TouchableOpacity style={styles.sHeart} onPress={onLike} hitSlop={6}>
             <Ionicons
               name="heart"
-              size={IS_TABLET ? 20 : 17}
+              size={adaptiveSize(17)}
               color={AppColors.white}
             />
           </TouchableOpacity>
@@ -936,7 +941,7 @@ const LiveChat = ({
             >
               <Ionicons
                 name="send"
-                size={IS_TABLET ? 18 : 15}
+                size={adaptiveSize(15)}
                 color={canSubmit ? AppColors.primary : AppColors.white}
               />
             </TouchableOpacity>
@@ -944,7 +949,7 @@ const LiveChat = ({
           <TouchableOpacity style={styles.hCircle} onPress={onLike} hitSlop={6}>
             <Ionicons
               name="heart"
-              size={IS_TABLET ? 22 : 18}
+              size={AppIconSize.md}
               color={AppColors.white}
             />
           </TouchableOpacity>
@@ -958,7 +963,7 @@ const LiveChat = ({
             ) : (
               <Ionicons
                 name="person"
-                size={IS_TABLET ? 22 : 18}
+                size={AppIconSize.md}
                 color={AppColors.textSecondary}
               />
             )}
@@ -981,7 +986,7 @@ const LiveChat = ({
             >
               <Ionicons
                 name="send"
-                size={IS_TABLET ? 18 : 15}
+                size={adaptiveSize(15)}
                 color={canSubmit ? AppColors.primary : AppColors.white}
               />
             </TouchableOpacity>
@@ -989,7 +994,7 @@ const LiveChat = ({
           <TouchableOpacity style={styles.pHeart} onPress={onLike} hitSlop={6}>
             <Ionicons
               name="heart"
-              size={IS_TABLET ? 22 : 18}
+              size={AppIconSize.md}
               color={AppColors.white}
             />
           </TouchableOpacity>
@@ -1012,7 +1017,7 @@ const LiveChat = ({
           >
             <Ionicons
               name="send"
-              size={IS_TABLET ? 22 : 18}
+              size={AppIconSize.md}
               color={AppColors.white}
             />
           </TouchableOpacity>

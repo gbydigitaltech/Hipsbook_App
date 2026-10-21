@@ -2,7 +2,12 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { log, logWarn } from '../../helpers/logger';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 
 import CommentIcon from '../../assets/icons/teacher/CommentIcon';
 import PlayCircleSolidIcon from '../../assets/icons/teacher/PlayCircleSolidIcon';
@@ -27,6 +32,7 @@ import {
   AppRadius,
   sharedPaddingHorizontal,
   thaiSafeLineHeight,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import { Course } from '../../types/data/courses/course.type';
 import { AppStackParamList } from '../../types/data/navigation/navigation.types';
@@ -35,6 +41,18 @@ import AppScreenHeader from '../../components/sections/AppScreenHeader';
 
 type TeacherProfileRouteProp = RouteProp<AppStackParamList, 'TeacherProfile'>;
 type TeacherProfileNavProp = NativeStackNavigationProp<AppStackParamList>;
+
+/**
+ * Text sizes for this screen. Phone keeps its original sizes; tablet gets a
+ * clearer hierarchy: name > section headings > stats > body.
+ */
+const NAME_FONT = IS_TABLET ? AppFontSize.h1 : AppFontSize.title;
+// Section headings use the same size as other screens' in-page headings
+const HEADING_FONT = AppFontSize.subtitle;
+const STAT_NUMBER_FONT = IS_TABLET ? AppFontSize.h2 : AppFontSize.subtitle;
+const STAT_LABEL_FONT = IS_TABLET ? AppFontSize.body : AppFontSize.caption;
+const STAT_ICON_SIZE = adaptiveSize(18);
+const AVATAR_SIZE = IS_TABLET ? 120 : 88;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -56,7 +74,12 @@ const TeacherProfileScreen = () => {
   const navigation = useNavigation<TeacherProfileNavProp>();
   const { id } = route.params ?? {};
 
-  const { scale, verticalScale, responsiveRadius } = useResponsive();
+  const { scale, verticalScale, responsiveRadius, moderateScale } =
+    useResponsive();
+  const { width: windowWidth } = useWindowDimensions();
+
+  // Course cards line up with the boxes above (same side margins)
+  const courseCardWidth = windowWidth - scale(sharedPaddingHorizontal) * 2;
   const scrollRef = useRef<ScrollView | null>(null);
 
   const stripHtml = (html?: string | null) => {
@@ -236,21 +259,21 @@ const TeacherProfileScreen = () => {
           borderWidth: 1,
           borderColor: AppColors.border,
           borderRadius: responsiveRadius(AppRadius.lg),
-          paddingVertical: verticalScale(IS_TABLET ? 24 : 20),
-          paddingHorizontal: scale(IS_TABLET ? 26 : 22),
-          marginTop: verticalScale(IS_TABLET ? 28 : 24),
+          paddingVertical: verticalScale(adaptiveSize(20)),
+          paddingHorizontal: scale(adaptiveSize(22)),
+          marginTop: verticalScale(adaptiveSize(24)),
           marginHorizontal: scale(sharedPaddingHorizontal),
         },
         profileSection: {
           justifyContent: 'center',
           alignItems: 'center',
-          gap: verticalScale(IS_TABLET ? 12 : 10),
+          gap: verticalScale(adaptiveSize(10)),
         },
         statsRow: {
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: scale(IS_TABLET ? 24 : 18),
+          gap: scale(adaptiveSize(18)),
           marginTop: verticalScale(4),
         },
         statItem: {
@@ -268,7 +291,7 @@ const TeacherProfileScreen = () => {
         statLabel: { color: AppColors.textTertiary },
         statDivider: {
           width: StyleSheet.hairlineWidth,
-          height: verticalScale(30),
+          height: verticalScale(IS_TABLET ? 40 : 30),
           backgroundColor: AppColors.border,
         },
         sectionHeadingRow: {
@@ -278,17 +301,18 @@ const TeacherProfileScreen = () => {
         },
         accentBar: {
           width: scale(3),
-          height: verticalScale(16),
+          // Same height as the heading text
+          height: moderateScale(HEADING_FONT, 0.5),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.primary,
         },
         bodyText: {
           color: AppColors.textSecondary,
-          lineHeight: thaiSafeLineHeight(verticalScale(IS_TABLET ? 26 : 22)),
+          lineHeight: thaiSafeLineHeight(verticalScale(adaptiveSize(22))),
         },
         educationSection: {
           marginTop: verticalScale(16),
-          gap: verticalScale(IS_TABLET ? 10 : 8),
+          gap: verticalScale(adaptiveSize(8)),
         },
 
         experienceCard: {
@@ -296,10 +320,10 @@ const TeacherProfileScreen = () => {
           borderWidth: 1,
           borderColor: AppColors.border,
           borderRadius: responsiveRadius(AppRadius.lg),
-          paddingVertical: verticalScale(IS_TABLET ? 24 : 20),
-          paddingHorizontal: scale(IS_TABLET ? 26 : 22),
+          paddingVertical: verticalScale(adaptiveSize(20)),
+          paddingHorizontal: scale(adaptiveSize(22)),
           marginTop: verticalScale(IS_IOS ? 24 : 20),
-          gap: verticalScale(IS_TABLET ? 10 : 8),
+          gap: verticalScale(adaptiveSize(8)),
           marginHorizontal: scale(sharedPaddingHorizontal),
         },
 
@@ -309,7 +333,7 @@ const TeacherProfileScreen = () => {
           gap: verticalScale(14),
         },
       }),
-    [verticalScale, responsiveRadius, scale],
+    [verticalScale, responsiveRadius, scale, moderateScale],
   );
 
   const teacherFullName =
@@ -343,7 +367,7 @@ const TeacherProfileScreen = () => {
         <View style={styles.profileCard}>
           <View style={styles.profileSection}>
             <RoundProfileImage
-              size={IS_TABLET ? 104 : 88}
+              size={AVATAR_SIZE}
               source={
                 teacher?.profile_image
                   ? { uri: teacher.profile_image }
@@ -351,25 +375,19 @@ const TeacherProfileScreen = () => {
               }
             />
 
-            <AppText fontWeight="medium" fontSize={AppFontSize.title}>
+            <AppText fontWeight="medium" fontSize={NAME_FONT}>
               {teacherFullName}
             </AppText>
 
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <View style={styles.statNumberRow}>
-                  <StarIcon size={IS_TABLET ? 22 : 18} />
-                  <AppText
-                    fontWeight="semiBold"
-                    fontSize={AppFontSize.subtitle}
-                  >
+                  <StarIcon size={STAT_ICON_SIZE} />
+                  <AppText fontWeight="semiBold" fontSize={STAT_NUMBER_FONT}>
                     {ratingText}
                   </AppText>
                 </View>
-                <AppText
-                  fontSize={AppFontSize.caption}
-                  style={styles.statLabel}
-                >
+                <AppText fontSize={STAT_LABEL_FONT} style={styles.statLabel}>
                   คะแนน
                 </AppText>
               </View>
@@ -378,18 +396,12 @@ const TeacherProfileScreen = () => {
 
               <View style={styles.statItem}>
                 <View style={styles.statNumberRow}>
-                  <CommentIcon size={IS_TABLET ? 22 : 18} />
-                  <AppText
-                    fontWeight="semiBold"
-                    fontSize={AppFontSize.subtitle}
-                  >
+                  <CommentIcon size={STAT_ICON_SIZE} />
+                  <AppText fontWeight="semiBold" fontSize={STAT_NUMBER_FONT}>
                     {reviewText}
                   </AppText>
                 </View>
-                <AppText
-                  fontSize={AppFontSize.caption}
-                  style={styles.statLabel}
-                >
+                <AppText fontSize={STAT_LABEL_FONT} style={styles.statLabel}>
                   รีวิว
                 </AppText>
               </View>
@@ -398,18 +410,12 @@ const TeacherProfileScreen = () => {
 
               <View style={styles.statItem}>
                 <View style={styles.statNumberRow}>
-                  <PlayCircleSolidIcon size={IS_TABLET ? 22 : 18} />
-                  <AppText
-                    fontWeight="semiBold"
-                    fontSize={AppFontSize.subtitle}
-                  >
+                  <PlayCircleSolidIcon size={STAT_ICON_SIZE} />
+                  <AppText fontWeight="semiBold" fontSize={STAT_NUMBER_FONT}>
                     {teacher?.course_amount ?? 0}
                   </AppText>
                 </View>
-                <AppText
-                  fontSize={AppFontSize.caption}
-                  style={styles.statLabel}
-                >
+                <AppText fontSize={STAT_LABEL_FONT} style={styles.statLabel}>
                   คอร์ส
                 </AppText>
               </View>
@@ -422,7 +428,7 @@ const TeacherProfileScreen = () => {
               <AppText
                 fontWeight="medium"
                 style={{ color: AppColors.primary }}
-                fontSize={AppFontSize.subtitle}
+                fontSize={HEADING_FONT}
               >
                 ประวัติการศึกษา
               </AppText>
@@ -439,7 +445,7 @@ const TeacherProfileScreen = () => {
             <AppText
               fontWeight="medium"
               style={{ color: AppColors.primary }}
-              fontSize={AppFontSize.subtitle}
+              fontSize={HEADING_FONT}
             >
               ประสบการณ์
             </AppText>
@@ -452,14 +458,14 @@ const TeacherProfileScreen = () => {
         <View style={styles.coursesSection}>
           <AppText
             fontWeight="medium"
-            fontSize={AppFontSize.subtitle}
+            fontSize={HEADING_FONT}
             style={{ marginHorizontal: scale(sharedPaddingHorizontal) }}
           >
             คอร์สที่สอนโดย{' '}
             <AppText
               fontWeight="medium"
               style={{ color: AppColors.primary }}
-              fontSize={AppFontSize.subtitle}
+              fontSize={HEADING_FONT}
             >
               {teacherFullName}
             </AppText>
@@ -468,6 +474,7 @@ const TeacherProfileScreen = () => {
           <View>
             <HorizontalCourseSlider
               data={teacherCoursesRecommend}
+              itemWidth={courseCardWidth}
               onReachEnd={loadMoreTeacherCourses}
               hasMore={hasMore}
               loadingMore={loadingMoreTeacherCourses}

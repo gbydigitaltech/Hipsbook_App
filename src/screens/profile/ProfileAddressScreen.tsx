@@ -19,13 +19,17 @@ import AppLoadingOverlay from '../../components/loading/AppLoadingOverlay';
 import AppText from '../../components/texts/AppText';
 import AppScrollView from '../../components/views/AppScrollView';
 
-import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { useQueryClient } from '@tanstack/react-query';
 import { prefetchProvinces } from '../../hooks/address/useAddressOptions';
 import { useAddressesProfile } from '../../hooks/profile/useProfileAddress';
 import { AppColors } from '../../styles/colors';
-import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  AppIconSize,
+  adaptiveSize,
+} from '../../styles/sharedstyles';
 import { ProfileStackParamList } from '../../types/data/navigation/navigation.types';
 import { AddressItem } from '../../types/data/profile/profileAddress.types';
 import AppScreenHeader from '../../components/sections/AppScreenHeader';
@@ -128,16 +132,16 @@ const ProfileAddressScreen = () => {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          paddingVertical: verticalScale(IS_TABLET ? 48 : 40),
+          paddingVertical: verticalScale(adaptiveSize(40)),
         },
         infoAddress: {
           backgroundColor: AppColors.surface,
           borderWidth: StyleSheet.hairlineWidth,
           borderColor: AppColors.border,
-          marginTop: verticalScale(IS_TABLET ? 20 : 16),
+          marginTop: verticalScale(adaptiveSize(16)),
           borderRadius: responsiveRadius(AppRadius.lg),
-          paddingVertical: verticalScale(IS_TABLET ? 18 : 16),
-          paddingHorizontal: scale(IS_TABLET ? 20 : 16),
+          paddingVertical: verticalScale(adaptiveSize(16)),
+          paddingHorizontal: scale(adaptiveSize(16)),
         },
         cardDivider: {
           height: StyleSheet.hairlineWidth,
@@ -155,7 +159,7 @@ const ProfileAddressScreen = () => {
         buttonHeader: {
           flexDirection: 'row',
           alignItems: 'center',
-          gap: scale(IS_TABLET ? 12 : 10),
+          gap: scale(adaptiveSize(10)),
         },
         infoContent: {
           marginTop: verticalScale(14),
@@ -277,18 +281,18 @@ const ProfileAddressScreen = () => {
 
                     <View style={styles.buttonHeader}>
                       <AppIconButton
-                        iconSize={IS_TABLET ? 24 : 20}
-                        buttonWidth={IS_TABLET ? 44 : 38}
-                        buttonHeight={IS_TABLET ? 44 : 38}
+                        iconSize={AppIconSize.lg}
+                        buttonWidth={adaptiveSize(38)}
+                        buttonHeight={adaptiveSize(38)}
                         bgColor={AppColors.surfaceStrong}
                         icon={<EditLocationIcon />}
                         onPress={() => handleEdit(a.id)}
                         disabled={busy}
                       />
                       <AppIconButton
-                        iconSize={IS_TABLET ? 24 : 20}
-                        buttonWidth={IS_TABLET ? 44 : 38}
-                        buttonHeight={IS_TABLET ? 44 : 38}
+                        iconSize={AppIconSize.lg}
+                        buttonWidth={adaptiveSize(38)}
+                        buttonHeight={adaptiveSize(38)}
                         bgColor={AppColors.danger + '22'}
                         icon={<TrashIcon color={AppColors.danger} />}
                         onPress={() => confirmDelete(a.id)}

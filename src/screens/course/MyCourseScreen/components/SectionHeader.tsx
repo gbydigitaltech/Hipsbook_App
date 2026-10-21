@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Search from '../../../../components/search/Search';
 import AppText from '../../../../components/texts/AppText';
-import { IS_TABLET } from '../../../../constants/platform';
 import { useResponsive } from '../../../../helpers/responsive';
 import { AppColors } from '../../../../styles/colors';
 import {
@@ -10,6 +9,7 @@ import {
   AppRadius,
   PRESSED_OPACITY,
   sharedPaddingHorizontal,
+  adaptiveSize,
 } from '../../../../styles/sharedstyles';
 
 type Props = {
@@ -54,7 +54,7 @@ const SectionHeader = ({
       StyleSheet.create({
         segmentWrap: {
           paddingHorizontal: scale(sharedPaddingHorizontal),
-          marginBottom: verticalScale(IS_TABLET ? 16 : 12),
+          marginBottom: verticalScale(adaptiveSize(12)),
         },
         segment: {
           flexDirection: 'row',
@@ -71,7 +71,7 @@ const SectionHeader = ({
           alignItems: 'center',
           justifyContent: 'center',
           gap: scale(6),
-          paddingVertical: verticalScale(IS_TABLET ? 17 : 14),
+          paddingVertical: verticalScale(adaptiveSize(14)),
           paddingHorizontal: scale(8),
           borderRadius: responsiveRadius(AppRadius.pill),
         },

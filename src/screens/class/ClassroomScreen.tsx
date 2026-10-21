@@ -12,7 +12,7 @@ import { log, logWarn } from '../../helpers/logger';
 import AppBackground from '../../components/background/AppBackground';
 import PdfRender from '../../components/pdf/PdfRender';
 import AppFlatList from '../../components/views/AppFlatList';
-import { IS_IOS, IS_TABLET } from '../../constants/platform';
+import { IS_IOS } from '../../constants/platform';
 import {
   canAccessItem,
   isTruthyFlag,
@@ -29,6 +29,7 @@ import {
   androidSafeTop,
   iosSafeTop,
   sharedPaddingHorizontal,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import { AppColors } from '../../styles/colors';
 import { AppStackParamList } from '../../types/data/navigation/navigation.types';
@@ -443,7 +444,7 @@ const ClassroomScreen = () => {
             topInset={
               IS_IOS ? verticalScale(iosSafeTop) : verticalScale(androidSafeTop)
             }
-            backSize={IS_TABLET ? 48 : 40}
+            backSize={adaptiveSize(40)}
             title={detailData?.label ?? ''}
             onPressLessonDetail={() => setLessonDetailVisible(true)}
             onPressCourseAbout={() => setCourseAboutVisible(true)}

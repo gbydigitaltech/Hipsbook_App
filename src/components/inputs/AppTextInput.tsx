@@ -11,7 +11,7 @@ import {
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { AppRadius } from '../../styles/sharedstyles';
+import { AppFontSize, AppRadius } from '../../styles/sharedstyles';
 import { AppTextInputProps } from '../../types/ui/inputs/app-text-input.props';
 import AppText from '../texts/AppText';
 
@@ -29,7 +29,7 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
       backgroundColor = AppColors.backgroundInteractive, // Input background color
       radius = AppRadius.md, // Wrapper corner radius
       textColor = AppColors.white, // Default text color
-      fontSize = 16, // Base text size
+      fontSize = AppFontSize.subtitle, // Base text size
       fontWeight = 'regular', // Font weight key for getFontFamily
       secureTextEntry = false, // Password mode
       disabled = false, // Disable input/editing
@@ -137,7 +137,10 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
           right: Math.max(MIN_TAP / 2, iconHitSlop),
         } as const,
 
-        labelFontSize: moderateScale(labelFontSize ?? 16, 0.5),
+        labelFontSize: moderateScale(
+          labelFontSize ?? AppFontSize.subtitle,
+          0.5,
+        ),
         labelSpacing: responsiveSpacing(6),
       };
     }, [

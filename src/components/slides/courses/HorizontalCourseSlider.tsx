@@ -9,11 +9,16 @@ import {
 import Carousel from 'react-native-snap-carousel';
 import { useResponsive } from '../../../helpers/responsive';
 
-import { IS_TABLET } from '../../../constants/platform';
 import { AppColors } from '../../../styles/colors';
 import { HorizontalCourseSliderProps } from '../../../types/ui/slides/course/course-slider.props';
-import CourseHorizontalCard from '../../cards/CourseHorizontalCard';
-import { AppRadius } from '../../../styles/sharedstyles';
+import CourseHorizontalCard, {
+  COURSE_HORIZONTAL_ACTION_WIDTH,
+} from '../../cards/CourseHorizontalCard';
+import {
+  AppButtonHeight,
+  AppRadius,
+  adaptiveSize,
+} from '../../../styles/sharedstyles';
 
 const DEFAULT_AUTO_SLIDE_INTERVAL = 5000;
 const DEFAULT_AUTOPLAY_DELAY = 500;
@@ -23,11 +28,12 @@ const HorizontalCourseSliderSkeletonCard = React.memo(() => {
   const { scale, verticalScale, responsiveRadius, responsiveSpacing } =
     useResponsive();
 
-  const avatarSize = scale(IS_TABLET ? 32 : 26);
-  const padding = responsiveSpacing(IS_TABLET ? 12 : 10);
-  const fixedHeight = verticalScale(IS_TABLET ? 168 : 140);
+  const avatarSize = scale(adaptiveSize(26));
+  const padding = responsiveSpacing(adaptiveSize(10));
+  const fixedHeight = verticalScale(adaptiveSize(140));
   const imageSize = fixedHeight - padding * 2;
-  const buttonHeight = verticalScale(IS_TABLET ? 44 : 40);
+  const buttonHeight = verticalScale(AppButtonHeight.card);
+  const actionWidth = COURSE_HORIZONTAL_ACTION_WIDTH;
   const actionButtonRadius = responsiveRadius(AppRadius.pill);
 
   const styles = useMemo(
@@ -41,7 +47,7 @@ const HorizontalCourseSliderSkeletonCard = React.memo(() => {
           borderColor: AppColors.border,
           borderRadius: responsiveRadius(AppRadius.md),
           padding,
-          gap: scale(IS_TABLET ? 20 : 16),
+          gap: scale(adaptiveSize(16)),
           height: fixedHeight,
         },
         cover: {
@@ -71,29 +77,29 @@ const HorizontalCourseSliderSkeletonCard = React.memo(() => {
         },
         titleLineLong: {
           width: '92%',
-          height: verticalScale(IS_TABLET ? 18 : 14),
+          height: verticalScale(adaptiveSize(14)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
         titleLineShort: {
           width: '62%',
-          height: verticalScale(IS_TABLET ? 18 : 14),
+          height: verticalScale(adaptiveSize(14)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
         sideIcon: {
-          width: scale(IS_TABLET ? 32 : 28),
-          height: scale(IS_TABLET ? 32 : 28),
+          width: scale(adaptiveSize(28)),
+          height: scale(adaptiveSize(28)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
-          marginLeft: scale(IS_TABLET ? 10 : 8),
+          marginLeft: scale(adaptiveSize(8)),
         },
         teacherRow: {
           flexDirection: 'row',
           alignItems: 'center',
           width: '100%',
           gap: scale(6),
-          minHeight: verticalScale(IS_TABLET ? 28 : 24),
+          minHeight: verticalScale(adaptiveSize(24)),
         },
         teacherAvatar: {
           width: avatarSize,
@@ -105,18 +111,18 @@ const HorizontalCourseSliderSkeletonCard = React.memo(() => {
         },
         teacherName: {
           width: '36%',
-          height: verticalScale(IS_TABLET ? 14 : 12),
+          height: verticalScale(adaptiveSize(12)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
         teacherBadge: {
-          width: scale(IS_TABLET ? 34 : 28),
-          height: verticalScale(IS_TABLET ? 24 : 20),
+          width: scale(adaptiveSize(28)),
+          height: verticalScale(adaptiveSize(20)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
         actionButton: {
-          width: '60%',
+          minWidth: actionWidth,
           alignSelf: 'flex-end',
           height: buttonHeight,
           borderRadius: actionButtonRadius,
@@ -126,13 +132,14 @@ const HorizontalCourseSliderSkeletonCard = React.memo(() => {
         },
         actionText: {
           width: '42%',
-          height: verticalScale(IS_TABLET ? 14 : 12),
+          height: verticalScale(adaptiveSize(12)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surfaceActive,
         },
       }),
     [
       actionButtonRadius,
+      actionWidth,
       avatarSize,
       buttonHeight,
       fixedHeight,

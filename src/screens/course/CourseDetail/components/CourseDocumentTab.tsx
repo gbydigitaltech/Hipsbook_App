@@ -15,8 +15,8 @@ import {
   CourseDocumentUnion,
 } from '../types/document.types';
 
-import { IS_TABLET } from '../../../../constants/platform';
 import { DocumentGroup } from '../types/group.types';
+import { AppFontSize, adaptiveSize } from '../../../../styles/sharedstyles';
 
 interface Props {
   groups: DocumentGroup[];
@@ -46,10 +46,10 @@ const CourseDocumentTab: React.FC<Props> = ({
 
   const normalizedCurrentMediaId = normalizeId(currentMediaId);
 
-  const titleFontSize = IS_TABLET ? 22 : 18;
-  const groupTitleFontSize = IS_TABLET ? 20 : 16;
-  const emptyFontSize = IS_TABLET ? 20 : 16;
-  const emptyIconSize = IS_TABLET ? 90 : 75;
+  const titleFontSize = AppFontSize.title;
+  const groupTitleFontSize = AppFontSize.subtitle;
+  const emptyFontSize = AppFontSize.subtitle;
+  const emptyIconSize = adaptiveSize(75);
 
   const styles = useMemo(
     () =>

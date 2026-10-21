@@ -12,6 +12,7 @@ import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import type { AppButtonProps } from '../../types/ui/buttons/app-button.props';
 import AppText from '../texts/AppText';
+import { AppFontSize } from '../../styles/sharedstyles';
 
 type BackgroundContainerProps = {
   isSolid: boolean;
@@ -82,7 +83,7 @@ const AppButton: React.FC<AppButtonProps> = ({
   opacity = 1,
 
   fontColor = AppColors.white,
-  fontSize = 16,
+  fontSize = AppFontSize.subtitle,
   fontWeight = 'medium',
 
   activeOpacity = 0.8,

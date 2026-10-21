@@ -31,7 +31,7 @@ const ExpandableText: React.FC<Props> = ({
   html,
   children,
   maxLines = 8,
-  fontSize = 14,
+  fontSize = AppFontSize.body,
   contentWidth = 0,
   fontWeight = 'regular',
   fadeColors = ['rgba(17,17,17,0)', 'rgba(17,17,17,0.95)'],

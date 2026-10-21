@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import {
+  DimensionValue,
   Image,
   Pressable,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
 
 import LibraryIcon from '../../assets/icons/course/LibraryIcon';
 import VideoIcon from '../../assets/icons/course/VideoIcon';
+import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { buyLabel, isFreeItem } from '../../helpers/access';
 import { AppColors } from '../../styles/colors';
@@ -17,14 +19,26 @@ import type { CourseCardProps } from '../../types/ui/cards/course-card.props';
 import AppButton from '../buttons/AppButton';
 import AppImage from '../images/AppImage';
 // import AppCartButton from '../buttons/AppCartButton'; //
-import { IS_TABLET } from '../../constants/platform';
 import WhitelistButton from '../buttons/WhitelistButton';
 import AppText from '../texts/AppText';
 import {
+  AppButtonHeight,
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
+
+/**
+ * Minimum action-button width (% of the info column); the button grows
+ * past it when the label is longer. Shared with
+ * HorizontalCourseSlider's skeleton. Tablet uses a smaller share because the
+ * card is much wider, so 60% would make the button a long bar.
+ */
+export const COURSE_HORIZONTAL_ACTION_WIDTH: DimensionValue = IS_TABLET
+  ? '40%'
+  : '60%';
 
 const CourseHorizontalCard: React.FC<CourseCardProps> = ({
   label,
@@ -69,11 +83,14 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
   const learnLabel = startLabel?.trim() || 'เริ่มเรียน';
   const actionLabel = inLibrary ? 'เรียนต่อ' : learnLabel;
 
-  const avatarSize = scale(IS_TABLET ? 32 : 26);
-  const padding = responsiveSpacing(IS_TABLET ? 12 : 10);
-  const fixedHeight = verticalScale(IS_TABLET ? 168 : 140);
+  const avatarSize = scale(adaptiveSize(26));
+  const padding = responsiveSpacing(adaptiveSize(10));
+  const fixedHeight = verticalScale(adaptiveSize(140));
   const imageSize = fixedHeight - padding * 2;
-  const buttonHeight = verticalScale(IS_TABLET ? 44 : 40);
+  const buttonHeight = verticalScale(AppButtonHeight.card);
+  // Minimum width; the button grows for longer labels (e.g. ฿12,990)
+  const actionWidth = COURSE_HORIZONTAL_ACTION_WIDTH;
+  const actionPaddingH = scale(adaptiveSize(16));
   const actionButtonRadius = responsiveRadius(AppRadius.pill);
 
   return (
@@ -84,7 +101,7 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
         {
           borderRadius: responsiveRadius(AppRadius.md),
           padding,
-          gap: scale(IS_TABLET ? 20 : 16),
+          gap: scale(adaptiveSize(16)),
           height: fixedHeight,
           opacity: pressed ? PRESSED_OPACITY : 1,
         },
@@ -128,25 +145,22 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
               style={[
                 styles.headerRightIcon,
                 {
-                  marginLeft: scale(IS_TABLET ? 10 : 8),
+                  marginLeft: scale(adaptiveSize(8)),
                   alignSelf: inLibrary ? 'flex-start' : 'center',
                 },
               ]}
             >
               {inLibrary ? (
-                <LibraryIcon
-                  size={IS_TABLET ? 32 : 28}
-                  color={AppColors.primary}
-                />
+                <LibraryIcon size={AppIconSize.xxl} color={AppColors.primary} />
               ) : (
                 <WhitelistButton
                   isWhitelisted={isWhitelisted}
                   onToggle={next => {
                     onToggleWhitelist?.(next);
                   }}
-                  buttonHeight={IS_TABLET ? 32 : 28}
-                  buttonWidth={IS_TABLET ? 32 : 28}
-                  iconSize={IS_TABLET ? 22 : 18}
+                  buttonHeight={adaptiveSize(28)}
+                  buttonWidth={adaptiveSize(28)}
+                  iconSize={AppIconSize.md}
                 />
               )}
             </View>
@@ -156,7 +170,7 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
         <View
           style={[
             styles.teacherRow,
-            { gap: scale(6), minHeight: verticalScale(IS_TABLET ? 28 : 24) },
+            { gap: scale(6), minHeight: verticalScale(adaptiveSize(24)) },
           ]}
         >
           {teacherInfo.firstAvatar ? (
@@ -210,8 +224,8 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
               style={[
                 styles.remainingBadge,
                 {
-                  paddingHorizontal: scale(IS_TABLET ? 10 : 8),
-                  height: verticalScale(IS_TABLET ? 24 : 20),
+                  paddingHorizontal: scale(adaptiveSize(8)),
+                  height: verticalScale(adaptiveSize(20)),
                 },
               ]}
             >
@@ -228,6 +242,8 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
               styles.startLearn,
               styles.halfInfoButton,
               {
+                minWidth: actionWidth,
+                paddingHorizontal: actionPaddingH,
                 height: buttonHeight,
                 borderRadius: actionButtonRadius,
                 gap: scale(8),
@@ -241,7 +257,7 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
             accessibilityRole="button"
             accessibilityLabel={actionLabel}
           >
-            <VideoIcon size={IS_TABLET ? 22 : 18} color={AppColors.primary} />
+            <VideoIcon size={AppIconSize.md} color={AppColors.primary} />
             <AppText
               style={styles.startLearnText}
               numberOfLines={1}
@@ -253,23 +269,27 @@ const CourseHorizontalCard: React.FC<CourseCardProps> = ({
           </TouchableOpacity>
         ) : (
           <View style={[styles.actionRow, { gap: scale(10) }]}>
-            <View style={styles.buyButtonContainer}>
+            <View
+              style={[styles.buyButtonContainer, { minWidth: actionWidth }]}
+            >
               <AppButton
                 title={priceLabel}
                 onPress={() => {
                   onPressBuy?.();
                 }}
                 fontSize={AppFontSize.caption}
+                fullWidth
                 containerStyle={{
-                  width: '100%',
                   borderRadius: actionButtonRadius,
                 }}
                 contentStyle={[
                   styles.buyButtonContent,
                   {
+                    // Width follows the label (long prices grow the button)
+                    width: 'auto',
                     height: buttonHeight,
                     minHeight: buttonHeight,
-                    paddingHorizontal: 0,
+                    paddingHorizontal: actionPaddingH,
                     paddingVertical: 0,
                   },
                 ]}
@@ -362,8 +382,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   buyButtonContainer: {
-    width: '60%',
     alignSelf: 'flex-end',
+    maxWidth: '100%',
   },
   buyButtonContent: {
     paddingVertical: 0,
@@ -376,8 +396,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   halfInfoButton: {
-    width: '60%',
     alignSelf: 'flex-end',
+    maxWidth: '100%',
   },
   startLearnText: {
     color: AppColors.primary,

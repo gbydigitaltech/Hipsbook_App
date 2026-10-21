@@ -5,12 +5,17 @@ import {
   Carousel,
   type CarouselPanGesture,
 } from 'react-native-reanimated-carousel';
-import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import { AppColors } from '../../../styles/colors';
 import { VerticalCourseSliderProps } from '../../../types/ui/slides/course/course-slider.props';
-import CourseVerticalCard from '../../cards/CourseVerticalCard';
-import { AppRadius } from '../../../styles/sharedstyles';
+import CourseVerticalCard, {
+  useCourseVerticalCardSize,
+} from '../../cards/CourseVerticalCard';
+import {
+  AppButtonHeight,
+  AppRadius,
+  adaptiveSize,
+} from '../../../styles/sharedstyles';
 
 const DEFAULT_AUTO_SLIDE_INTERVAL = 5000;
 const DEFAULT_AUTOPLAY_DELAY = 500;
@@ -20,10 +25,9 @@ const VerticalCourseSliderSkeletonCard = React.memo(() => {
   const { scale, verticalScale, responsiveRadius, responsiveSpacing } =
     useResponsive();
 
-  const avatarSize = scale(IS_TABLET ? 30 : 26);
-  const padding = responsiveSpacing(IS_TABLET ? 12 : 10);
-  const fixedHeight = verticalScale(IS_TABLET ? 372 : 310);
-  const cardWidth = scale(IS_TABLET ? 264 : 220);
+  const avatarSize = scale(adaptiveSize(26));
+  const padding = responsiveSpacing(adaptiveSize(10));
+  const { width: cardWidth, height: fixedHeight } = useCourseVerticalCardSize();
   const cardRadius = responsiveRadius(AppRadius.md);
 
   const styles = useMemo(
@@ -66,20 +70,20 @@ const VerticalCourseSliderSkeletonCard = React.memo(() => {
           gap: verticalScale(6),
         },
         titleLineLong: {
-          height: verticalScale(IS_TABLET ? 18 : 14),
+          height: verticalScale(adaptiveSize(14)),
           width: '92%',
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
         titleLineShort: {
-          height: verticalScale(IS_TABLET ? 18 : 14),
+          height: verticalScale(adaptiveSize(14)),
           width: '68%',
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
         sideIcon: {
-          width: scale(IS_TABLET ? 34 : 28),
-          height: scale(IS_TABLET ? 34 : 28),
+          width: scale(adaptiveSize(28)),
+          height: scale(adaptiveSize(28)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
           marginTop: verticalScale(2),
@@ -88,7 +92,7 @@ const VerticalCourseSliderSkeletonCard = React.memo(() => {
           flexDirection: 'row',
           alignItems: 'center',
           gap: scale(6),
-          minHeight: verticalScale(IS_TABLET ? 26 : 22),
+          minHeight: verticalScale(adaptiveSize(22)),
         },
         teacherAvatar: {
           width: avatarSize,
@@ -99,14 +103,14 @@ const VerticalCourseSliderSkeletonCard = React.memo(() => {
           borderColor: AppColors.borderStrong,
         },
         teacherName: {
-          height: verticalScale(IS_TABLET ? 14 : 12),
+          height: verticalScale(adaptiveSize(12)),
           width: '44%',
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
         teacherBadge: {
-          height: verticalScale(IS_TABLET ? 24 : 20),
-          width: scale(IS_TABLET ? 34 : 28),
+          height: verticalScale(adaptiveSize(20)),
+          width: scale(adaptiveSize(28)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surface,
         },
@@ -114,13 +118,13 @@ const VerticalCourseSliderSkeletonCard = React.memo(() => {
           marginTop: verticalScale(2),
           backgroundColor: AppColors.backgroundInteractive,
           borderRadius: responsiveRadius(AppRadius.pill),
-          height: verticalScale(40),
+          height: verticalScale(AppButtonHeight.card),
           alignItems: 'center',
           justifyContent: 'center',
         },
         actionText: {
           width: '42%',
-          height: verticalScale(IS_TABLET ? 14 : 12),
+          height: verticalScale(adaptiveSize(12)),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.surfaceActive,
         },
@@ -180,12 +184,10 @@ const VerticalCourseSlider: React.FC<VerticalCourseSliderProps> = React.memo(
     loading = false,
     skeletonCount = DEFAULT_SKELETON_COUNT,
   }) => {
-    const { scale, verticalScale } = useResponsive();
     const { width: screenWidth } = useWindowDimensions();
 
-    const cardWidth = useMemo(() => scale(IS_TABLET ? 264 : 220), [scale]);
-
-    const sliderHeight = verticalScale(IS_TABLET ? 372 : 310);
+    const { width: cardWidth, height: sliderHeight } =
+      useCourseVerticalCardSize();
 
     // Distance between cards (center to center)
     const step = cardWidth + gap * 2;

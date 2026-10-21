@@ -26,7 +26,6 @@ import AppEmptyState from '../../components/states/AppEmptyState';
 import Search, { SEARCH_BAR_HEIGHT } from '../../components/search/Search';
 import AppText from '../../components/texts/AppText';
 import AppFlatList from '../../components/views/AppFlatList';
-import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import {
   LocalCourseFilterState,
@@ -42,6 +41,8 @@ import {
   AppRadius,
   PRESSED_OPACITY,
   sharedTopSpace,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import { Course } from '../../types/data/courses/course.type';
 import {
@@ -115,7 +116,7 @@ const CourseScreen = () => {
         },
         headerRow: {
           marginTop: sharedTopSpace,
-          marginBottom: verticalScale(IS_TABLET ? 24 : 18),
+          marginBottom: verticalScale(adaptiveSize(18)),
         },
         title: {
           marginBottom: verticalScale(12),
@@ -407,7 +408,7 @@ const CourseScreen = () => {
                 >
                   <Ionicons
                     name="options-outline"
-                    size={IS_TABLET ? 24 : 20}
+                    size={AppIconSize.lg}
                     color={AppColors.white}
                   />
                   {hasActiveFilters && <View style={styles.filterDot} />}

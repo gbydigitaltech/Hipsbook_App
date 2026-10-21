@@ -1,10 +1,13 @@
 import React from 'react';
 import { Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { AppRadius, PRESSED_OPACITY } from '../../styles/sharedstyles';
+import {
+  AppRadius,
+  PRESSED_OPACITY,
+  adaptiveSize,
+} from '../../styles/sharedstyles';
 
 type Props = {
   size?: number;
@@ -23,7 +26,7 @@ const MoreVerticalButton: React.FC<Props> = ({
 }) => {
   const { scale, verticalScale, responsiveRadius } = useResponsive();
 
-  const btnSize = scale(IS_TABLET ? 46 : 40);
+  const btnSize = scale(adaptiveSize(40));
   const iconW = scale(size);
   const iconH = verticalScale(size);
 

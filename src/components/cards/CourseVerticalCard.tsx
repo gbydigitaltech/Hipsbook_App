@@ -17,14 +17,25 @@ import type { CourseCardProps } from '../../types/ui/cards/course-card.props';
 import AppButton from '../buttons/AppButton';
 import AppImage from '../images/AppImage';
 // import AppCartButton from '../buttons/AppCartButton'; // <-- not used (commented)
-import { IS_TABLET } from '../../constants/platform';
 import WhitelistButton from '../buttons/WhitelistButton';
 import AppText from '../texts/AppText';
 import {
+  AppButtonHeight,
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
+
+/** Card size, shared with VerticalCourseSlider (slider height + skeleton). */
+export const useCourseVerticalCardSize = () => {
+  const { scale, verticalScale } = useResponsive();
+  return {
+    width: scale(adaptiveSize(220)),
+    height: verticalScale(adaptiveSize(310)),
+  };
+};
 
 const CourseVerticalCard: React.FC<CourseCardProps> = ({
   label, // Course title
@@ -52,7 +63,6 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
   const hasWhitelistProp = typeof whitelist === 'boolean';
   const isWhitelisted = !!whitelist;
 
-
   // Teacher summary (show first teacher + remaining count)
   const teacherInfo = useMemo(() => {
     const firstJoin = teacher?.[0]?.join_Teacher ?? null;
@@ -77,10 +87,11 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
   const actionLabel = inLibrary ? 'เรียนต่อ' : learnLabel;
 
   // Responsive dimensions
-  const avatarSize = scale(IS_TABLET ? 30 : 26);
-  const padding = responsiveSpacing(IS_TABLET ? 12 : 10);
-  const fixedHeight = verticalScale(IS_TABLET ? 372 : 310);
-  const cardWidth = scale(IS_TABLET ? 264 : 220);
+  const avatarSize = scale(adaptiveSize(26));
+  const padding = responsiveSpacing(adaptiveSize(10));
+  const { width: cardWidth, height: fixedHeight } = useCourseVerticalCardSize();
+  // Same action-button height as CourseHorizontalCard
+  const buttonHeight = verticalScale(AppButtonHeight.card);
   const imageAspectRatio = 4 / 3;
   const cardRadius = responsiveRadius(AppRadius.md);
 
@@ -151,7 +162,7 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
             >
               {inLibrary ? (
                 <LibraryIcon
-                  size={IS_TABLET ? 34 : IS_TABLET ? 34 : 28}
+                  size={adaptiveSize(28)}
                   color={AppColors.primary}
                 />
               ) : (
@@ -160,9 +171,9 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
                   onToggle={next => {
                     onToggleWhitelist?.(next);
                   }}
-                  buttonHeight={IS_TABLET ? 34 : 28}
-                  buttonWidth={IS_TABLET ? 34 : 28}
-                  iconSize={IS_TABLET ? 22 : 18}
+                  buttonHeight={adaptiveSize(28)}
+                  buttonWidth={adaptiveSize(28)}
+                  iconSize={AppIconSize.md}
                 />
               )}
             </View>
@@ -172,7 +183,7 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
         <View
           style={[
             styles.teacherRow,
-            { gap: scale(6), minHeight: verticalScale(IS_TABLET ? 26 : 22) },
+            { gap: scale(6), minHeight: verticalScale(adaptiveSize(22)) },
           ]}
         >
           {teacherInfo.firstAvatar ? (
@@ -227,7 +238,7 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
                 styles.remainingBadge,
                 {
                   paddingHorizontal: scale(8),
-                  height: verticalScale(IS_TABLET ? 24 : 20),
+                  height: verticalScale(adaptiveSize(20)),
                 },
               ]}
             >
@@ -243,7 +254,7 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
             style={[
               styles.startLearn,
               {
-                paddingVertical: verticalScale(10),
+                height: buttonHeight,
                 borderRadius: responsiveRadius(AppRadius.pill),
                 gap: scale(8),
               },
@@ -256,7 +267,7 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
             accessibilityRole="button"
             accessibilityLabel={actionLabel}
           >
-            <VideoIcon size={18} color={AppColors.primary} />
+            <VideoIcon size={AppIconSize.md} color={AppColors.primary} />
             <AppText
               style={[styles.startLearnText]}
               fontSize={AppFontSize.caption}
@@ -269,7 +280,7 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
             style={[
               styles.startLearn,
               {
-                paddingVertical: verticalScale(10),
+                height: buttonHeight,
                 borderRadius: responsiveRadius(AppRadius.pill),
                 gap: scale(8),
               },
@@ -282,7 +293,7 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
             accessibilityRole="button"
             accessibilityLabel={actionLabel}
           >
-            <VideoIcon size={18} color={AppColors.primary} />
+            <VideoIcon size={AppIconSize.md} color={AppColors.primary} />
             <AppText
               style={[styles.startLearnText]}
               fontSize={AppFontSize.caption}
@@ -299,7 +310,9 @@ const CourseVerticalCard: React.FC<CourseCardProps> = ({
                 fontSize={AppFontSize.caption}
                 fullWidth
                 contentStyle={{
-                  paddingVertical: verticalScale(10),
+                  height: buttonHeight,
+                  minHeight: buttonHeight,
+                  paddingVertical: 0,
                 }}
               />
             </View>

@@ -14,10 +14,14 @@ import RatingIcon from '../../../../assets/icons/RatingIcon';
 import AppLoadingOverlay from '../../../../components/loading/AppLoadingOverlay';
 import RoundProfileImage from '../../../../components/profiles/RoundProfileImage';
 import AppText from '../../../../components/texts/AppText';
-import { IS_TABLET } from '../../../../constants/platform';
 import { useResponsive } from '../../../../helpers/responsive';
 import { AppColors } from '../../../../styles/colors';
-import { AppFontSize, AppRadius } from '../../../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  AppIconSize,
+  adaptiveSize,
+} from '../../../../styles/sharedstyles';
 
 type PersonalInfo = {
   first_name?: string | null;
@@ -146,13 +150,13 @@ const ThreadRow: React.FC<{
           flexDirection: 'row',
           alignItems: 'center',
           marginTop: verticalScale(6),
-          gap: scale(IS_TABLET ? 6 : 4),
+          gap: scale(adaptiveSize(4)),
         },
         commentBox: {
           borderRadius: responsiveRadius(AppRadius.lg),
           backgroundColor: AppColors.backgroundInteractive,
-          paddingVertical: verticalScale(IS_TABLET ? 10 : 8),
-          paddingHorizontal: scale(IS_TABLET ? 20 : 16),
+          paddingVertical: verticalScale(adaptiveSize(8)),
+          paddingHorizontal: scale(adaptiveSize(16)),
         },
         content: {
           color: AppColors.white,
@@ -164,7 +168,7 @@ const ThreadRow: React.FC<{
   return (
     <View style={styles.container}>
       <View style={styles.profileRow}>
-        <RoundProfileImage size={IS_TABLET ? 68 : 56} name={name} />
+        <RoundProfileImage size={adaptiveSize(56)} name={name} />
 
         <View style={styles.right}>
           <View style={styles.header}>
@@ -190,7 +194,7 @@ const ThreadRow: React.FC<{
               {Array.from({ length: 5 }).map((_, i) => (
                 <RatingIcon
                   key={i}
-                  size={IS_TABLET ? 20 : 16}
+                  size={AppIconSize.sm}
                   color={
                     i < filledCount ? AppColors.rating : AppColors.ratingEmpty
                   }
@@ -289,15 +293,15 @@ const CourseReviewRepliesModal: React.FC<Props> = ({
         handle: {
           alignSelf: 'center',
           backgroundColor: AppColors.surfaceStrong,
-          width: scale(IS_TABLET ? 54 : 44),
+          width: scale(adaptiveSize(44)),
           height: verticalScale(5),
           borderRadius: responsiveRadius(AppRadius.pill),
-          marginBottom: verticalScale(IS_TABLET ? 36 : 30),
+          marginBottom: verticalScale(adaptiveSize(30)),
         },
         header: {
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: verticalScale(IS_TABLET ? 20 : 16),
+          marginBottom: verticalScale(adaptiveSize(16)),
         },
         title: {
           color: AppColors.white,

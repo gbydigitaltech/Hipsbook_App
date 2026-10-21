@@ -4,13 +4,13 @@ import { IS_IOS } from '../../constants/platform';
 import { getFontFamily } from '../../helpers/fontFamilyHelper';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { LINE_HEIGHT_RATIO } from '../../styles/sharedstyles';
+import { AppFontSize, LINE_HEIGHT_RATIO } from '../../styles/sharedstyles';
 import { AppTextProps } from '../../types/ui/texts/text.props';
 
 const AppText: React.FC<AppTextProps> = ({
   children, // Text content
   fontWeight = 'regular', // Font weight key for getFontFamily
-  fontSize = 16, // Base font size before responsive scaling
+  fontSize = AppFontSize.subtitle, // Base font size before responsive scaling (16 on phone)
   style, // External style override
   allowFontScaling = false, // Accessibility text scaling
   maxFontSizeMultiplier = 1.2, // Limit accessibility scaling

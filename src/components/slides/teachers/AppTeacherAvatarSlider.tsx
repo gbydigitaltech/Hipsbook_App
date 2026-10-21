@@ -2,10 +2,9 @@ import React, { memo, useCallback, useMemo } from 'react';
 import type { ImageSourcePropType, ListRenderItemInfo } from 'react-native';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import TeacherAvatar from '../../teachers/TeacherAvatar';
-import { PRESSED_OPACITY } from '../../../styles/sharedstyles';
+import { PRESSED_OPACITY, adaptiveSize } from '../../../styles/sharedstyles';
 
 export type TeacherAvatarItem = {
   id: string; // Unique item key
@@ -18,10 +17,10 @@ type Props = {
 };
 
 // Spacing constants for tablet/mobile
-const AVATAR_SPACING = IS_TABLET ? 18 : 14;
-const AVATAR_EDGE_SPACING = IS_TABLET ? 12 : 10;
-const AVATAR_SIZE = IS_TABLET ? 120 : 100;
-const LIST_VERTICAL_PADDING = IS_TABLET ? 6 : 4;
+const AVATAR_SPACING = adaptiveSize(14);
+const AVATAR_EDGE_SPACING = adaptiveSize(10);
+const AVATAR_SIZE = adaptiveSize(100);
+const LIST_VERTICAL_PADDING = adaptiveSize(4);
 
 const AppTeacherAvatarSlider: React.FC<Props> = ({ data, onItemPress }) => {
   const { scale, responsiveSpacing } = useResponsive();

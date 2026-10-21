@@ -9,6 +9,7 @@ import {
 } from '../../types/ui/selects/select.props';
 import AppText from '../texts/AppText';
 import AppSelect from './AppSelect';
+import { AppFontSize } from '../../styles/sharedstyles';
 
 function AppSelectController<
   TFieldValues extends FieldValues,
@@ -23,7 +24,7 @@ function AppSelectController<
   defaultValue = null,
   disabled,
   showErrorText = true,
-  errorFontSize = 12,
+  errorFontSize = AppFontSize.caption,
   containerStyle,
   errorBlockStyle,
   errorTextStyle,

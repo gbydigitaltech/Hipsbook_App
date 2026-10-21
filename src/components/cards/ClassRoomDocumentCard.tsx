@@ -17,6 +17,8 @@ import {
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import AppButton from '../buttons/AppButton';
 import AppText from '../texts/AppText';
@@ -113,7 +115,7 @@ const ClassRoomDocumentCard: React.FC<Props> = ({
   const fixedHeight = verticalScale(IS_TABLET ? 140 : 120);
 
   const actionButtonWidth = scale(IS_TABLET ? 148 : 120);
-  const actionButtonHeight = verticalScale(IS_TABLET ? 48 : 38);
+  const actionButtonHeight = verticalScale(adaptiveSize(38));
 
   const styles = useMemo(
     () =>
@@ -236,7 +238,7 @@ const ClassRoomDocumentCard: React.FC<Props> = ({
               {badgeLabel}
             </AppText>
           )}
-          {!canStart && <LockedThumbOverlay size={IS_TABLET ? 28 : 24} />}
+          {!canStart && <LockedThumbOverlay size={AppIconSize.xl} />}
         </View>
 
         <View style={styles.infoContainer}>
@@ -289,12 +291,12 @@ const ClassRoomDocumentCard: React.FC<Props> = ({
                 <View style={styles.iconWrapper}>
                   {isAudio ? (
                     <ListenIcon
-                      size={IS_TABLET ? 28 : 24}
+                      size={AppIconSize.xl}
                       color={AppColors.primary}
                     />
                   ) : (
                     <DownloadIcon
-                      size={IS_TABLET ? 22 : 18}
+                      size={AppIconSize.md}
                       color={AppColors.primary}
                     />
                   )}

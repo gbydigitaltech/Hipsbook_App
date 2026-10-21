@@ -14,7 +14,7 @@ import {
 
 import AppButton from '../../components/buttons/AppButton';
 import AppText from '../../components/texts/AppText';
-import { IS_IOS, IS_TABLET } from '../../constants/platform';
+import { IS_IOS } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { useCourseFilter } from '../../hooks/course/useCourseFilter';
 import CategoryIconBadge from '../../components/category/CategoryIconBadge';
@@ -23,6 +23,7 @@ import {
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import { GetCourseListParams } from '../../types/data/courses/course.query.types';
 
@@ -148,17 +149,17 @@ const CourseFilterModal: React.FC<Props> = ({ visible, onClose, onApply }) => {
         },
         handle: {
           alignSelf: 'center',
-          width: scale(IS_TABLET ? 54 : 44),
+          width: scale(adaptiveSize(44)),
           height: verticalScale(5),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.surfaceStrong,
-          marginBottom: verticalScale(IS_TABLET ? 24 : 20),
+          marginBottom: verticalScale(adaptiveSize(20)),
         },
         headerRow: {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: verticalScale(IS_TABLET ? 18 : 14),
+          marginBottom: verticalScale(adaptiveSize(14)),
         },
         closeButton: {
           marginRight: scale(-8),

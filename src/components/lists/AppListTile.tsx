@@ -6,7 +6,11 @@ import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import { AppListTileProps } from '../../types/ui/lists/app-list-tile.props';
 import AppText from '../texts/AppText';
-import { AppRadius, PRESSED_OPACITY } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  PRESSED_OPACITY,
+} from '../../styles/sharedstyles';
 
 const AppListTile: React.FC<AppListTileProps> = ({
   title, // Main title text
@@ -26,7 +30,7 @@ const AppListTile: React.FC<AppListTileProps> = ({
   // Responsive sizing
   const iconHeightBox = verticalScale(24);
   const iconWidthBox = scale(24);
-  const defaultFontSize = 16;
+  const defaultFontSize = AppFontSize.subtitle;
   const finalFontSize = titleFontSize ?? defaultFontSize;
   const chevronSize = 14;
 

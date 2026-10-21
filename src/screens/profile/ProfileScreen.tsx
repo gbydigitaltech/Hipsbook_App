@@ -29,6 +29,7 @@ import {
   AppFontSize,
   AppRadius,
   sharedTopSpace,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import {
   AppStackParamList,
@@ -103,13 +104,13 @@ const ProfileScreen = () => {
           borderRadius: responsiveRadius(AppRadius.lg),
           paddingHorizontal: scale(10),
           gap: verticalScale(8),
-          paddingVertical: verticalScale(IS_TABLET ? 36 : 24),
-          marginTop: verticalScale(IS_TABLET ? 18 : 10),
+          paddingVertical: verticalScale(adaptiveSize(24)),
+          marginTop: verticalScale(adaptiveSize(10)),
         },
 
         infoContainer: {
           alignItems: 'center',
-          gap: verticalScale(IS_TABLET ? 6 : 8),
+          gap: verticalScale(adaptiveSize(8)),
         },
 
         nameText: {
@@ -121,22 +122,22 @@ const ProfileScreen = () => {
         },
 
         skeletonAvatar: {
-          width: IS_TABLET ? 130 : 110,
-          height: IS_TABLET ? 130 : 110,
+          width: adaptiveSize(110),
+          height: adaptiveSize(110),
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.sheetRaised,
         },
 
         skeletonName: {
           width: scale(IS_TABLET ? 220 : 160),
-          height: verticalScale(IS_TABLET ? 24 : 18),
+          height: verticalScale(adaptiveSize(18)),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.sheetRaised,
         },
 
         skeletonEmail: {
           width: scale(IS_TABLET ? 260 : 200),
-          height: verticalScale(IS_TABLET ? 22 : 16),
+          height: verticalScale(adaptiveSize(16)),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.sheetRaised,
         },
@@ -147,7 +148,7 @@ const ProfileScreen = () => {
         },
 
         listGroup: {
-          marginTop: verticalScale(IS_TABLET ? 24 : 20),
+          marginTop: verticalScale(adaptiveSize(20)),
         },
         tileHintText: {
           color: AppColors.textTertiary,
@@ -204,7 +205,7 @@ const ProfileScreen = () => {
                   : undefined
               }
               disabled={isUploadingProfileImage}
-              size={IS_TABLET ? 130 : 110}
+              size={adaptiveSize(110)}
             />
           )}
 
@@ -241,14 +242,14 @@ const ProfileScreen = () => {
         <AppListGroup label="บัญชีของฉัน" containerStyle={styles.listGroup}>
           <AppListTile
             title="แก้ไขโปรไฟล์"
-            leftIcon={<EditUserIcon size={IS_TABLET ? 26 : 22} />}
+            leftIcon={<EditUserIcon size={adaptiveSize(22)} />}
             onPress={goEditProfile}
             titleFontSize={AppFontSize.subtitle}
           />
 
           <AppListTile
             title="ที่อยู่"
-            leftIcon={<HomeOutlineIcon size={IS_TABLET ? 26 : 22} />}
+            leftIcon={<HomeOutlineIcon size={adaptiveSize(22)} />}
             onPress={goAddress}
             titleFontSize={AppFontSize.subtitle}
           />
@@ -256,7 +257,7 @@ const ProfileScreen = () => {
           {isHipsbook ? (
             <AppListTile
               title="รหัสผ่าน"
-              leftIcon={<LockIcon size={IS_TABLET ? 26 : 22} />}
+              leftIcon={<LockIcon size={adaptiveSize(22)} />}
               rightContent={
                 <AppText
                   fontSize={AppFontSize.caption}
@@ -274,7 +275,7 @@ const ProfileScreen = () => {
         <AppListGroup label="เกี่ยวกับ" containerStyle={styles.listGroup}>
           <AppListTile
             title="เกี่ยวกับ Hipsbook"
-            leftIcon={<InfoCircleIcon size={IS_TABLET ? 26 : 22} />}
+            leftIcon={<InfoCircleIcon size={adaptiveSize(22)} />}
             onPress={goAboutHipsbook}
             titleFontSize={AppFontSize.subtitle}
           />
@@ -283,7 +284,7 @@ const ProfileScreen = () => {
         <AppListGroup containerStyle={styles.listGroup}>
           <AppListTile
             title="ออกจากระบบ"
-            leftIcon={<LogoutIcon size={IS_TABLET ? 26 : 22} />}
+            leftIcon={<LogoutIcon size={adaptiveSize(22)} />}
             rightContent={null}
             destructive
             onPress={onSignOut}

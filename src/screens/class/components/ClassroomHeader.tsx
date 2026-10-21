@@ -10,12 +10,12 @@ import LessonPlayer from '../../../components/videos/LessonPlayer';
 import { useResponsive } from '../../../helpers/responsive';
 
 import MoreMenuPopover from '../../../components/popovers/MoreMenuPopover';
-import { IS_TABLET } from '../../../constants/platform';
 import { AppColors } from '../../../styles/colors';
 import {
   AppFontSize,
   AppRadius,
   sharedPaddingHorizontal,
+  adaptiveSize,
 } from '../../../styles/sharedstyles';
 
 export type ClassroomTabKey = 'ALL' | 'LEARN' | 'BUY_MORE';
@@ -130,8 +130,8 @@ const ClassroomHeader: React.FC<Props> = ({
 
         playerContainerFullscreen: { marginTop: 0, gap: 0 },
         playerContainer: {
-          marginTop: verticalScale(IS_TABLET ? 24 : 20),
-          gap: verticalScale(IS_TABLET ? 18 : 12),
+          marginTop: verticalScale(adaptiveSize(20)),
+          gap: verticalScale(adaptiveSize(12)),
           flexDirection: 'column',
         },
         coverBox: {
@@ -146,7 +146,7 @@ const ClassroomHeader: React.FC<Props> = ({
         segWrap: {
           paddingHorizontal: scale(sharedPaddingHorizontal),
           paddingTop: verticalScale(4),
-          paddingBottom: verticalScale(IS_TABLET ? 18 : 14),
+          paddingBottom: verticalScale(adaptiveSize(14)),
         },
         segContainer: {
           flexDirection: 'row',
@@ -163,7 +163,7 @@ const ClassroomHeader: React.FC<Props> = ({
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          paddingVertical: verticalScale(IS_TABLET ? 12 : 10),
+          paddingVertical: verticalScale(adaptiveSize(10)),
           borderRadius: responsiveRadius(AppRadius.pill),
           overflow: 'hidden',
         },

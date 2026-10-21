@@ -4,10 +4,13 @@ import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import CommentIcon from '../../../../assets/icons/CommentIcon';
 import ReviewItem from '../../../../components/reviews/ReviewItem';
 import AppText from '../../../../components/texts/AppText';
-import { IS_TABLET } from '../../../../constants/platform';
 import { useResponsive } from '../../../../helpers/responsive';
 import { AppColors } from '../../../../styles/colors';
-import { AppFontSize, AppRadius } from '../../../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  adaptiveSize,
+} from '../../../../styles/sharedstyles';
 
 type Props = {
   loading: boolean;
@@ -80,8 +83,8 @@ const CourseCommentsSection: React.FC<Props> = ({
         },
         loadMoreWrap: {
           alignItems: 'center',
-          marginTop: verticalScale(IS_TABLET ? 20 : 16),
-          marginBottom: verticalScale(IS_TABLET ? 10 : 8),
+          marginTop: verticalScale(adaptiveSize(16)),
+          marginBottom: verticalScale(adaptiveSize(8)),
         },
         loadMoreBtn: {
           paddingHorizontal: verticalScale(16),
@@ -148,7 +151,7 @@ const CourseCommentsSection: React.FC<Props> = ({
         keyExtractor={item => String(item.id)}
         scrollEnabled={false}
         ItemSeparatorComponent={() => (
-          <View style={{ height: verticalScale(IS_TABLET ? 20 : 16) }} />
+          <View style={{ height: verticalScale(adaptiveSize(16)) }} />
         )}
         renderItem={({ item }) => {
           const isMyReview = item.id === myReviewId;
@@ -172,7 +175,7 @@ const CourseCommentsSection: React.FC<Props> = ({
         }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <CommentIcon size={IS_TABLET ? 96 : 80} />
+            <CommentIcon size={adaptiveSize(80)} />
             <AppText
               style={{ color: AppColors.white }}
               fontSize={AppFontSize.subtitle}

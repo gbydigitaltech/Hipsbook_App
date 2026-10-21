@@ -1,29 +1,25 @@
 import React, { memo, useMemo } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import ChevronDownIcon from '../../assets/icons/ChevronDownIcon';
 import PlayCircleIcon from '../../assets/icons/course/PlayCircleIcon';
-import VideoIcon from '../../assets/icons/course/VideoIcon';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { getVideoThumbnailUrl } from '../../helpers/videoThumbnail';
 import { buyLabel, canAccessItem } from '../../helpers/access';
 import { AppColors } from '../../styles/colors';
-import AppButton from '../buttons/AppButton';
 import AppImage from '../images/AppImage';
 import { IMAGES } from '../../constants/images-paths';
 import AppText from '../texts/AppText';
 import DurationBadge from './DurationBadge';
+import LessonActionButton from './LessonActionButton';
 import LockedThumbOverlay from './LockedThumbOverlay';
 import {
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 
 // Strip HTML tags.
@@ -82,9 +78,6 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
   const showAttachmentButton =
     canStart && hasAttachments && !!onPressAttachments;
 
-  const actionButtonWidth = scale(IS_TABLET ? 156 : 120);
-  const actionButtonHeight = verticalScale(IS_TABLET ? 48 : 42);
-
   const handleTouchLesson = () => {
     if (canStart && onPressStart) onPressStart();
   };
@@ -120,13 +113,13 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
           />
           {canStart && (
             <View style={styles.playIconOverlay}>
-              <PlayCircleIcon size={IS_TABLET ? 44 : 28} />
+              <PlayCircleIcon size={AppIconSize.xxl} />
             </View>
           )}
         </View>
 
         {/* Not bought yet: dark tint + centred lock */}
-        {!canStart && <LockedThumbOverlay size={IS_TABLET ? 44 : 28} />}
+        {!canStart && <LockedThumbOverlay size={AppIconSize.xxl} />}
         {!!duration && <DurationBadge text={duration} />}
       </View>
 
@@ -134,8 +127,8 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
         style={[
           styles.cardContainer,
           {
-            paddingVertical: verticalScale(IS_TABLET ? 10 : 8),
-            paddingHorizontal: scale(IS_TABLET ? 12 : 10),
+            paddingVertical: verticalScale(adaptiveSize(8)),
+            paddingHorizontal: scale(adaptiveSize(10)),
           },
         ]}
       >
@@ -172,8 +165,8 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
                 style={[
                   styles.attachmentBtn,
                   {
-                    width: scale(IS_TABLET ? 38 : 32),
-                    height: scale(IS_TABLET ? 38 : 32),
+                    width: scale(adaptiveSize(32)),
+                    height: scale(adaptiveSize(32)),
                     borderRadius: responsiveRadius(AppRadius.pill),
                   },
                 ]}
@@ -187,7 +180,7 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
                   }}
                 >
                   <ChevronDownIcon
-                    size={IS_TABLET ? 16 : 14}
+                    size={AppIconSize.xs}
                     color={AppColors.white}
                   />
                 </View>
@@ -196,48 +189,13 @@ const ClassRoomLibraryLessonCard: React.FC<LessonCardProps> = ({
           </View>
 
           <View style={styles.buttonRightContainer}>
-            {canStart ? (
-              <View
-                style={[
-                  styles.startLearn,
-                  {
-                    width: actionButtonWidth,
-                    height: actionButtonHeight,
-                    borderRadius: responsiveRadius(AppRadius.pill),
-                    gap: scale(8),
-                  },
-                ]}
-              >
-                <VideoIcon
-                  size={IS_TABLET ? 22 : 18}
-                  color={AppColors.primary}
-                />
-                <AppText
-                  style={styles.startLearnText}
-                  fontSize={AppFontSize.caption}
-                >
-                  เริ่มเรียน
-                </AppText>
-              </View>
-            ) : (
-              <View style={[styles.actionRow, { gap: scale(10) }]}>
-                <View
-                  style={{
-                    width: actionButtonWidth,
-                    height: actionButtonHeight,
-                  }}
-                >
-                  <AppButton
-                    title={paidPriceLabel}
-                    onPress={onPressBuy ?? (() => {})}
-                    fontSize={AppFontSize.caption}
-                    containerStyle={{
-                      height: actionButtonHeight,
-                    }}
-                  />
-                </View>
-              </View>
-            )}
+            {/* The whole card already starts the lesson, so "start" is a plain view */}
+            <LessonActionButton
+              canStart={canStart}
+              priceLabel={paidPriceLabel}
+              onPressBuy={onPressBuy}
+              startAsView
+            />
           </View>
         </View>
       </View>
@@ -303,20 +261,6 @@ const styles = StyleSheet.create({
   },
   buttonRightContainer: {
     alignItems: 'flex-end',
-  },
-  startLearn: {
-    backgroundColor: AppColors.backgroundInteractive,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'flex-end',
-  },
-  startLearnText: {
-    color: AppColors.primary,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignSelf: 'flex-end',
   },
 });
 

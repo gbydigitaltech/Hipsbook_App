@@ -2,12 +2,13 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import AppBackButton from '../../components/buttons/AppBackButton';
 import AppText from '../../components/texts/AppText';
-import { IS_Android, IS_TABLET } from '../../constants/platform';
+import { IS_Android } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import {
   androidSafeTop,
   AppFontSize,
   iosSafeTop,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 
 export interface AppScreenHeaderProps {
@@ -21,7 +22,7 @@ export interface AppScreenHeaderProps {
 }
 
 /** Back-button size — used as the equal left/right slot width so the title is truly centered. */
-const SIDE_SIZE = IS_TABLET ? 48 : 40;
+const SIDE_SIZE = adaptiveSize(40);
 
 /**
  * Standard screen header.

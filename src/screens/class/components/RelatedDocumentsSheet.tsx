@@ -15,10 +15,13 @@ import ClassRoomDocumentCard, {
   normalizeDocumentType,
 } from '../../../components/cards/ClassRoomDocumentCard';
 import AppText from '../../../components/texts/AppText';
-import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import { AppColors } from '../../../styles/colors';
-import { AppFontSize, AppRadius } from '../../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  adaptiveSize,
+} from '../../../styles/sharedstyles';
 import { DocumentGroup, DocumentItem } from '../ClassroomScreen';
 
 const { height: screenHeight } = Dimensions.get('window');
@@ -141,10 +144,10 @@ const RelatedDocumentsSheet: React.FC<Props> = ({
         },
         groupTitle: {
           color: AppColors.white,
-          marginBottom: verticalScale(IS_TABLET ? 14 : 12),
+          marginBottom: verticalScale(adaptiveSize(12)),
         },
         groupItems: {
-          gap: verticalScale(IS_TABLET ? 14 : 12),
+          gap: verticalScale(adaptiveSize(12)),
         },
         emptyWrap: {
           flex: 1,
