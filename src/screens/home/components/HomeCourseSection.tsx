@@ -5,6 +5,7 @@ import AppSectionHeader from '../../../components/sections/AppSectionHeader';
 import HorizontalCourseSlider from '../../../components/slides/courses/HorizontalCourseSlider';
 import VerticalCourseSlider from '../../../components/slides/courses/VerticalCourseSlider';
 import AppText from '../../../components/texts/AppText';
+import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import {
   AppFontSize,
@@ -13,6 +14,14 @@ import {
 import { SliderCourseItem } from '../../../types/ui/slides/course/course-slider.props';
 
 const { width: screenWidth } = Dimensions.get('window');
+
+/** Home section heading sizes (larger on tablet) */
+export const HOME_SECTION_TITLE_FONT = IS_TABLET
+  ? AppFontSize.h1
+  : AppFontSize.title;
+export const HOME_SECTION_SEE_ALL_FONT = IS_TABLET
+  ? AppFontSize.body
+  : AppFontSize.caption;
 
 type HomeCourseSectionProps = {
   title: string;
@@ -62,6 +71,8 @@ const HomeCourseSection: React.FC<HomeCourseSectionProps> = ({
         {useSectionHeader ? (
           <AppSectionHeader
             title={title}
+            titleFontSize={HOME_SECTION_TITLE_FONT}
+            seeAllFontSize={HOME_SECTION_SEE_ALL_FONT}
             onPressSeeAll={onPressSeeAll}
             seeAllLabel={seeAllLabel}
           />

@@ -16,7 +16,11 @@ import AppText from '../../../components/texts/AppText';
 import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import { AppColors } from '../../../styles/colors';
-import { AppFontSize, AppRadius } from '../../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  adaptiveSize,
+} from '../../../styles/sharedstyles';
 
 type Props = {
   visible: boolean;
@@ -126,16 +130,16 @@ const CourseAboutSheet: React.FC<Props> = ({
         },
         handle: {
           alignSelf: 'center',
-          width: scale(IS_TABLET ? 54 : 44),
+          width: scale(adaptiveSize(44)),
           height: verticalScale(5),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.surfaceStrong,
-          marginBottom: verticalScale(IS_TABLET ? 36 : 30),
+          marginBottom: verticalScale(adaptiveSize(30)),
         },
         header: {
           alignItems: 'flex-start',
           justifyContent: 'center',
-          marginBottom: verticalScale(IS_TABLET ? 20 : 16),
+          marginBottom: verticalScale(adaptiveSize(16)),
         },
         title: {
           color: AppColors.white,

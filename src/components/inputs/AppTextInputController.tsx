@@ -6,6 +6,7 @@ import { AppColors } from '../../styles/colors';
 import { AppTextInputControllerProps } from '../../types/ui/inputs/app-text-input-controller.props';
 import AppText from '../texts/AppText';
 import AppTextInput from './AppTextInput';
+import { AppFontSize } from '../../styles/sharedstyles';
 
 function AppTextInputController<TFieldValues extends FieldValues>({
   control,
@@ -15,7 +16,7 @@ function AppTextInputController<TFieldValues extends FieldValues>({
   labelFontSize,
   fontSize,
   fontWeight,
-  errorFontSize = 12,
+  errorFontSize = AppFontSize.caption,
   placeholder,
   defaultValue,
   disabled,

@@ -6,6 +6,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import RNBootSplash from 'react-native-bootsplash';
+import Orientation from 'react-native-orientation-locker';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -26,6 +27,12 @@ function App() {
 
   useEffect(() => {
     configureGoogle();
+  }, []);
+
+  // Portrait everywhere (iPhone and iPad). Only the lesson player and live
+  // viewer/publisher switch to landscape for fullscreen, then lock back.
+  useEffect(() => {
+    Orientation.lockToPortrait();
   }, []);
 
   useEffect(() => {
@@ -67,18 +74,18 @@ function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <View style={{ flex: 1, backgroundColor: '#000000' }}>
-          <NavigationContainer
-            theme={navigationTheme}
-            onReady={() => {
-              setNavReady(true);
-            }}
-          >
-            <RootNavigator />
-          </NavigationContainer>
-        </View>
-      </SafeAreaProvider>
+        <SafeAreaProvider>
+          <View style={{ flex: 1, backgroundColor: '#000000' }}>
+            <NavigationContainer
+              theme={navigationTheme}
+              onReady={() => {
+                setNavReady(true);
+              }}
+            >
+              <RootNavigator />
+            </NavigationContainer>
+          </View>
+        </SafeAreaProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

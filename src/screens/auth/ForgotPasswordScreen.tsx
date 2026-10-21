@@ -33,6 +33,7 @@ import { AppColors } from '../../styles/colors';
 import {
   AppFontSize,
   sharedPaddingHorizontal,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import type { AuthStackParamList } from '../../types/data/navigation/navigation.types';
 import {
@@ -115,71 +116,74 @@ const ForgotPasswordScreen: React.FC = () => {
             <AppSafeView style={styles.container}>
               <AppScreenHeader />
 
-              <Image
-                source={IMAGES.forgotLogo}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-
-              <View style={styles.titleArea}>
-                <AppText fontWeight="semiBold" fontSize={AppFontSize.h1}>
-                  ลืมรหัสผ่านใช่ไหม
-                </AppText>
-                <AppText fontSize={AppFontSize.body} style={styles.lead}>
-                  กรุณากรอกอีเมลของคุณ
-                </AppText>
-              </View>
-
-              <View style={styles.inputField}>
-                <AppTextInputController
-                  control={control}
-                  name="email"
-                  label="อีเมล"
-                  labelFontSize={IS_TABLET ? 20 : 16}
-                  fontSize={AppFontSize.subtitle}
-                  errorFontSize={IS_TABLET ? 14 : 12}
-                  placeholder="กรุณากรอกอีเมล"
-                  inputProps={{
-                    inputWrapperStyle: {
-                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
-                    },
-                    autoCapitalize: 'none',
-                    keyboardType: 'email-address',
-                    textContentType: 'emailAddress',
-                    autoComplete: 'email',
-                    returnKeyType: 'default',
-                    accessibilityLabel: 'อีเมล',
-                  }}
+              {/* iPad / tablet: extra side margin for the form (back button stays put) */}
+              <View style={styles.formArea}>
+                <Image
+                  source={IMAGES.forgotLogo}
+                  style={styles.logo}
+                  resizeMode="contain"
                 />
-              </View>
 
-              <View style={styles.buttonArea}>
-                <AppButton
-                  title="รีเซ็ตรหัสผ่าน"
-                  onPress={() => !isSubmitting && handleSubmit(onSubmit)()}
-                  contentStyle={styles.button}
-                  fontSize={AppFontSize.subtitle}
-                  disabled={isSubmitting}
-                />
-              </View>
-
-              <View style={styles.toSignIn}>
-                <Pressable
-                  onPress={() => navigation.navigate('SignIn')}
-                  accessibilityRole="button"
-                  hitSlop={12}
-                  style={({ pressed }) => [
-                    baseStyles.centered,
-                    pressed && baseStyles.pressed,
-                  ]}
-                >
-                  <AppText
-                    fontSize={AppFontSize.subtitle}
-                    style={baseStyles.primaryText}
-                  >
-                    หรือเข้าสู่ระบบ
+                <View style={styles.titleArea}>
+                  <AppText fontWeight="semiBold" fontSize={AppFontSize.h1}>
+                    ลืมรหัสผ่านใช่ไหม
                   </AppText>
-                </Pressable>
+                  <AppText fontSize={AppFontSize.body} style={styles.lead}>
+                    กรุณากรอกอีเมลของคุณ
+                  </AppText>
+                </View>
+
+                <View style={styles.inputField}>
+                  <AppTextInputController
+                    control={control}
+                    name="email"
+                    label="อีเมล"
+                    labelFontSize={AppFontSize.subtitle}
+                    fontSize={AppFontSize.subtitle}
+                    errorFontSize={AppFontSize.caption}
+                    placeholder="กรุณากรอกอีเมล"
+                    inputProps={{
+                      inputWrapperStyle: {
+                        minHeight: verticalScale(adaptiveSize(54)),
+                      },
+                      autoCapitalize: 'none',
+                      keyboardType: 'email-address',
+                      textContentType: 'emailAddress',
+                      autoComplete: 'email',
+                      returnKeyType: 'default',
+                      accessibilityLabel: 'อีเมล',
+                    }}
+                  />
+                </View>
+
+                <View style={styles.buttonArea}>
+                  <AppButton
+                    title="รีเซ็ตรหัสผ่าน"
+                    onPress={() => !isSubmitting && handleSubmit(onSubmit)()}
+                    contentStyle={styles.button}
+                    fontSize={AppFontSize.subtitle}
+                    disabled={isSubmitting}
+                  />
+                </View>
+
+                <View style={styles.toSignIn}>
+                  <Pressable
+                    onPress={() => navigation.navigate('SignIn')}
+                    accessibilityRole="button"
+                    hitSlop={12}
+                    style={({ pressed }) => [
+                      baseStyles.centered,
+                      pressed && baseStyles.pressed,
+                    ]}
+                  >
+                    <AppText
+                      fontSize={AppFontSize.subtitle}
+                      style={baseStyles.primaryText}
+                    >
+                      หรือเข้าสู่ระบบ
+                    </AppText>
+                  </Pressable>
+                </View>
               </View>
 
               <AppLoadingOverlay
@@ -214,9 +218,15 @@ const createStyles = (
       paddingHorizontal: scale(sharedPaddingHorizontal),
     },
 
+    formArea: {
+      // Same side margin as sign-in / sign-up on tablets (56 total)
+      paddingHorizontal: IS_TABLET
+        ? scale(56) - scale(sharedPaddingHorizontal)
+        : 0,
+    },
     logo: {
       width: '100%',
-      height: verticalScale(IS_TABLET ? 144 : 120),
+      height: verticalScale(adaptiveSize(120)),
       marginTop: verticalScale(IS_TABLET ? 32 : 24),
       alignSelf: 'center',
     },
@@ -224,7 +234,7 @@ const createStyles = (
     titleArea: {
       alignItems: 'center',
       gap: verticalScale(6),
-      marginTop: verticalScale(IS_TABLET ? 38 : 32),
+      marginTop: verticalScale(adaptiveSize(32)),
     },
 
     lead: {
@@ -233,7 +243,7 @@ const createStyles = (
 
     inputField: {
       width: '100%',
-      marginTop: verticalScale(IS_TABLET ? 24 : 18),
+      marginTop: verticalScale(adaptiveSize(18)),
     },
 
     buttonArea: {

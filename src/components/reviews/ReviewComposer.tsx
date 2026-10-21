@@ -9,6 +9,7 @@ import {
   AppRadius,
   PRESSED_OPACITY,
   sharedPaddingHorizontal,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import AppText from '../texts/AppText';
 
@@ -36,7 +37,7 @@ const ReviewComposer: React.FC<Props> = ({
           right: 0,
           bottom: 0,
           paddingHorizontal: scale(sharedPaddingHorizontal),
-          paddingTop: verticalScale(IS_TABLET ? 14 : 10),
+          paddingTop: verticalScale(adaptiveSize(10)),
           paddingBottom: verticalScale(IS_Android ? 10 : 22),
           backgroundColor: AppColors.secondary,
           borderTopWidth: 1,
@@ -46,7 +47,7 @@ const ReviewComposer: React.FC<Props> = ({
           minHeight: verticalScale(IS_TABLET ? 56 : 44),
           borderRadius: responsiveRadius(AppRadius.md),
           backgroundColor: AppColors.backgroundInteractive,
-          paddingHorizontal: scale(IS_TABLET ? 18 : 14),
+          paddingHorizontal: scale(adaptiveSize(14)),
           justifyContent: 'center',
         },
         fakePlaceholder: {

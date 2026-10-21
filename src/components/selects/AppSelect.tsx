@@ -26,8 +26,8 @@ import {
 } from '../../styles/sharedstyles';
 
 const SELECT_CONSTANTS = {
-  LABEL_FONT_SIZE: 16,
-  VALUE_FONT_SIZE: 16,
+  LABEL_FONT_SIZE: AppFontSize.subtitle,
+  VALUE_FONT_SIZE: AppFontSize.subtitle,
   INPUT_PADDING_HORIZONTAL: 16,
   LABEL_SPACING: 6,
   ROW_PADDING_VERTICAL: 12,
@@ -562,7 +562,7 @@ const createStyles = ({
 
     searchInputText: {
       color: AppColors.white,
-      fontSize: 16,
+      fontSize: AppFontSize.subtitle,
     },
 
     list: {

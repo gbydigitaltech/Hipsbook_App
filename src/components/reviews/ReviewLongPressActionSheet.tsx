@@ -10,13 +10,13 @@ import {
   View,
 } from 'react-native';
 
-import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import {
   AppFontSize,
   AppRadius,
   sharedPaddingHorizontal,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import AppText from '../texts/AppText';
 
@@ -120,8 +120,8 @@ const ReviewLongPressActionSheet: React.FC<Props> = ({
           borderTopLeftRadius: responsiveRadius(AppRadius.sheet),
           borderTopRightRadius: responsiveRadius(AppRadius.sheet),
           paddingHorizontal: scale(sharedPaddingHorizontal),
-          paddingTop: verticalScale(IS_TABLET ? 18 : 14),
-          paddingBottom: verticalScale(IS_TABLET ? 28 : 24),
+          paddingTop: verticalScale(adaptiveSize(14)),
+          paddingBottom: verticalScale(adaptiveSize(24)),
           maxHeight: '80%',
         },
         keyboardWrap: {
@@ -129,16 +129,16 @@ const ReviewLongPressActionSheet: React.FC<Props> = ({
         },
         handle: {
           alignSelf: 'center',
-          width: scale(IS_TABLET ? 54 : 44),
+          width: scale(adaptiveSize(44)),
           height: verticalScale(5),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.surfaceStrong,
-          marginBottom: verticalScale(IS_TABLET ? 36 : 30),
+          marginBottom: verticalScale(adaptiveSize(30)),
         },
         header: {
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: verticalScale(IS_TABLET ? 32 : 16),
+          marginBottom: verticalScale(adaptiveSize(16)),
         },
         title: {
           color: AppColors.white,
@@ -150,15 +150,15 @@ const ReviewLongPressActionSheet: React.FC<Props> = ({
           marginTop: verticalScale(6),
         },
         actionList: {
-          gap: verticalScale(IS_TABLET ? 14 : 10),
-          paddingBottom: verticalScale(IS_TABLET ? 16 : 8),
+          gap: verticalScale(adaptiveSize(10)),
+          paddingBottom: verticalScale(adaptiveSize(8)),
         },
         actionButton: {
           minHeight: verticalScale(52),
           justifyContent: 'center',
           alignItems: 'center',
           paddingHorizontal: scale(16),
-          paddingVertical: verticalScale(IS_TABLET ? 18 : 14),
+          paddingVertical: verticalScale(adaptiveSize(14)),
           borderRadius: responsiveRadius(AppRadius.md),
           backgroundColor: AppColors.backgroundInteractive,
         },
@@ -173,12 +173,12 @@ const ReviewLongPressActionSheet: React.FC<Props> = ({
           color: AppColors.danger,
         },
         cancelButton: {
-          marginTop: verticalScale(IS_TABLET ? 18 : 14),
+          marginTop: verticalScale(adaptiveSize(14)),
           minHeight: verticalScale(52),
           justifyContent: 'center',
           alignItems: 'center',
           paddingHorizontal: scale(16),
-          paddingVertical: verticalScale(IS_TABLET ? 18 : 14),
+          paddingVertical: verticalScale(adaptiveSize(14)),
           borderRadius: responsiveRadius(AppRadius.md),
           backgroundColor: AppColors.surfaceSubtle,
         },

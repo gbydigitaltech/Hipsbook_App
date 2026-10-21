@@ -5,7 +5,6 @@ import PlayCircleSolidIcon from '../../../../assets/icons/teacher/PlayCircleSoli
 import StarIcon from '../../../../assets/icons/teacher/StarIcon';
 import RoundProfileImage from '../../../../components/profiles/RoundProfileImage';
 import AppText from '../../../../components/texts/AppText';
-import { IS_TABLET } from '../../../../constants/platform';
 import { useResponsive } from '../../../../helpers/responsive';
 import { AppColors } from '../../../../styles/colors';
 import { Teacher } from '../../../../types/data/teachers/teacher.type';
@@ -13,6 +12,8 @@ import {
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  AppIconSize,
+  adaptiveSize,
 } from '../../../../styles/sharedstyles';
 // Props for one teacher card item
 
@@ -45,7 +46,7 @@ const TeacherItem: React.FC<TeacherItemProps> = ({ teacher, onPress }) => {
         },
         row: {
           flexDirection: 'row',
-          gap: scale(IS_TABLET ? 8 : 6),
+          gap: scale(adaptiveSize(6)),
           alignItems: 'center',
         },
       }),
@@ -61,7 +62,7 @@ const TeacherItem: React.FC<TeacherItemProps> = ({ teacher, onPress }) => {
           source={
             teacher.profile_image ? { uri: teacher.profile_image } : undefined
           }
-          size={IS_TABLET ? 96 : 80}
+          size={adaptiveSize(80)}
         />
 
         <View style={styles.details}>
@@ -74,14 +75,14 @@ const TeacherItem: React.FC<TeacherItemProps> = ({ teacher, onPress }) => {
           </AppText>
 
           <View style={styles.row}>
-            <PlayCircleSolidIcon size={IS_TABLET ? 20 : 16} />
+            <PlayCircleSolidIcon size={AppIconSize.sm} />
             <AppText fontSize={AppFontSize.caption}>
               {teacher.course_amount} คอร์ส
             </AppText>
           </View>
 
           <View style={styles.row}>
-            <StarIcon size={IS_TABLET ? 20 : 16} />
+            <StarIcon size={AppIconSize.sm} />
             <AppText fontSize={AppFontSize.caption}>
               <AppText
                 style={{ color: AppColors.primary }}
@@ -96,7 +97,7 @@ const TeacherItem: React.FC<TeacherItemProps> = ({ teacher, onPress }) => {
 
         <Ionicons
           name="chevron-forward"
-          size={IS_TABLET ? 22 : 18}
+          size={AppIconSize.md}
           color={AppColors.textTertiary}
         />
       </View>

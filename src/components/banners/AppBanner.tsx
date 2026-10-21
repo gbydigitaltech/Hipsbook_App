@@ -16,6 +16,7 @@ import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppBannerProps } from '../../types/ui/banner/app-banner.props';
 import { AppColors } from '../../styles/colors';
+import { adaptiveSize } from '../../styles/sharedstyles';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -97,7 +98,7 @@ const AppBanner: React.FC<AppBannerProps> = ({
   const maxH = IS_TABLET ? verticalScale(260) : verticalScale(180);
   const bannerHeight = clamp(itemWidth / baseRatio, minH, maxH);
 
-  const gap = scale(IS_TABLET ? 14 : 10);
+  const gap = scale(adaptiveSize(10));
   const slideInnerPadding = gap / 2;
 
   const markLoaded = useCallback((index: number) => {
@@ -131,7 +132,7 @@ const AppBanner: React.FC<AppBannerProps> = ({
         card: {
           width: '100%',
           height: '100%',
-          borderRadius: responsiveRadius(IS_TABLET ? 14 : 10),
+          borderRadius: responsiveRadius(adaptiveSize(10)),
           overflow: 'hidden',
           backgroundColor: AppColors.sheetDeep,
         },

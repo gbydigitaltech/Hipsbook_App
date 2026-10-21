@@ -34,7 +34,6 @@ import CourseActionBar from './components/CourseActionBar';
 import AppText from '../../../components/texts/AppText';
 import ExpandableText from '../../../components/texts/ExpandableText';
 import AppScrollView from '../../../components/views/AppScrollView';
-import { IS_TABLET } from '../../../constants/platform';
 import { useResponsive } from '../../../helpers/responsive';
 import { useCourseDetail } from '../../../hooks/course/useCourseDetail';
 import { useCourseLessonList } from '../../../hooks/course/useCourseLessonList';
@@ -52,6 +51,8 @@ import {
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  AppIconSize,
+  adaptiveSize,
 } from '../../../styles/sharedstyles';
 import { AppStackParamList } from '../../../types/data/navigation/navigation.types';
 import CourseCommentsSection from './components/CourseCommentsSection';
@@ -223,7 +224,7 @@ const CourseDetailScreen = () => {
   const isCourseOwned = !!course?.library || !!course?.library_id;
   const reviewComposerVisible =
     activeTab === 'comment' && isCourseOwned && canCreateReview;
-  const reviewComposerSpace = verticalScale(IS_TABLET ? 72 : 60);
+  const reviewComposerSpace = verticalScale(adaptiveSize(60));
 
   const videoGroups = useMemo(() => {
     if (!lessonList?.data) return [];
@@ -669,9 +670,9 @@ const CourseDetailScreen = () => {
             <WhitelistButton
               isWhitelisted={!!(whitelistMap[course.id] ?? !!course.whitelist)}
               onToggle={handleToggleWhitelist}
-              buttonHeight={IS_TABLET ? 42 : 36}
-              buttonWidth={IS_TABLET ? 42 : 36}
-              iconSize={IS_TABLET ? 24 : 20}
+              buttonHeight={adaptiveSize(36)}
+              buttonWidth={adaptiveSize(36)}
+              iconSize={AppIconSize.lg}
             />
           }
         />
@@ -699,7 +700,7 @@ const CourseDetailScreen = () => {
                 <View key={`${chip.text}-${i}`} style={styles.metaChip}>
                   <Ionicons
                     name={chip.icon}
-                    size={IS_TABLET ? 18 : 15}
+                    size={adaptiveSize(15)}
                     color={AppColors.primary}
                   />
                   <AppText
@@ -720,22 +721,22 @@ const CourseDetailScreen = () => {
               {
                 key: 'content',
                 label: 'รายละเอียด',
-                icon: <BookIcon size={IS_TABLET ? 32 : 28} />,
+                icon: <BookIcon size={AppIconSize.xxl} />,
               },
               {
                 key: 'lesson',
                 label: 'บทเรียน',
-                icon: <VideoIcon size={IS_TABLET ? 32 : 28} />,
+                icon: <VideoIcon size={AppIconSize.xxl} />,
               },
               {
                 key: 'document',
                 label: 'เอกสาร',
-                icon: <DocumentIcon size={IS_TABLET ? 32 : 28} />,
+                icon: <DocumentIcon size={AppIconSize.xxl} />,
               },
               {
                 key: 'comment',
                 label: 'รีวิว',
-                icon: <ChatIcon size={IS_TABLET ? 32 : 28} />,
+                icon: <ChatIcon size={AppIconSize.xxl} />,
               },
             ]}
             onChange={handleChangeTab}
@@ -743,9 +744,7 @@ const CourseDetailScreen = () => {
 
           <View style={styles.contentTab}>
             {activeTab === 'content' && (
-              <View
-                style={{ paddingBottom: verticalScale(IS_TABLET ? 24 : 20) }}
-              >
+              <View style={{ paddingBottom: verticalScale(adaptiveSize(20)) }}>
                 <View style={styles.detailCard}>
                   <View style={styles.sectionHeadingRow}>
                     <View style={styles.accentBar} />
@@ -822,8 +821,8 @@ const CourseDetailScreen = () => {
                     showsHorizontalScrollIndicator={false}
                     keyExtractor={(item, index) => `${item}-${index}`}
                     contentContainerStyle={{
-                      gap: scale(IS_TABLET ? 12 : 10),
-                      marginTop: verticalScale(IS_TABLET ? 24 : 20),
+                      gap: scale(adaptiveSize(10)),
+                      marginTop: verticalScale(adaptiveSize(20)),
                     }}
                     renderItem={({ item }) => (
                       <TouchableOpacity
@@ -834,8 +833,8 @@ const CourseDetailScreen = () => {
                         <View
                           style={{
                             backgroundColor: AppColors.backgroundInteractive,
-                            paddingVertical: verticalScale(IS_TABLET ? 8 : 6),
-                            paddingHorizontal: scale(IS_TABLET ? 18 : 14),
+                            paddingVertical: verticalScale(adaptiveSize(6)),
+                            paddingHorizontal: scale(adaptiveSize(14)),
                             borderRadius: responsiveRadius(AppRadius.sm),
                           }}
                         >

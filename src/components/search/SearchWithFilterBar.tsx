@@ -19,6 +19,8 @@ import {
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import AppTextInput from '../inputs/AppTextInput';
 
@@ -54,9 +56,9 @@ const SearchWithFilterBar: React.FC<SearchWithFilterBarProps> = ({
   const transitionRef = useRef(false);
   const mountTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const searchIconSize = IS_TABLET ? 34 : 28;
-  const moreIconSize = IS_TABLET ? 26 : 22;
-  const rowHeight = verticalScale(IS_TABLET ? 64 : 54);
+  const searchIconSize = AppIconSize.xxl;
+  const moreIconSize = adaptiveSize(22);
+  const rowHeight = verticalScale(adaptiveSize(54));
 
   const searchSlotWidth = scale(40);
 
@@ -289,7 +291,7 @@ const SearchWithFilterBar: React.FC<SearchWithFilterBarProps> = ({
                   onChangeText={onChangeText}
                   placeholder={placeholder}
                   autoFocus
-                  leftIcon={<SearchIcon size={IS_TABLET ? 28 : 24} />}
+                  leftIcon={<SearchIcon size={AppIconSize.xl} />}
                   rightIcon={
                     <TouchableOpacity
                       onPress={() => {
@@ -299,7 +301,7 @@ const SearchWithFilterBar: React.FC<SearchWithFilterBarProps> = ({
                       activeOpacity={PRESSED_OPACITY}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      <CloseIcon size={IS_TABLET ? 16 : 14} />
+                      <CloseIcon size={AppIconSize.xs} />
                     </TouchableOpacity>
                   }
                   radius={AppRadius.md}

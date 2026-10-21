@@ -99,7 +99,11 @@ const AppSectionHeader: React.FC<AppSectionHeaderProps> = ({
             >
               {seeAllLabel}
             </AppText>
-            <ForwardChevronIcon size={10} color={AppColors.textSecondary} />
+            {/* Chevron follows the label size (10 at the default caption size) */}
+            <ForwardChevronIcon
+              size={Math.round(seeAllFontSize * 0.8)}
+              color={AppColors.textSecondary}
+            />
           </Pressable>
         ) : null}
       </View>

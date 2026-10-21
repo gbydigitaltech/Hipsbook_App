@@ -13,6 +13,16 @@
     android:usesCleartextTraffic="${usesCleartextTraffic}"
     android:supportsRtl="true">
 
+    <!--
+      Android 16 (targetSdk 36) ignores orientation locks on large screens.
+      Opt out for now so tablets stay portrait like iPad; only the video /
+      live fullscreen switches to landscape. Temporary: not honoured once
+      targetSdk moves to 37.
+    -->
+    <property
+      android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+      android:value="true" />
+
     <activity
       android:name=".MainActivity"
       android:label="@string/app_name"

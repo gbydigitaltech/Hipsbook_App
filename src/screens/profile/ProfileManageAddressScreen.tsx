@@ -12,13 +12,14 @@ import AppLoadingOverlay from '../../components/loading/AppLoadingOverlay';
 import AppSelectController from '../../components/selects/AppSelectController';
 import AppScrollView from '../../components/views/AppScrollView';
 
-import { IS_IOS, IS_TABLET } from '../../constants/platform';
+import { IS_IOS } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 
 import { AppColors } from '../../styles/colors';
 import {
   AppFontSize,
   sharedPaddingHorizontal,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 
 import { useProfileAddressForm } from '../../hooks/profile/useProfileAddressForm';
@@ -92,10 +93,10 @@ const ProfileManageAddressScreen = () => {
       StyleSheet.create({
         rootView: { flex: 1 },
         form: {
-          marginTop: verticalScale(IS_TABLET ? 38 : 32),
-          gap: verticalScale(IS_TABLET ? 4 : 2),
+          marginTop: verticalScale(adaptiveSize(32)),
+          gap: verticalScale(adaptiveSize(2)),
         },
-        row: { flexDirection: 'row', gap: scale(IS_TABLET ? 12 : 10) },
+        row: { flexDirection: 'row', gap: scale(adaptiveSize(10)) },
         col: { flex: 1 },
         footer: {
           flexDirection: 'row',
@@ -199,13 +200,13 @@ const ProfileManageAddressScreen = () => {
             control={control}
             name="firstName"
             label="ชื่อ"
-            labelFontSize={IS_TABLET ? 20 : 16}
+            labelFontSize={AppFontSize.subtitle}
             fontSize={AppFontSize.subtitle}
-            errorFontSize={IS_TABLET ? 14 : 12}
+            errorFontSize={AppFontSize.caption}
             placeholder="กรอกชื่อ"
             inputProps={{
               inputWrapperStyle: {
-                minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                minHeight: verticalScale(adaptiveSize(54)),
               },
             }}
             disabled={busy}
@@ -215,13 +216,13 @@ const ProfileManageAddressScreen = () => {
             control={control}
             name="lastName"
             label="นามสกุล"
-            labelFontSize={IS_TABLET ? 20 : 16}
+            labelFontSize={AppFontSize.subtitle}
             fontSize={AppFontSize.subtitle}
-            errorFontSize={IS_TABLET ? 14 : 12}
+            errorFontSize={AppFontSize.caption}
             placeholder="กรอกนามสกุล"
             inputProps={{
               inputWrapperStyle: {
-                minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                minHeight: verticalScale(adaptiveSize(54)),
               },
             }}
             disabled={busy}
@@ -231,13 +232,13 @@ const ProfileManageAddressScreen = () => {
             control={control}
             name="phone"
             label="เบอร์โทรศัพท์"
-            labelFontSize={IS_TABLET ? 20 : 16}
+            labelFontSize={AppFontSize.subtitle}
             fontSize={AppFontSize.subtitle}
-            errorFontSize={IS_TABLET ? 14 : 12}
+            errorFontSize={AppFontSize.caption}
             placeholder="กรอกเบอร์โทรศัพท์"
             inputProps={{
               inputWrapperStyle: {
-                minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                minHeight: verticalScale(adaptiveSize(54)),
               },
               keyboardType: 'phone-pad',
               maxLength: 10,
@@ -257,13 +258,13 @@ const ProfileManageAddressScreen = () => {
             control={control}
             name="address"
             label="ที่อยู่"
-            labelFontSize={IS_TABLET ? 20 : 16}
+            labelFontSize={AppFontSize.subtitle}
             fontSize={AppFontSize.subtitle}
-            errorFontSize={IS_TABLET ? 14 : 12}
+            errorFontSize={AppFontSize.caption}
             placeholder="กรอกที่อยู่"
             inputProps={{
               inputWrapperStyle: {
-                minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                minHeight: verticalScale(adaptiveSize(54)),
               },
             }}
             disabled={busy}
@@ -276,14 +277,14 @@ const ProfileManageAddressScreen = () => {
                 name="province"
                 label="จังหวัด"
                 placeholder="เลือกจังหวัด"
-                labelFontSize={IS_TABLET ? 20 : 16}
+                labelFontSize={AppFontSize.subtitle}
                 fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
+                errorFontSize={AppFontSize.caption}
                 items={provinceItems}
                 disabled={busy}
                 rules={{ required: 'กรุณาเลือกจังหวัด' }}
                 inputWrapperStyle={{
-                  minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                  minHeight: verticalScale(adaptiveSize(54)),
                 }}
               />
             </View>
@@ -294,14 +295,14 @@ const ProfileManageAddressScreen = () => {
                 name="district"
                 label="อำเภอ/เขต"
                 placeholder="เลือกอำเภอ/เขต"
-                labelFontSize={IS_TABLET ? 20 : 16}
+                labelFontSize={AppFontSize.subtitle}
                 fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
+                errorFontSize={AppFontSize.caption}
                 items={districtItems}
                 disabled={!provinceId || busy}
                 rules={{ required: 'กรุณาเลือกอำเภอ/เขต' }}
                 inputWrapperStyle={{
-                  minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                  minHeight: verticalScale(adaptiveSize(54)),
                 }}
               />
             </View>
@@ -314,14 +315,14 @@ const ProfileManageAddressScreen = () => {
                 name="subdistrict"
                 label="ตำบล/แขวง"
                 placeholder="เลือกตำบล/แขวง"
-                labelFontSize={IS_TABLET ? 20 : 16}
+                labelFontSize={AppFontSize.subtitle}
                 fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
+                errorFontSize={AppFontSize.caption}
                 items={subdistrictItems}
                 disabled={!districtId || busy}
                 rules={{ required: 'กรุณาเลือกตำบล/แขวง' }}
                 inputWrapperStyle={{
-                  minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                  minHeight: verticalScale(adaptiveSize(54)),
                 }}
               />
             </View>
@@ -331,13 +332,13 @@ const ProfileManageAddressScreen = () => {
                 control={control}
                 name="zip"
                 label="รหัสไปรษณีย์"
-                labelFontSize={IS_TABLET ? 20 : 16}
+                labelFontSize={AppFontSize.subtitle}
                 fontSize={AppFontSize.subtitle}
-                errorFontSize={IS_TABLET ? 14 : 12}
+                errorFontSize={AppFontSize.caption}
                 placeholder="เช่น 10160"
                 inputProps={{
                   inputWrapperStyle: {
-                    minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                    minHeight: verticalScale(adaptiveSize(54)),
                   },
                   keyboardType: 'number-pad',
                   maxLength: 5,

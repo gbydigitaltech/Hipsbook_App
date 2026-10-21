@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { IS_TABLET } from '../../constants/platform';
 import { logWarn } from '../../helpers/logger';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
@@ -22,6 +21,8 @@ import {
   AppRadius,
   PRESSED_OPACITY,
   sharedTopSpace,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import AppSpinner from '../loading/AppSpinner';
 import Search, { SEARCH_BAR_HEIGHT } from '../search/Search';
@@ -234,12 +235,12 @@ const StreamSection = () => {
         // flexGrow lets the empty message fill (and center in) the space left
         content: {
           flexGrow: 1,
-          gap: verticalScale(IS_TABLET ? 14 : 12),
+          gap: verticalScale(adaptiveSize(12)),
         },
         // Same header as the Course tab: big title + search bar
         headerRow: {
           marginTop: sharedTopSpace,
-          marginBottom: verticalScale(IS_TABLET ? 24 : 18),
+          marginBottom: verticalScale(adaptiveSize(18)),
         },
         title: {
           marginBottom: verticalScale(12),
@@ -254,7 +255,7 @@ const StreamSection = () => {
         },
         chipsTop: { marginTop: 0 },
         chips: {
-          marginTop: verticalScale(IS_TABLET ? 20 : 16),
+          marginTop: verticalScale(adaptiveSize(16)),
           marginBottom: verticalScale(4),
         },
         loading: {
@@ -296,7 +297,7 @@ const StreamSection = () => {
           >
             <Ionicons
               name="videocam-outline"
-              size={IS_TABLET ? 24 : 20}
+              size={AppIconSize.lg}
               color={AppColors.white}
             />
           </TouchableOpacity>

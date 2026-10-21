@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import PlayCircleIcon from '../../assets/icons/course/PlayCircleIcon';
-import VideoIcon from '../../assets/icons/course/VideoIcon';
 import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { getVideoThumbnailUrl } from '../../helpers/videoThumbnail';
@@ -10,14 +9,15 @@ import AppImage from '../images/AppImage';
 import { IMAGES } from '../../constants/images-paths';
 import { buyLabel, canAccessItem } from '../../helpers/access';
 import { AppColors } from '../../styles/colors';
-import AppButton from '../buttons/AppButton';
 import AppText from '../texts/AppText';
 import DurationBadge from './DurationBadge';
+import LessonActionButton from './LessonActionButton';
 import LockedThumbOverlay from './LockedThumbOverlay';
 import {
   AppFontSize,
   AppRadius,
-  PRESSED_OPACITY,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 
 const stripHtml = (html?: string) => {
@@ -61,12 +61,9 @@ const CourseDetailLessonCard: React.FC<LessonCardProps> = ({
   const cleanDescription = useMemo(() => stripHtml(description), [description]);
 
   const paidPriceLabel = buyLabel(price);
-  const cardHeight = IS_TABLET ? 140 : 116;
+  const cardHeight = adaptiveSize(116);
   const imageWidth = cardHeight * (4 / 3);
   const thumbnailUrl = getVideoThumbnailUrl(mediaId, IS_TABLET ? 720 : 480);
-
-  const actionButtonWidth = scale(IS_TABLET ? 148 : 120);
-  const actionButtonHeight = verticalScale(IS_TABLET ? 48 : 42);
 
   const styles = useMemo(
     () =>
@@ -106,7 +103,7 @@ const CourseDetailLessonCard: React.FC<LessonCardProps> = ({
         cardContainer: {
           flex: 1,
           paddingVertical: verticalScale(10),
-          paddingHorizontal: scale(IS_TABLET ? 12 : 10),
+          paddingHorizontal: scale(adaptiveSize(10)),
           justifyContent: 'center',
         },
         contentArea: {
@@ -119,49 +116,14 @@ const CourseDetailLessonCard: React.FC<LessonCardProps> = ({
         descriptionText: {
           color: AppColors.white,
           opacity: 0.7,
-          marginTop: verticalScale(IS_TABLET ? 3 : 2),
+          marginTop: verticalScale(adaptiveSize(2)),
         },
         buttonRightContainer: {
           alignItems: 'flex-end',
           marginTop: verticalScale(4),
         },
-        actionButtonWrapper: {
-          width: actionButtonWidth,
-          height: actionButtonHeight,
-        },
-        startButtonTouchable: {
-          width: '100%',
-          height: '100%',
-        },
-        startLearn: {
-          width: '100%',
-          height: '100%',
-          backgroundColor: AppColors.backgroundInteractive,
-          borderRadius: responsiveRadius(AppRadius.pill),
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: scale(8),
-          paddingHorizontal: scale(12),
-        },
-        startLearnText: {
-          color: AppColors.primary,
-        },
-        buyButtonContent: {
-          height: actionButtonHeight,
-          paddingVertical: 0,
-          paddingHorizontal: scale(20),
-        },
       }),
-    [
-      responsiveRadius,
-      cardHeight,
-      imageWidth,
-      verticalScale,
-      scale,
-      actionButtonWidth,
-      actionButtonHeight,
-    ],
+    [responsiveRadius, cardHeight, imageWidth, verticalScale, scale],
   );
 
   return (
@@ -175,13 +137,13 @@ const CourseDetailLessonCard: React.FC<LessonCardProps> = ({
           />
           {canStart && (
             <View style={styles.playIconOverlay}>
-              <PlayCircleIcon size={IS_TABLET ? 34 : 28} />
+              <PlayCircleIcon size={AppIconSize.xxl} />
             </View>
           )}
         </View>
 
         {/* Not bought yet: dark tint + centred lock */}
-        {!canStart && <LockedThumbOverlay size={IS_TABLET ? 34 : 28} />}
+        {!canStart && <LockedThumbOverlay size={AppIconSize.xxl} />}
         {!!duration && <DurationBadge text={duration} />}
       </View>
 
@@ -210,36 +172,12 @@ const CourseDetailLessonCard: React.FC<LessonCardProps> = ({
           </View>
 
           <View style={styles.buttonRightContainer}>
-            <View style={styles.actionButtonWrapper}>
-              {canStart ? (
-                <TouchableOpacity
-                  onPress={onPressStart}
-                  activeOpacity={PRESSED_OPACITY}
-                  style={styles.startButtonTouchable}
-                >
-                  <View style={styles.startLearn}>
-                    <VideoIcon
-                      size={IS_TABLET ? 22 : 18}
-                      color={AppColors.primary}
-                    />
-                    <AppText
-                      style={styles.startLearnText}
-                      fontSize={AppFontSize.caption}
-                    >
-                      เริ่มเรียน
-                    </AppText>
-                  </View>
-                </TouchableOpacity>
-              ) : (
-                <AppButton
-                  title={paidPriceLabel}
-                  onPress={onPressBuy ?? (() => {})}
-                  fontSize={AppFontSize.caption}
-                  fullWidth
-                  contentStyle={styles.buyButtonContent}
-                />
-              )}
-            </View>
+            <LessonActionButton
+              canStart={canStart}
+              priceLabel={paidPriceLabel}
+              onPressStart={onPressStart}
+              onPressBuy={onPressBuy}
+            />
           </View>
         </View>
       </View>

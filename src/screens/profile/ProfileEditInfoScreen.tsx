@@ -30,7 +30,7 @@ import AppLoadingOverlay from '../../components/loading/AppLoadingOverlay';
 import RoundProfileImage from '../../components/profiles/RoundProfileImage';
 import AppText from '../../components/texts/AppText';
 import AppScrollView from '../../components/views/AppScrollView';
-import { IS_Android, IS_IOS, IS_TABLET } from '../../constants/platform';
+import { IS_Android, IS_IOS } from '../../constants/platform';
 import {
   ddmmyyyyToEpochUTC,
   formatDateDDMMYYYY,
@@ -38,7 +38,11 @@ import {
 import { useResponsive } from '../../helpers/responsive';
 import { useProfile } from '../../stores/profile';
 import { AppColors } from '../../styles/colors';
-import { AppFontSize } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppIconSize,
+  adaptiveSize,
+} from '../../styles/sharedstyles';
 import { ProfileStackParamList } from '../../types/data/navigation/navigation.types';
 import {
   ProfileForm,
@@ -193,8 +197,8 @@ export default function ProfileEditInfoScreen() {
           color: AppColors.white,
         },
         formContainer: {
-          marginTop: verticalScale(IS_TABLET ? 10 : 6),
-          gap: verticalScale(IS_TABLET ? 4 : 2),
+          marginTop: verticalScale(adaptiveSize(6)),
+          gap: verticalScale(adaptiveSize(2)),
         },
         buttonContainer: {
           flexDirection: 'row',
@@ -346,7 +350,7 @@ export default function ProfileEditInfoScreen() {
             imageUrl={profileImageUrl}
             onPress={handlePickProfileImage}
             disabled={isBusy}
-            size={IS_TABLET ? 110 : 90}
+            size={adaptiveSize(90)}
           />
 
           <AppText fontSize={AppFontSize.body} style={styles.changePhotoText}>
@@ -360,13 +364,13 @@ export default function ProfileEditInfoScreen() {
               control={control}
               name="firstName"
               label="ชื่อ"
-              labelFontSize={IS_TABLET ? 20 : 16}
+              labelFontSize={AppFontSize.subtitle}
               fontSize={AppFontSize.subtitle}
-              errorFontSize={IS_TABLET ? 14 : 12}
+              errorFontSize={AppFontSize.caption}
               placeholder="กรุณากรอกชื่อ"
               inputProps={{
                 inputWrapperStyle: {
-                  minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                  minHeight: verticalScale(adaptiveSize(54)),
                 },
                 returnKeyType: 'next',
                 blurOnSubmit: false,
@@ -379,14 +383,14 @@ export default function ProfileEditInfoScreen() {
             <AppTextInputController
               control={control}
               name="lastName"
-              labelFontSize={IS_TABLET ? 20 : 16}
+              labelFontSize={AppFontSize.subtitle}
               fontSize={AppFontSize.subtitle}
-              errorFontSize={IS_TABLET ? 14 : 12}
+              errorFontSize={AppFontSize.caption}
               label="นามสกุล"
               placeholder="กรุณากรอกนามสกุล"
               inputProps={{
                 inputWrapperStyle: {
-                  minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                  minHeight: verticalScale(adaptiveSize(54)),
                 },
                 returnKeyType: 'next',
                 blurOnSubmit: false,
@@ -400,13 +404,13 @@ export default function ProfileEditInfoScreen() {
               control={control}
               name="email"
               label="อีเมล"
-              labelFontSize={IS_TABLET ? 20 : 16}
+              labelFontSize={AppFontSize.subtitle}
               fontSize={AppFontSize.subtitle}
-              errorFontSize={IS_TABLET ? 14 : 12}
+              errorFontSize={AppFontSize.caption}
               placeholder="กรุณากรอกอีเมล"
               inputProps={{
                 inputWrapperStyle: {
-                  minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                  minHeight: verticalScale(adaptiveSize(54)),
                 },
                 autoCapitalize: 'none',
                 keyboardType: 'email-address',
@@ -421,13 +425,13 @@ export default function ProfileEditInfoScreen() {
               control={control}
               name="phone"
               label="เบอร์โทรศัพท์"
-              labelFontSize={IS_TABLET ? 20 : 16}
+              labelFontSize={AppFontSize.subtitle}
               fontSize={AppFontSize.subtitle}
-              errorFontSize={IS_TABLET ? 14 : 12}
+              errorFontSize={AppFontSize.caption}
               placeholder="กรุณากรอกเบอร์โทรศัพท์"
               inputProps={{
                 inputWrapperStyle: {
-                  minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                  minHeight: verticalScale(adaptiveSize(54)),
                 },
                 keyboardType: 'phone-pad',
                 maxLength: 10,
@@ -457,15 +461,15 @@ export default function ProfileEditInfoScreen() {
                   label="วันเกิด"
                   placeholder="เลือกวัน"
                   formatValue={v => (typeof v === 'string' ? v : '')}
-                  labelFontSize={IS_TABLET ? 20 : 16}
+                  labelFontSize={AppFontSize.subtitle}
                   fontSize={AppFontSize.subtitle}
-                  errorFontSize={IS_TABLET ? 14 : 12}
+                  errorFontSize={AppFontSize.caption}
                   inputProps={{
                     inputWrapperStyle: {
-                      minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                      minHeight: verticalScale(adaptiveSize(54)),
                     },
                     editable: false,
-                    rightIcon: <CalendarIcon size={IS_TABLET ? 24 : 20} />,
+                    rightIcon: <CalendarIcon size={AppIconSize.lg} />,
                   }}
                 />
               </View>

@@ -46,6 +46,7 @@ import { AppColors } from '../../styles/colors';
 import {
   AppFontSize,
   sharedPaddingHorizontal,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import type { AuthStackParamList } from '../../types/data/navigation/navigation.types';
 import { AppOtpInputRef } from '../../types/ui/inputs/app-otp-input.props';
@@ -108,18 +109,21 @@ const OtpScreen = () => {
         },
         logo: {
           width: scale(200),
-          height: verticalScale(IS_TABLET ? 144 : 120),
+          height: verticalScale(adaptiveSize(120)),
           marginTop: verticalScale(24),
           alignSelf: 'center',
         },
         titleArea: {
           alignItems: 'center',
           gap: verticalScale(6),
-          marginTop: verticalScale(IS_TABLET ? 38 : 32),
+          marginTop: verticalScale(adaptiveSize(32)),
         },
         formArea: {
           width: '100%',
-          paddingHorizontal: scale(16),
+          // Tablet: same 56 side margin as the other auth screens
+          paddingHorizontal: IS_TABLET
+            ? scale(56) - scale(sharedPaddingHorizontal)
+            : scale(16),
         },
         inputField: {
           width: '100%',
@@ -253,6 +257,10 @@ const OtpScreen = () => {
                   <AppOtpInput
                     ref={otpRef}
                     length={6}
+                    // Tablet: larger square cells, centered
+                    gap={IS_TABLET ? scale(14) : undefined}
+                    cellSize={IS_TABLET ? { width: 68, height: 68 } : undefined}
+                    fontSize={IS_TABLET ? 28 : undefined}
                     value={otp}
                     onChangeCode={setOtp}
                   />

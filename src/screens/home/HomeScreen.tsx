@@ -38,6 +38,7 @@ import {
   AppRadius,
   sharedPaddingHorizontal,
   sharedTopSpace,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import { Course } from '../../types/data/courses/course.type';
 import {
@@ -46,7 +47,10 @@ import {
 } from '../../types/data/navigation/navigation.types';
 import { SliderCourseItem } from '../../types/ui/slides/course/course-slider.props';
 import CategoryQuickNav, { QuickNavItem } from './components/CategoryQuickNav';
-import HomeCourseSection from './components/HomeCourseSection';
+import HomeCourseSection, {
+  HOME_SECTION_SEE_ALL_FONT,
+  HOME_SECTION_TITLE_FONT,
+} from './components/HomeCourseSection';
 
 type HomeBottomNavProp = BottomTabNavigationProp<BottomTabParamList, 'Home'>;
 type HomeStackNavProp = NativeStackNavigationProp<AppStackParamList>;
@@ -74,6 +78,12 @@ const HOME_COURSES_PER_CATEGORY = 6;
 
 /** Skeleton sections shown before the first response arrives */
 const SKELETON_SECTIONS = 3;
+
+/** Home header sizes (tablet is larger so it doesn't look tiny on a wide screen) */
+const HEADER_AVATAR_SIZE = IS_TABLET ? 76 : 50;
+const HEADER_SEARCH_ICON_SIZE = adaptiveSize(28);
+const HEADER_GREETING_FONT = IS_TABLET ? AppFontSize.body : AppFontSize.caption;
+const HEADER_NAME_FONT = IS_TABLET ? AppFontSize.h1 : AppFontSize.title;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -371,23 +381,23 @@ const HomeScreen = () => {
           color: AppColors.textSecondary,
         },
         skeletonAvatar: {
-          width: IS_TABLET ? 60 : 50,
-          height: IS_TABLET ? 60 : 50,
+          width: HEADER_AVATAR_SIZE,
+          height: HEADER_AVATAR_SIZE,
           borderRadius: AppRadius.pill,
           backgroundColor: AppColors.backgroundInteractive,
         },
         skeletonName: {
           width: scale(IS_TABLET ? 180 : 120),
           maxWidth: '70%',
-          height: verticalScale(IS_TABLET ? 22 : 16),
+          height: verticalScale(adaptiveSize(16)),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.backgroundInteractive,
         },
         bannerContainer: {
-          marginTop: verticalScale(IS_TABLET ? 30 : 26),
+          marginTop: verticalScale(adaptiveSize(26)),
         },
         quickNavContainer: {
-          marginTop: verticalScale(IS_TABLET ? 24 : 20),
+          marginTop: verticalScale(adaptiveSize(20)),
         },
         courseSection: {
           marginTop: verticalScale(30),
@@ -442,14 +452,14 @@ const HomeScreen = () => {
                       ? profile.profile_image
                       : undefined
                   }
-                  size={IS_TABLET ? 60 : 50}
+                  size={HEADER_AVATAR_SIZE}
                   disabled
                 />
 
                 <View style={styles.greetingCol}>
                   <AppText
                     style={styles.greetingText}
-                    fontSize={AppFontSize.caption}
+                    fontSize={HEADER_GREETING_FONT}
                     numberOfLines={1}
                   >
                     พร้อมเรียนรู้หรือยัง
@@ -457,7 +467,7 @@ const HomeScreen = () => {
                   <AppText
                     style={styles.nameText}
                     fontWeight="semiBold"
-                    fontSize={AppFontSize.title}
+                    fontSize={HEADER_NAME_FONT}
                     numberOfLines={1}
                     ellipsizeMode="tail"
                   >
@@ -471,7 +481,7 @@ const HomeScreen = () => {
           <View style={styles.rightHead}>
             <AppIconBadgeButton
               renderIcon={(s, c) => (
-                <SearchIcon size={IS_TABLET ? 34 : 28} color={c} />
+                <SearchIcon size={HEADER_SEARCH_ICON_SIZE} color={c} />
               )}
               onPress={() => navigation.navigate('Course')}
             />
@@ -519,6 +529,8 @@ const HomeScreen = () => {
         <View style={styles.recommendedTeacherSection}>
           <AppSectionHeader
             title="อาจารย์ของเรา"
+            titleFontSize={HOME_SECTION_TITLE_FONT}
+            seeAllFontSize={HOME_SECTION_SEE_ALL_FONT}
             containerStyle={styles.teacherSectionHeader}
           />
 

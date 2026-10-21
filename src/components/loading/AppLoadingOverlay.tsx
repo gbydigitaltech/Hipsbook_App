@@ -9,7 +9,7 @@ import {
 import AppSpinner from './AppSpinner';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
-import { thaiSafeLineHeight } from '../../styles/sharedstyles';
+import { AppFontSize, thaiSafeLineHeight } from '../../styles/sharedstyles';
 import { AppLoadingOverlayProps } from '../../types/ui/loading/app-loading-overlay.props';
 
 const AppLoadingOverlay: React.FC<AppLoadingOverlayProps> = ({
@@ -50,7 +50,7 @@ const AppLoadingOverlay: React.FC<AppLoadingOverlayProps> = ({
         text: {
           marginTop: verticalScale(10),
           color: AppColors.white,
-          fontSize: moderateScale(14),
+          fontSize: moderateScale(AppFontSize.body),
           textAlign: 'center',
           lineHeight: thaiSafeLineHeight(moderateScale(20)),
         },

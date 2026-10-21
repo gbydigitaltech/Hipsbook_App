@@ -11,11 +11,14 @@ import AppTextInputController from '../../components/inputs/AppTextInputControll
 import AppLoadingOverlay from '../../components/loading/AppLoadingOverlay';
 import AppText from '../../components/texts/AppText';
 import AppScrollView from '../../components/views/AppScrollView';
-import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { apiUpdatePassword } from '../../services/profile/profilePassword';
 import { AppColors } from '../../styles/colors';
-import { AppFontSize } from '../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppIconSize,
+  adaptiveSize,
+} from '../../styles/sharedstyles';
 import { ProfileStackParamList } from '../../types/data/navigation/navigation.types';
 import {
   changePasswordSchema,
@@ -170,13 +173,13 @@ export default function ProfileChangePasswordScreen() {
         rootView: { flex: 1 },
         formContainer: {
           marginTop: verticalScale(40),
-          gap: verticalScale(IS_TABLET ? 4 : 2),
+          gap: verticalScale(adaptiveSize(2)),
         },
         buttonContainer: {
           flexDirection: 'row',
           alignItems: 'center',
-          gap: scale(IS_TABLET ? 12 : 10),
-          marginTop: verticalScale(IS_TABLET ? 12 : 10),
+          gap: scale(adaptiveSize(10)),
+          marginTop: verticalScale(adaptiveSize(10)),
         },
         button: {
           flex: 1,
@@ -204,13 +207,13 @@ export default function ProfileChangePasswordScreen() {
             control={control}
             name="currentPassword"
             label="รหัสผ่านเดิม"
-            labelFontSize={IS_TABLET ? 20 : 16}
+            labelFontSize={AppFontSize.subtitle}
             fontSize={AppFontSize.subtitle}
-            errorFontSize={IS_TABLET ? 14 : 12}
+            errorFontSize={AppFontSize.caption}
             placeholder="กรอกรหัสผ่านเดิม"
             inputProps={{
               inputWrapperStyle: {
-                minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                minHeight: verticalScale(adaptiveSize(54)),
               },
               secureTextEntry: !showCurrent,
               autoCapitalize: 'none',
@@ -219,9 +222,9 @@ export default function ProfileChangePasswordScreen() {
               textContentType: 'password',
               autoComplete: 'current-password',
               rightIcon: showCurrent ? (
-                <ShowPasswordIcon size={IS_TABLET ? 24 : 20} />
+                <ShowPasswordIcon size={AppIconSize.lg} />
               ) : (
-                <HidePasswordIcon size={IS_TABLET ? 24 : 20} />
+                <HidePasswordIcon size={AppIconSize.lg} />
               ),
               onPressRightIcon: () => setShowCurrent(s => !s),
               onEndEditing: async (e: any) => {
@@ -236,14 +239,14 @@ export default function ProfileChangePasswordScreen() {
             control={control}
             name="newPassword"
             label="รหัสผ่านใหม่"
-            labelFontSize={IS_TABLET ? 20 : 16}
+            labelFontSize={AppFontSize.subtitle}
             fontSize={AppFontSize.subtitle}
-            errorFontSize={IS_TABLET ? 14 : 12}
+            errorFontSize={AppFontSize.caption}
             placeholder="กรอกรหัสผ่านใหม่"
             showErrorText={false}
             inputProps={{
               inputWrapperStyle: {
-                minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                minHeight: verticalScale(adaptiveSize(54)),
               },
               secureTextEntry: !showNew,
               autoCapitalize: 'none',
@@ -252,9 +255,9 @@ export default function ProfileChangePasswordScreen() {
               textContentType: 'newPassword',
               autoComplete: 'new-password',
               rightIcon: showNew ? (
-                <ShowPasswordIcon size={IS_TABLET ? 24 : 20} />
+                <ShowPasswordIcon size={AppIconSize.lg} />
               ) : (
-                <HidePasswordIcon size={IS_TABLET ? 24 : 20} />
+                <HidePasswordIcon size={AppIconSize.lg} />
               ),
               onPressRightIcon: () => setShowNew(s => !s),
               onChange: async (e: any) => {
@@ -283,13 +286,13 @@ export default function ProfileChangePasswordScreen() {
             control={control}
             name="confirmNewPassword"
             label="ยืนยันรหัสผ่านใหม่"
-            labelFontSize={IS_TABLET ? 20 : 16}
+            labelFontSize={AppFontSize.subtitle}
             fontSize={AppFontSize.subtitle}
-            errorFontSize={IS_TABLET ? 14 : 12}
+            errorFontSize={AppFontSize.caption}
             placeholder="กรอกรหัสผ่านอีกครั้ง"
             inputProps={{
               inputWrapperStyle: {
-                minHeight: verticalScale(IS_TABLET ? 64 : 54),
+                minHeight: verticalScale(adaptiveSize(54)),
               },
               secureTextEntry: !showConfirm,
               autoCapitalize: 'none',
@@ -298,9 +301,9 @@ export default function ProfileChangePasswordScreen() {
               textContentType: 'password',
               autoComplete: 'new-password',
               rightIcon: showConfirm ? (
-                <ShowPasswordIcon size={IS_TABLET ? 24 : 20} />
+                <ShowPasswordIcon size={AppIconSize.lg} />
               ) : (
-                <HidePasswordIcon size={IS_TABLET ? 24 : 20} />
+                <HidePasswordIcon size={AppIconSize.lg} />
               ),
               onPressRightIcon: () => setShowConfirm(s => !s),
               onEndEditing: async (e: any) => {

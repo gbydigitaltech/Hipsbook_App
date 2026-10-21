@@ -53,8 +53,11 @@ export type AppOtpInputProps = {
   /** Cell border radius in pixels */
   radius?: number;
 
-  /** Cell text size in pixels */
+  /** Cell text size before responsive scaling (default 18) */
   fontSize?: number;
+
+  /** Cell size before responsive scaling (default 50×50) */
+  cellSize?: { width: number; height: number };
 
   /** Semantic font weight for cell text */
   fontWeight?: FontWeightType;

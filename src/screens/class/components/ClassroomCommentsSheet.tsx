@@ -23,7 +23,7 @@ import CommentIcon from '../../../assets/icons/CommentIcon';
 import ReviewComposerForm from '../../../components/reviews/ReviewComposerForm';
 import ReviewLongPressActionSheet from '../../../components/reviews/ReviewLongPressActionSheet';
 import AppText from '../../../components/texts/AppText';
-import { IS_IOS, IS_TABLET } from '../../../constants/platform';
+import { IS_IOS } from '../../../constants/platform';
 import { log } from '../../../helpers/logger';
 import { useResponsive } from '../../../helpers/responsive';
 import { useCourseReviewAll } from '../../../hooks/review/useCourseReviewAll';
@@ -32,7 +32,12 @@ import { useCreateCourseReview } from '../../../hooks/review/useCreateCourseRevi
 import { useDeleteCourseReview } from '../../../hooks/review/useDeleteCourseReview';
 import { useToggleCourseReviewLike } from '../../../hooks/review/useToggleCourseReviewLike';
 import { AppColors } from '../../../styles/colors';
-import { AppFontSize, AppRadius } from '../../../styles/sharedstyles';
+import {
+  AppFontSize,
+  AppRadius,
+  AppIconSize,
+  adaptiveSize,
+} from '../../../styles/sharedstyles';
 import CourseCommentsSection from '../../course/CourseDetail/components/CourseCommentsSection';
 import CourseReviewRepliesModal from '../../course/CourseDetail/components/CourseReviewRepliesModal';
 
@@ -270,12 +275,12 @@ const ClassroomCommentsSheet: React.FC<Props> = ({
           flexDirection: 'row',
           alignItems: 'center',
           gap: scale(10),
-          minHeight: verticalScale(IS_TABLET ? 56 : 46),
+          minHeight: verticalScale(adaptiveSize(46)),
           borderRadius: responsiveRadius(AppRadius.md),
           backgroundColor: AppColors.surface,
           borderWidth: 1,
           borderColor: AppColors.border,
-          paddingHorizontal: scale(IS_TABLET ? 18 : 14),
+          paddingHorizontal: scale(adaptiveSize(14)),
           marginTop: verticalScale(10),
         },
         composerText: { flex: 1, color: AppColors.textTertiary },
@@ -356,7 +361,7 @@ const ClassroomCommentsSheet: React.FC<Props> = ({
 
                 {isEmpty ? (
                   <View style={styles.emptyWrap}>
-                    <CommentIcon size={IS_TABLET ? 96 : 80} />
+                    <CommentIcon size={adaptiveSize(80)} />
                     <AppText
                       fontSize={AppFontSize.subtitle}
                       style={styles.emptyText}
@@ -399,7 +404,7 @@ const ClassroomCommentsSheet: React.FC<Props> = ({
                     </AppText>
                     <Ionicons
                       name="create-outline"
-                      size={IS_TABLET ? 24 : 20}
+                      size={AppIconSize.lg}
                       color={AppColors.primary}
                     />
                   </Pressable>

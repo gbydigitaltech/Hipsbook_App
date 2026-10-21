@@ -14,7 +14,7 @@ import {
 
 import AppButton from '../../components/buttons/AppButton';
 import AppText from '../../components/texts/AppText';
-import { IS_IOS, IS_TABLET } from '../../constants/platform';
+import { IS_IOS } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { useCourseFilter } from '../../hooks/course/useCourseFilter';
 import CategoryIconBadge from '../../components/category/CategoryIconBadge';
@@ -23,6 +23,7 @@ import {
   AppFontSize,
   AppRadius,
   PRESSED_OPACITY,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import { GetCourseListParams } from '../../types/data/courses/course.query.types';
 
@@ -41,12 +42,16 @@ type Props = {
 
 const { height: screenHeight } = Dimensions.get('window');
 
+/**
+ * Price ranges sent as `price` ("min-max"). Same values as the website:
+ * open-ended "more than" uses "min-null" ("3000+" makes the API fail).
+ */
 const PRICE_OPTIONS = [
   { id: 'all', label: 'ทั้งหมด' },
   { id: '0-0', label: 'ฟรี' },
   { id: '1-1000', label: '1-1,000' },
-  { id: '1000-3000', label: '1,000-3,000' },
-  { id: '3000+', label: 'มากกว่า 3,000' },
+  { id: '1001-3000', label: '1,001-3,000' },
+  { id: '3000-null', label: 'มากกว่า 3,000' },
 ];
 
 const CourseFilterModal: React.FC<Props> = ({ visible, onClose, onApply }) => {
@@ -144,17 +149,17 @@ const CourseFilterModal: React.FC<Props> = ({ visible, onClose, onApply }) => {
         },
         handle: {
           alignSelf: 'center',
-          width: scale(IS_TABLET ? 54 : 44),
+          width: scale(adaptiveSize(44)),
           height: verticalScale(5),
           borderRadius: responsiveRadius(AppRadius.pill),
           backgroundColor: AppColors.surfaceStrong,
-          marginBottom: verticalScale(IS_TABLET ? 24 : 20),
+          marginBottom: verticalScale(adaptiveSize(20)),
         },
         headerRow: {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: verticalScale(IS_TABLET ? 18 : 14),
+          marginBottom: verticalScale(adaptiveSize(14)),
         },
         closeButton: {
           marginRight: scale(-8),

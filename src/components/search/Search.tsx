@@ -2,13 +2,14 @@ import React, { useMemo } from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import CloseIcon from '../../assets/icons/CloseIcon';
 import SearchIcon from '../../assets/icons/search/SearchIcon';
-import { IS_TABLET } from '../../constants/platform';
 import { useResponsive } from '../../helpers/responsive';
 import { AppColors } from '../../styles/colors';
 import {
   AppFontSize,
   AppRadius,
   sharedPaddingHorizontal,
+  AppIconSize,
+  adaptiveSize,
 } from '../../styles/sharedstyles';
 import AppTextInput from '../inputs/AppTextInput';
 
@@ -22,7 +23,7 @@ export type SearchProps = {
   containerStyle?: ViewStyle;
 };
 
-export const SEARCH_BAR_HEIGHT = IS_TABLET ? 58 : 48;
+export const SEARCH_BAR_HEIGHT = adaptiveSize(48);
 
 const Search: React.FC<SearchProps> = ({
   value,
@@ -61,7 +62,7 @@ const Search: React.FC<SearchProps> = ({
           onChangeText={onChangeText}
           placeholder={placeholder}
           leftIcon={
-            <SearchIcon size={IS_TABLET ? 24 : 20} color={AppColors.primary} />
+            <SearchIcon size={AppIconSize.lg} color={AppColors.primary} />
           }
           rightIcon={
             value ? (
@@ -71,7 +72,7 @@ const Search: React.FC<SearchProps> = ({
                 accessibilityRole="button"
                 accessibilityLabel="ล้างคำค้นหา"
               >
-                <CloseIcon size={IS_TABLET ? 16 : 14} />
+                <CloseIcon size={AppIconSize.xs} />
               </TouchableOpacity>
             ) : undefined
           }

@@ -9,7 +9,7 @@ import { getVideoThumbnailUrl } from '../../../../helpers/videoThumbnail';
 import { preloadThumbnails } from '../../../../helpers/thumbnailPreload';
 import { LessonGroup } from '../types/group.types';
 import { CourseLesson } from '../types/lesson.types';
-import { AppFontSize } from '../../../../styles/sharedstyles';
+import { AppFontSize, adaptiveSize } from '../../../../styles/sharedstyles';
 
 interface Props {
   groups: LessonGroup[];
@@ -37,11 +37,11 @@ const CourseLessonTab: React.FC<Props> = ({ groups, onPressLesson }) => {
             title={group.title}
             titleFontSize={AppFontSize.subtitle}
             containerStyle={{
-              marginBottom: verticalScale(IS_TABLET ? 14 : 12),
+              marginBottom: verticalScale(adaptiveSize(12)),
             }}
           />
 
-          <View style={{ gap: verticalScale(IS_TABLET ? 20 : 16) }}>
+          <View style={{ gap: verticalScale(adaptiveSize(16)) }}>
             {group.videos.map((lesson: CourseLesson) => (
               <CourseDetailLessonCard
                 key={lesson.id}
